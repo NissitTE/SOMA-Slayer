@@ -718,21 +718,21 @@ function genItem(floor,forceRarity=null){
   const rarity=forceRarity||rollEquipRarity(floor);
   const slot=SLOT_TYPES[Math.floor(Math.random()*SLOT_TYPES.length)];
   const quality=rollQuality();
-  const rm={Junk:1,Normal:3,Fine:10,Rare:30,Legendary:80,GOD:200,SOMA:500};
-  const base=floor*2*(rm[rarity]||1);
+  const rm={Junk:1,Normal:1.5,Fine:2.5,Rare:5,Legendary:12,GOD:20,SOMA:25};
+  const base = Math.floor(Math.sqrt(floor) * 20 * (rm[rarity] || 1));
   const atkMult=quality==='hell'?1.5+Math.random()*0.5:quality==='heavenly'?1.2+Math.random()*0.4:0.9+Math.random()*0.3;
   const buffs={
-    str:quality!=='hell'?Math.floor(base*0.08):0,
-    agi:quality!=='hell'?Math.floor(base*0.06):0,
-    int:quality!=='hell'?Math.floor(base*0.06):0,
-    vit:quality!=='hell'?Math.floor(base*0.10):0,
+    str:quality!=='hell'?Math.floor(base*0.03):0,
+    agi:quality!=='hell'?Math.floor(base*0.02):0,
+    int:quality!=='hell'?Math.floor(base*0.02):0,
+    vit:quality!=='hell'?Math.floor(base*0.03):0,
   };
-  const hpMod=quality==='heavenly'?Math.floor(base*0.12):quality==='hell'?-Math.floor(base*0.08):0;
-  const reqStr=(['Legendary','GOD','SOMA'].includes(rarity))?Math.max(10,Math.floor(floor*0.5)):(['Rare','Fine'].includes(rarity))?Math.max(5,Math.floor(floor*0.2)):0;
+  const hpMod=quality==='heavenly'?Math.floor(base*0.05):quality==='hell'?-Math.floor(base*0.08):0;
+  const reqStr=(['Legendary','GOD','SOMA'].includes(rarity))?Math.max(10,Math.floor(floor*0.8)):(['Rare','Fine'].includes(rarity))?Math.max(5,Math.floor(floor*0.3)):0;
   const reqAgi=slot==='Weapon'&&rarity!=='Junk'?Math.max(5,Math.floor(floor*0.15)):0;
   const reqInt=(slot==='Necklace'||slot==='Pendant')?Math.max(5,Math.floor(floor*0.15)):0;
   const sellMult={Junk:1,Normal:1,Fine:1,Rare:1,Legendary:0.5,GOD:0.35,SOMA:0.25};
-  const value=base*(rm[rarity]||1)*(sellMult[rarity]||1);
+  const value = Math.floor(base * (sellMult[rarity] || 1));
   return{
     id:Math.random().toString(36).slice(2),
     stackKey:`${rarity}_${slot}_${quality}`,
@@ -740,7 +740,7 @@ function genItem(floor,forceRarity=null){
     fullName:`${rarity} ${slot}`,
     rarity,slot,quality,floor,itemLv:floor,
     atk:Math.floor(base*atkMult),
-    def:Math.floor(base*atkMult*0.6),
+    def:Math.floor(base*atkMult*0.5),
     effects:{buffs,hpMod,mpMod:0,statusEffects:[]},
     reqStr,reqAgi,reqInt,value,count:1,
   };
@@ -791,14 +791,14 @@ function closeEquipScreen(){equipOpenedFromBag=false;resumeGame();}
 // ─── LEVELING ───────────────────────────────────────────────
 function giveExp(amount){
   const p=G.p;
-  const mult=(p.isHidden&&p.floor>500)?2:1;
+  const mult=(p.isHidden&&p.floor>500)?1.2:1;
   p.exp+=amount*mult;
   while(p.lv<MAX_LV&&p.exp>=p.expNext){
-    p.exp-=p.expNext;p.lv++;p.pts+=5;p.skillPts++;
+    p.exp-=p.expNext;p.lv++;p.pts+=2;if(p.lv % 5 === 0) p.skillPts++;
     p.expNext=calcExpNext(p.lv);
     // AGI speed bonus per level
     if((p.moveSpeedPct||100)<200){
-      p.moveSpeedPct=Math.min(200,(p.moveSpeedPct||100)+(0.1+Math.random()*1.9));
+      p.moveSpeedPct=Math.min(200,(p.moveSpeedPct||100)+(0.1+Math.random()*0.4));
     }
     notify(`Level Up! LV ${p.lv}`,'var(--lux2)');
     const cs=calcStats(p);p.hp=cs.maxHp;p.mp=cs.maxMp;
@@ -871,9 +871,9 @@ const SHOP_ITEMS=[
   {id:'CLEANSE',name:'Cleanse',icon:'✨',desc:'Remove all effects',price:80},
   {id:'HP_POT_L',name:'HP Elixir',icon:'🍷',desc:'Restore 80% HP',price:200},
   {id:'MP_POT_L',name:'MP Elixir',icon:'🌀',desc:'Restore 80% MP',price:200},
-  {id:'EXP_SCROLL',name:'EXP Scroll',icon:'📜',desc:'Gain 5000 EXP',price:500},
+  {id:'EXP_SCROLL',name:'EXP Scroll',icon:'📜',desc:'Gain 5000 EXP',price:100000},
   {id:'JUNK',name:'Junk ×10',icon:'🔩',desc:'Used in forge',price:20,qty:10},
-  {id:'BLESSING',name:'เสริมบุญ',icon:'🙏',desc:'+1.5~3% drop 15min',price:100000},
+  {id:'BLESSING',name:'เสริมบุญ',icon:'🙏',desc:'+1.5~3% drop 15min',price:1000000},
 ];
 
 // ─── SKILLS ─────────────────────────────────────────────────
@@ -1004,7 +1004,7 @@ function playerDead(){
 
 function mobDied(m){
   const p=G.p;
-  const mult=(p.isHidden&&p.floor>500)?2:1;
+  const mult=(p.isHidden&&p.floor>500)?1.2:1;
   // FIX 3: Exp ตามเลเวลมอนสเตอร์ตัวเอง
   const mobLv=m.lv||p.floor;
   const baseExp=m.isBoss?mobLv*40:mobLv*4;
@@ -1703,11 +1703,11 @@ function sellItemPrompt(idx){
 // ×100: Leg 25% / Break 25% (high risk)
 function getForgeRates(amount){
   if(amount===100){
-    // HIGH RISK: Legendary 25%, GOD 3%, SOMA 2%, Break 25%, Normal 20%, Rare 20%, Junk 5%
-    return {Junk:0.05,Normal:0.20,Fine:0.00,Rare:0.20,Legendary:0.25,GOD:0.03,SOMA:0.02,Break:0.25};
+    // HIGH RISK: Legendary 5%, GOD 3%, SOMA 2%, Break 25%, Normal 25%, Rare 15%, Junk 5%
+    return {Junk:0.05,Normal:0.25,Fine:0.20,Rare:0.15,Legendary:0.05,GOD:0.03,SOMA:0.02,Break:0.25};
   } else {
     // ×10 and ×50 same
-    return {Junk:0.15,Normal:0.40,Fine:0.00,Rare:0.20,Legendary:0.05,GOD:0.03,SOMA:0.02,Break:0.15};
+    return {Junk:0.15,Normal:0.40,Fine:0.10,Rare:0.10,Legendary:0.05,GOD:0.03,SOMA:0.02,Break:0.15};
   }
 }
 
