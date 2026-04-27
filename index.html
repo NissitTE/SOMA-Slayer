@@ -918,14 +918,22 @@ function useSkillSlot(slot){
 
 function applySkill(sk){
   const p=G.p,cs=calcStats(p);
-  if(sk.type==='heal'){const h=cs.maxHp*sk.healPct;p.hp=Math.min(cs.maxHp,p.hp+h);logMsg(`${sk.name}: +${Math.floor(h)} HP`,'#2f2');}
-  else if(sk.type==='fullheal'){p.hp=cs.maxHp;p.mp=cs.maxMp;logMsg(`${sk.name}: Full!`,'#2f2');}
+  if(sk.type==='heal'){const h = (cs.maxHp * 0.1) + (cs.int * 5); // ฮีล 10% ของเลือด + 5 เท่าของค่า INT
+p.hp = Math.min(cs.maxHp, p.hp + h);logMsg(`${sk.name}: +${Math.floor(h)} HP`,'#2f2');}
+  // เดิม: p.hp=cs.maxHp; p.mp=cs.maxMp;
+// แก้เป็น: ฮีลแรงขึ้นตามค่า INT แต่ไม่เกิน 80% และไม่เติม MP จนเต็ม
+else if(sk.type==='fullheal'){
+  const healAmt = Math.floor(cs.maxHp * 0.7); // ฮีล 70% ของเลือดสูงสุด
+  p.hp = Math.min(cs.maxHp, p.hp + healAmt);
+  p.mp = Math.min(cs.maxMp, p.mp + (cs.maxMp * 0.2)); // คืนมานาแค่ 20%
+  logMsg(`${sk.name}: Massive Heal!`, '#2f2');
+}
   else if(sk.type==='cleanse'){p.statusEffects={};if(sk.buffKey)p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg('Cleansed!','#0ff');}
   else if(sk.type==='buff'){p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg(`${sk.name} active!`,'#0ff');}
   else if(sk.type==='hot'){p.statusEffects.hot={until:Date.now()+sk.hotDur,pct:sk.hotPct,last:Date.now()};logMsg(`${sk.name}: Regen`,'#2f2');}
   else if(sk.type==='atk'||sk.type==='stun'||sk.type==='pierce'){
     const sv=sk.stat==='str'?cs.str:sk.stat==='agi'?cs.agi:cs.int;
-    const base=sv*getSkillDmg(sk);let hits=0;
+    const base = Math.floor(Math.sqrt(sv) * 15 * getSkillDmg(sk));
     const rep=sk.repeat||1;
     for(let r=0;r<rep;r++){
       G.mobs.forEach(m=>{
@@ -1030,7 +1038,7 @@ function mobDied(m){
   }
 
   // อุปกรณ์สวมใส่ 10–25%
-  const equipChance=(m.isBoss?0.40:m.isElite?0.25:0.10+Math.random()*0.15)*(m.dropMult||1)+bless;
+  const equipChance=(m.isBoss?0.30:m.isElite?0.15:0.04+Math.random()*0.05)*(m.dropMult||1)+bless;
   if(Math.random()<equipChance){
     const item=genItem(p.floor);
     if(addToBag(item)){
