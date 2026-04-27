@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SOMA SLAYER v11.1</title>
+<title>SOMA SLAYER v11.2</title>
 <style>
 :root{
   --bg:#050505;--bg2:#0a0a0a;--bg3:#111;--panel:#0d0d0d;
@@ -17,8 +17,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',monospace;font-size:12px;overflow:hidden;height:100vh;display:flex;flex-direction:column}
-
-/* OVERLAYS */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:center;justify-content:center}
 .hidden{display:none!important}
 .panel-box{background:var(--bg3);border:1px solid var(--lux);padding:22px;width:95%}
@@ -26,8 +24,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',monospace;fon
 .panel-box h2{color:var(--lux);font-size:16px;letter-spacing:3px;margin-bottom:10px}
 .panel-box h3{color:var(--lux2);font-size:11px;letter-spacing:2px;margin-bottom:6px}
 .sub-title{color:var(--text2);text-align:center;font-size:10px;letter-spacing:3px;margin-bottom:16px}
-
-/* INPUTS / BTNS */
 input,select{background:#111;color:var(--text);border:1px solid var(--border2);padding:7px 10px;outline:none;font-family:inherit;font-size:11px;width:100%}
 input:focus,select:focus{border-color:var(--lux)}
 .btn{background:#1a1a1a;color:var(--text);border:1px solid var(--border2);padding:7px 14px;cursor:pointer;font-family:monospace;font-size:10px;letter-spacing:1px;transition:all .15s;white-space:nowrap}
@@ -36,27 +32,19 @@ input:focus,select:focus{border-color:var(--lux)}
 .btn.danger{border-color:#f22}.btn.danger:hover{background:#f22;color:#fff}
 .btn.sm{padding:3px 8px;font-size:9px}.btn.wide{width:100%;margin:3px 0}
 select option{background:#1a1a1a}
-
-/* START SCREEN */
 .class-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
 .class-card{border:1px solid var(--border2);padding:12px 8px;cursor:pointer;text-align:center;transition:all .2s}
 .class-card:hover,.class-card.selected{border-color:var(--lux);background:#1a0a00}
 .class-card .icon{font-size:24px;margin-bottom:4px}
 .class-card .cname{font-size:10px;font-weight:bold;letter-spacing:2px}
 .class-card .cdesc{color:var(--text2);font-size:8px;margin-top:3px;line-height:1.4}
-
-/* TOPBAR */
 #topbar{height:26px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 8px;gap:8px;flex-shrink:0}
 .floor-info{color:var(--lux);font-size:10px;font-weight:bold;letter-spacing:1px}
 .top-btns{margin-left:auto;display:flex;gap:4px;align-items:center}
-
-/* MAIN LAYOUT */
 #main-wrap{flex:1;display:flex;overflow:hidden}
 #ui-left{width:190px;border-right:1px solid var(--border);background:var(--panel);padding:8px;overflow-y:auto;flex-shrink:0}
 #canvas-wrap{flex:1;position:relative;overflow:hidden;cursor:crosshair}
 #ui-right{width:200px;border-left:1px solid var(--border);background:var(--panel);flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
-
-/* LEFT PANEL */
 .p-name{font-size:13px;font-weight:bold;color:var(--lux);letter-spacing:1px}
 .p-class{font-size:8px;color:var(--text2);letter-spacing:2px;margin-bottom:6px}
 .bar-wrap{margin:2px 0}
@@ -72,8 +60,6 @@ select option{background:#1a1a1a}
 .stat-btn:hover{background:var(--lux);color:#000}
 .stat-btn:disabled{opacity:.3;cursor:not-allowed}
 .section-label{font-size:8px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin:6px 0 3px;border-bottom:1px solid var(--border)}
-
-/* CANVAS */
 canvas{display:block;width:100%;height:100%}
 #hotbar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;background:rgba(0,0,0,.75);padding:6px;border:1px solid var(--border2);border-radius:3px;z-index:10}
 .hslot{width:42px;height:42px;border:1px solid #333;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;cursor:pointer;transition:border-color .1s}
@@ -81,12 +67,8 @@ canvas{display:block;width:100%;height:100%}
 .hslot .hkey{position:absolute;top:1px;left:2px;color:var(--lux);font-size:7px;font-weight:bold}
 .hslot .hicon{font-size:13px}.hslot .hval{font-size:7px;color:var(--text2)}
 .skill-cooldown{position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;pointer-events:none}
-
-/* STATUS ICONS */
 #status-icons{position:absolute;top:5px;left:5px;display:flex;gap:3px;z-index:5;flex-wrap:wrap;max-width:200px}
 .sicon{padding:2px 6px;border:1px solid var(--border2);background:rgba(10,10,10,.85);font-size:8px;border-radius:2px;font-family:monospace}
-
-/* RIGHT PANEL */
 #log-wrap{flex:0 0 110px;border-bottom:1px solid var(--border);overflow:hidden}
 #log{height:100%;overflow:hidden;padding:4px}
 .log-line{font-size:8px;line-height:1.4;padding:1px 0}
@@ -95,25 +77,16 @@ canvas{display:block;width:100%;height:100%}
 .bag-item{border:1px solid var(--border2);background:#0a0a0a;padding:2px;text-align:center;cursor:pointer;position:relative;font-size:7px;transition:border-color .1s}
 .bag-item:hover{border-color:var(--lux);transform:scale(1.05);z-index:2}
 .bag-item .it-icon{font-size:13px}.bag-item .it-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
 #status-panel{border-top:1px solid var(--border);padding:5px 6px;font-size:8px;color:var(--text2);line-height:1.6;flex-shrink:0}
-
-/* Rarity */
 .r-junk{color:var(--junk)}.r-normal{color:var(--normal)}.r-fine{color:var(--fine)}
 .r-rare{color:var(--rare)}.r-legendary{color:var(--legendary)}.r-god{color:var(--god)}.r-soma{color:var(--soma)}
 .border-junk{border-color:var(--junk)!important}.border-normal{border-color:#555!important}
 .border-fine{border-color:var(--fine)!important}.border-rare{border-color:var(--rare)!important}
 .border-legendary{border-color:var(--legendary)!important}.border-god{border-color:var(--god)!important}
 .border-soma{border-color:var(--soma)!important}
-
-/* Quality */
 .q-hell{color:#ff5555}.q-heavenly{color:#aaddff}.q-soso{color:#aaa}
-
-/* Rank letters */
 .rank-J{color:var(--junk)}.rank-N{color:var(--normal)}.rank-F{color:var(--fine)}
 .rank-R{color:var(--rare)}.rank-L{color:var(--legendary)}.rank-G{color:var(--god)}.rank-S{color:var(--soma)}
-
-/* EQUIPMENT SCREEN */
 .equip-main{display:grid;grid-template-columns:230px 1fr;gap:12px}
 .equip-slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .eslot{border:1px solid var(--border2);background:#0a0a0a;padding:5px;cursor:pointer;text-align:center;transition:border-color .15s;min-height:52px}
@@ -121,48 +94,32 @@ canvas{display:block;width:100%;height:100%}
 .eslot .sl{font-size:7px;color:var(--text3);letter-spacing:1px;display:block;margin-bottom:1px}
 .eslot .sn{font-size:8px;font-weight:bold}
 .eslot .sq{font-size:7px;margin-top:1px}
-
-/* Bag in equip screen */
 .equip-inv-list{display:flex;flex-direction:column;gap:2px;max-height:360px;overflow-y:auto}
 .equip-inv-item{display:flex;align-items:center;gap:5px;border:1px solid var(--border2);background:#0a0a0a;padding:4px;cursor:pointer;transition:border-color .15s;font-size:8px}
 .equip-inv-item:hover{border-color:var(--lux)}
-
-/* PAUSE */
 .pause-layout{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-/* SHOP */
 .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .shop-list{display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto}
 .shop-item{display:flex;align-items:center;gap:6px;border:1px solid var(--border2);background:#0a0a0a;padding:5px;cursor:pointer;transition:border-color .15s;font-size:9px}
 .shop-item:hover{border-color:var(--lux)}
 .shop-price{margin-left:auto;color:var(--lux2);font-size:9px;white-space:nowrap}
-
-/* SKILL */
 .skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:340px;overflow-y:auto}
 .skill-card{border:1px solid var(--border2);background:#0a0a0a;padding:6px;cursor:pointer;transition:all .15s}
 .skill-card:hover{border-color:var(--lux)}.skill-card.learned{border-color:var(--lux2)}
 .skill-card .sk-name{color:var(--lux2);font-size:9px;font-weight:bold;margin-bottom:2px}
 .skill-card .sk-desc{color:var(--text2);font-size:8px;line-height:1.3}
 .skill-card .sk-cost{color:#4488ff;font-size:8px;margin-top:2px}
-
-/* DUNGEON */
 .dung-list{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;max-height:300px;overflow-y:auto}
 .dfloor{border:1px solid var(--border2);background:#0a0a0a;padding:5px 3px;text-align:center;cursor:pointer;transition:all .1s;font-size:8px}
 .dfloor:hover{border-color:var(--lux)}.dfloor.cleared{border-color:#2e7d32;color:#a5d6a7}
 .dfloor.boss-floor{border-color:var(--legendary)}.dfloor.locked{opacity:.3;cursor:not-allowed}
 .dfloor.current{background:#1a0a00;border-color:var(--lux)}
-
-/* SAVE/LOAD */
 .save-slot{border:1px solid var(--border2);background:#0a0a0a;padding:8px;display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .save-slot .ss-name{color:var(--lux2);font-size:10px;font-weight:bold;margin-bottom:2px}
-
-/* NOTIFICATIONS */
 #notif{position:fixed;top:34px;right:8px;z-index:300;display:flex;flex-direction:column;gap:3px;pointer-events:none}
 .notif-item{background:#111;border:1px solid var(--border2);border-left:3px solid var(--lux);padding:5px 10px;font-size:9px;animation:slideIn .2s,fadeOut .3s 2.7s forwards}
 @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
 @keyframes fadeOut{to{opacity:0}}
-
-/* Epic drop banner */
 #epic-drop-banner{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:250;pointer-events:none;display:flex;flex-direction:column;gap:4px;align-items:center}
 .epic-banner{padding:6px 20px;border:2px solid;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:2px;text-align:center;animation:epicPop .4s ease-out,epicFade .5s 3s forwards;white-space:nowrap}
 .epic-banner.legendary{background:rgba(255,167,38,.15);border-color:var(--legendary);color:var(--legendary)}
@@ -170,35 +127,19 @@ canvas{display:block;width:100%;height:100%}
 .epic-banner.soma{background:rgba(255,64,129,.15);border-color:var(--soma);color:var(--soma)}
 @keyframes epicPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
 @keyframes epicFade{to{opacity:0;transform:translateY(-20px)}}
-
-/* TOOLTIP */
 #tooltip{position:fixed;background:#111;border:1px solid var(--border2);padding:7px 10px;font-size:9px;pointer-events:none;z-index:500;display:none;max-width:220px;line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,.8)}
-
-/* QTY MODAL */
 #qty-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:flex;align-items:center;justify-content:center}
 .qty-box{background:var(--bg3);border:1px solid var(--lux);padding:18px;min-width:260px}
 .qty-box h3{color:var(--lux2);margin-bottom:8px;font-size:12px}
-
-/* ITEM DETAIL SCREEN */
-#item-screen .panel-box{max-width:420px}
-
-/* MISC */
 .gold-txt{color:var(--lux2)}.soma-txt{color:var(--soma)}
 .separator{border:0;border-top:1px solid var(--border);margin:8px 0}
-.tag-boss{background:#4a1010;color:#ef9a9a;border:1px solid #f22;padding:1px 4px;font-size:7px}
 .hidden-unlock{border:2px solid var(--lux3);background:#1a1500;padding:10px;text-align:center;margin-top:8px}
-
-/* Filter bar */
 .filter-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;align-items:center}
 .filter-chip{padding:2px 7px;border:1px solid var(--border2);border-radius:10px;font-size:8px;cursor:pointer;transition:all .15s;font-family:monospace}
 .filter-chip:hover{border-color:var(--lux);color:var(--lux)}
 .filter-chip.active{background:var(--lux);color:#000;border-color:var(--lux)}
-
-/* Buy-back list */
 .bb-item{display:flex;align-items:center;gap:5px;border:1px solid var(--border2);background:#0a0a0a;padding:4px 6px;cursor:pointer;transition:border-color .15s;font-size:8px;margin-bottom:2px}
 .bb-item:hover{border-color:var(--lux2)}
-
-/* [FIX 5] Re-Forge button */
 .btn-reforge{background:#1a0a1a;border-color:#ab47bc;color:#ce93d8;}
 .btn-reforge:hover{background:#ab47bc;color:#fff;border-color:#ab47bc;}
 </style>
@@ -208,7 +149,6 @@ canvas{display:block;width:100%;height:100%}
 <div id="tooltip"></div>
 <div id="epic-drop-banner"></div>
 
-<!-- QTY MODAL -->
 <div id="qty-modal" class="hidden">
   <div class="qty-box">
     <h3 id="qty-title">Quantity</h3>
@@ -232,11 +172,10 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- START SCREEN -->
 <div id="start-screen" class="overlay">
   <div class="panel-box" style="max-width:500px">
     <h1>⚔ SOMA SLAYER</h1>
-    <div class="sub-title">V 11.1 · FULL EDITION</div>
+    <div class="sub-title">V 11.2 · FULL EDITION</div>
     <input type="text" id="in-name" placeholder="Hero Name..." style="margin-bottom:10px">
     <div class="class-grid">
       <div class="class-card selected" data-class="Knight" onclick="selectClass(this)">
@@ -262,7 +201,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- SAVE/LOAD SCREEN -->
 <div id="saveload-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:500px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -273,7 +211,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- PAUSE SCREEN -->
 <div id="pause-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:700px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:4px">
@@ -305,7 +242,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- EQUIPMENT SCREEN -->
 <div id="equip-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:860px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -319,25 +255,17 @@ canvas{display:block;width:100%;height:100%}
         </select>
         <select id="equip-filter-slot" onchange="renderEquipScreen()" style="width:auto;padding:3px 6px;font-size:9px">
           <option value="all">Slot: All</option>
-          <option value="Weapon">Weapon</option>
-          <option value="Shield">Shield</option>
-          <option value="Head">Head</option>
-          <option value="Chest">Chest</option>
-          <option value="Legs">Legs</option>
-          <option value="Cloak">Cloak</option>
-          <option value="Pendant">Pendant</option>
-          <option value="Necklace">Necklace</option>
+          <option value="Weapon">Weapon</option><option value="Shield">Shield</option>
+          <option value="Head">Head</option><option value="Chest">Chest</option>
+          <option value="Legs">Legs</option><option value="Cloak">Cloak</option>
+          <option value="Pendant">Pendant</option><option value="Necklace">Necklace</option>
           <option value="Ring">Ring</option>
         </select>
         <select id="equip-filter-rar" onchange="renderEquipScreen()" style="width:auto;padding:3px 6px;font-size:9px">
           <option value="all">Rarity: All</option>
-          <option value="Junk">Junk</option>
-          <option value="Normal">Normal</option>
-          <option value="Fine">Fine</option>
-          <option value="Rare">Rare</option>
-          <option value="Legendary">Legendary</option>
-          <option value="GOD">GOD</option>
-          <option value="SOMA">SOMA</option>
+          <option value="Junk">Junk</option><option value="Normal">Normal</option>
+          <option value="Fine">Fine</option><option value="Rare">Rare</option>
+          <option value="Legendary">Legendary</option><option value="GOD">GOD</option><option value="SOMA">SOMA</option>
         </select>
         <button class="btn sm" onclick="closeEquipScreen()">← FIGHT</button>
       </div>
@@ -346,7 +274,6 @@ canvas{display:block;width:100%;height:100%}
       <div>
         <h3>EQUIPPED <span style="color:var(--text3);font-size:7px">(click to unequip)</span></h3>
         <div class="equip-slots-grid" id="equip-slots-ui"></div>
-        <div style="margin-top:8px;font-size:8px;color:var(--text3)">Hover bag items for stats preview</div>
       </div>
       <div>
         <h3>BAG <span id="equip-bag-count" style="color:var(--text3)"></span> <span style="color:var(--text3);font-size:7px">(click to equip)</span></h3>
@@ -356,7 +283,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- SKILL SCREEN -->
 <div id="skill-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:660px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -371,7 +297,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- SHOP SCREEN -->
 <div id="shop-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:780px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -381,13 +306,11 @@ canvas{display:block;width:100%;height:100%}
         <button class="btn sm" onclick="resumeGame()">← FIGHT</button>
       </div>
     </div>
-    <!-- Shop tabs -->
     <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
       <button class="btn sm active" id="tab-buy-btn" onclick="switchShopTab('buy')">BUY</button>
       <button class="btn sm" id="tab-sell-btn" onclick="switchShopTab('sell')">SELL (50%)</button>
-      <button class="btn sm" id="tab-buyback-btn" onclick="switchShopTab('buyback')">BUY BACK (50 recent)</button>
+      <button class="btn sm" id="tab-buyback-btn" onclick="switchShopTab('buyback')">BUY BACK</button>
       <button class="btn sm" id="tab-forge-btn" onclick="switchShopTab('forge')">⚒ FORGE</button>
-      <!-- [FIX 5] Re-Forge tab -->
       <button class="btn sm btn-reforge" id="tab-reforge-btn" onclick="switchShopTab('reforge')">♻ RE-FORGE</button>
     </div>
     <div id="shop-tab-buy">
@@ -398,34 +321,19 @@ canvas{display:block;width:100%;height:100%}
       <h3>SELL EQUIPMENT <span style="color:var(--text3);font-size:8px">(50% of value)</span></h3>
       <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap">
         <select id="sell-sort" onchange="renderSellTab()" style="width:auto;padding:2px 5px;font-size:8px">
-          <option value="rarity">Rarity ↓</option>
-          <option value="value">Value ↓</option>
-          <option value="slot">Slot A-Z</option>
+          <option value="rarity">Rarity ↓</option><option value="value">Value ↓</option><option value="slot">Slot A-Z</option>
         </select>
         <select id="sell-filter-rar" onchange="renderSellTab()" style="width:auto;padding:2px 5px;font-size:8px">
-          <option value="all">All Rarity</option>
-          <option value="Junk">Junk</option>
-          <option value="Normal">Normal</option>
-          <option value="Fine">Fine</option>
-          <option value="Rare">Rare</option>
-          <option value="Legendary">Legendary</option>
-          <option value="GOD">GOD</option>
-          <option value="SOMA">SOMA</option>
+          <option value="all">All Rarity</option><option value="Junk">Junk</option><option value="Normal">Normal</option>
+          <option value="Fine">Fine</option><option value="Rare">Rare</option><option value="Legendary">Legendary</option>
+          <option value="GOD">GOD</option><option value="SOMA">SOMA</option>
         </select>
         <select id="sell-filter-slot" onchange="renderSellTab()" style="width:auto;padding:2px 5px;font-size:8px">
-          <option value="all">All Slots</option>
-          <option value="Weapon">Weapon</option>
-          <option value="Shield">Shield</option>
-          <option value="Head">Head</option>
-          <option value="Chest">Chest</option>
-          <option value="Legs">Legs</option>
-          <option value="Cloak">Cloak</option>
-          <option value="Pendant">Pendant</option>
-          <option value="Necklace">Necklace</option>
-          <option value="Ring">Ring</option>
+          <option value="all">All Slots</option><option value="Weapon">Weapon</option><option value="Shield">Shield</option>
+          <option value="Head">Head</option><option value="Chest">Chest</option><option value="Legs">Legs</option>
+          <option value="Cloak">Cloak</option><option value="Pendant">Pendant</option><option value="Necklace">Necklace</option><option value="Ring">Ring</option>
         </select>
-        <!-- [FIX 5] Sell Max All button -->
-        <button class="btn sm danger" onclick="sellAllFiltered()" title="ขายของทุกชิ้นที่กรองไว้ทั้งหมด">⚡ SELL ALL</button>
+        <button class="btn sm danger" onclick="sellAllFiltered()">⚡ SELL ALL</button>
       </div>
       <div class="shop-list" id="shop-sell-list"></div>
     </div>
@@ -437,30 +345,29 @@ canvas{display:block;width:100%;height:100%}
       <h3>⚒ JUNK FORGE</h3>
       <div style="font-size:8px;color:var(--text2);margin-bottom:6px">
         Combine Junk → forge random equipment.<br>
-        <span style="color:#f44">⚠ Junk ×50/100: อัตรา Legendary+ ลดลง เพื่อให้ยากขึ้น</span>
+        <b style="color:#fa0">×10:</b> Normal 40% / Rare 20% / Leg 5% / God+Soma 5% / Break 15%<br>
+        <b style="color:#f80">×50:</b> เหมือน ×10 แต่ Drop rate เท่ากัน<br>
+        <b style="color:#f44">×100:</b> Leg 25% / Break 25% สูงขึ้น ความเสี่ยงสูง
       </div>
       <div style="font-size:8px;color:var(--text2);margin-bottom:5px">Junk: <span id="junk-count" style="color:var(--lux2)">0</span></div>
       <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
-        <button class="btn sm" onclick="forgeJunk(10)">⚒ FORGE ×10 (ปกติ)</button>
-        <button class="btn sm" onclick="forgeJunk(50)">⚒ FORGE ×50 <span style="color:#fa0">[-25% L+]</span></button>
-        <button class="btn sm" onclick="forgeJunk(100)">⚒ FORGE ×100 <span style="color:#f44">[-50% L+]</span></button>
+        <button class="btn sm" onclick="forgeJunk(10)">⚒ FORGE ×10</button>
+        <button class="btn sm" onclick="forgeJunk(50)">⚒ FORGE ×50</button>
+        <button class="btn sm" onclick="forgeJunk(100)">⚒ FORGE ×100 <span style="color:#f44">[HIGH RISK]</span></button>
       </div>
       <div id="forge-result" style="font-size:9px;min-height:30px"></div>
     </div>
-    <!-- [FIX 5] Re-Forge tab -->
     <div id="shop-tab-reforge" class="hidden">
-      <h3>♻ RE-FORGE <span style="color:var(--text3);font-size:8px">(แปลงอุปกรณ์สวมใส่ → Junk)</span></h3>
+      <h3>♻ RE-FORGE <span style="color:var(--text3);font-size:8px">(แปลงอุปกรณ์ → Junk)</span></h3>
       <div style="font-size:8px;color:var(--text2);margin-bottom:8px;line-height:1.6">
-        อัตราแลก: Normal=5🔩 · Fine/Rare=20🔩 · Legendary=50🔩 · GOD/SOMA=200🔩<br>
+        อัตราแลก: Normal=2🔩 · Rare=5🔩 · Legendary=10🔩 · GOD/SOMA=20🔩<br>
         <span style="color:#f44">⚠ ถอดอุปกรณ์ออกจาก slot ก่อนแล้วกด Re-Forge จาก Bag</span>
       </div>
-      <div style="font-size:8px;color:var(--text3);margin-bottom:4px">เลือกอุปกรณ์จาก BAG เพื่อแปลงเป็น Junk:</div>
       <div class="shop-list" id="reforge-list"></div>
     </div>
   </div>
 </div>
 
-<!-- DUNGEON SCREEN -->
 <div id="dungeon-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:700px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -474,7 +381,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- ITEM DETAIL SCREEN -->
 <div id="item-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:400px">
     <h2 id="item-detail-name" style="margin-bottom:3px">ITEM</h2>
@@ -485,7 +391,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- TOPBAR -->
 <div id="topbar">
   <span class="floor-info" id="floor-info">FLOOR 1</span>
   <span id="enemy-count" style="font-size:8px;color:var(--text2)"></span>
@@ -502,7 +407,6 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<!-- MAIN -->
 <div id="main-wrap">
   <div id="ui-left">
     <div class="p-name" id="p-name">-</div>
@@ -528,7 +432,6 @@ canvas{display:block;width:100%;height:100%}
     <div id="stat-ui"></div>
     <div class="section-label">COMBAT</div>
     <div id="combat-stats" style="font-size:8px;color:var(--text2);line-height:1.7"></div>
-    <!-- [FIX 3] AGI Speed info -->
     <div class="section-label">AGI SPEED</div>
     <div id="agi-speed-info" style="font-size:8px;color:var(--text2);line-height:1.6"></div>
   </div>
@@ -565,17 +468,16 @@ canvas{display:block;width:100%;height:100%}
 
 <script>
 'use strict';
-/* ═══ SOMA SLAYER v11.1 — PATCHED ══════════════════════════════
-   FIX 1: Circular obstacle collision (radius-based) — no more stuck
-   FIX 2: Junk 50/100 lowers Legendary+ drop rates
-   FIX 3: Movement speed tied to AGI (not just stat bonus)
-   FIX 4: Equip from Bag → auto-close + resume fight
-   FIX 5: Sell MAX All button + Re-Forge tab
-   FIX 6: Legendary-SOMA sell value reduced
-   FIX 7: Shop item 9,999G → 100,000G
+/* ═══ SOMA SLAYER v11.2 ══════════════════════════════════════
+   FIX 1: Obstacles moved to border (decoration only, no collision)
+   FIX 2: New monster types & elite system
+   FIX 3: New drop rate system (3 tiers by floor)
+   FIX 4: New EXP formula (starts 10, ×1.3, cap 9,999,999)
+   FIX 5: New forge rates per amount
+   FIX 6: Re-Forge junk rates updated
+   FIX 7: Gold ×2 × mob level
 ═══════════════════════════════════════════════════════════════ */
 
-// ─── CONSTANTS ─────────────────────────────────────────────
 const MAX_LV=9999, MAX_STAT=9999, MAX_GOLD=999999999, BAG_SIZE=199;
 const MAX_SKILL_LV=99;
 const RARITY=['Junk','Normal','Fine','Rare','Legendary','GOD','SOMA'];
@@ -585,86 +487,345 @@ const SLOT_TYPES=['Weapon','Shield','Head','Chest','Legs','Cloak','Pendant','Nec
 const SLOT_ICONS={Weapon:'⚔',Shield:'🛡',Head:'🪖',Chest:'🥋',Legs:'👖',Cloak:'🧣',Pendant:'💠',Necklace:'📿',Ring:'💍'};
 const HIDDEN_CLASS={Knight:'Excalibur',Archer:'.50 Calibre',Priest:'Merlin Bloodline'};
 
-// ─── [FIX 4] Track whether equip screen was opened from Bag or from menu ─
-let equipOpenedFromBag = false;
-
-// ─── DROP RATES ─────────────────────────────────────────────
-function getDropRarityRates(floor){
-  const t=Math.min(10,Math.floor(floor/100));
-  const eb=t*0.006;
-  return [
-    Math.max(0.10,0.35-t*0.02),
-    Math.max(0.15,0.30-t*0.01),
-    Math.min(0.25,0.18+t*0.005),
-    Math.min(0.12,0.08*0.90+eb),
-    Math.min(0.07,0.05*0.75+eb),
-    Math.min(0.04,0.02*0.70+eb*0.5),
-    Math.min(0.02,0.005*0.65+eb*0.3),
-  ];
-}
+let equipOpenedFromBag=false;
 
 // ─── BIOMES ─────────────────────────────────────────────────
 const BIOMES=[
-  {name:'Forest',   bg:'#1a2b1a', accent:'#2d4a2d', ground:'#0f1a0f', obstacles:[{icon:'🌲',w:24,h:32},{icon:'🪨',w:20,h:16}]},
-  {name:'Cave',     bg:'#1a1520', accent:'#2a2030', ground:'#0e0c14', obstacles:[{icon:'🪨',w:22,h:18},{icon:'💎',w:14,h:14}]},
-  {name:'Mountain', bg:'#1a1e28', accent:'#2a3040', ground:'#111620', obstacles:[{icon:'🗻',w:30,h:36},{icon:'🪨',w:18,h:14}]},
-  {name:'Sky',      bg:'#142240', accent:'#1e3060', ground:'#0e1830', obstacles:[{icon:'☁',w:40,h:20},{icon:'🌙',w:18,h:18}]},
-  {name:'Ocean',    bg:'#0d2035', accent:'#1a3a5c', ground:'#081524', obstacles:[{icon:'🐚',w:16,h:12},{icon:'🪸',w:18,h:22}]},
-  {name:'Hell',     bg:'#2a0a00', accent:'#400e00', ground:'#1a0500', obstacles:[{icon:'💀',w:16,h:20},{icon:'🔥',w:14,h:18}]},
-  {name:'Heaven',   bg:'#1a1a30', accent:'#2a2a50', ground:'#101025', obstacles:[{icon:'⭐',w:14,h:14},{icon:'✦',w:10,h:10}]},
-  {name:'Desert',   bg:'#2a1e0a', accent:'#3a2e14', ground:'#1c1206', obstacles:[{icon:'🌵',w:16,h:28},{icon:'🪨',w:20,h:14}]},
-  {name:'Snow',     bg:'#101828', accent:'#1a2840', ground:'#0a1018', obstacles:[{icon:'❄',w:14,h:14},{icon:'🌨',w:18,h:16}]},
-  {name:'Space',    bg:'#000010', accent:'#0a0a2a', ground:'#000008', obstacles:[{icon:'🌑',w:20,h:20},{icon:'✦',w:8,h:8}]},
+  {name:'Forest',   bg:'#1a2b1a',accent:'#2d4a2d',ground:'#0f1a0f',deco:[{icon:'🌲'},{icon:'🪨'},{icon:'🌿'},{icon:'🍄'}]},
+  {name:'Cave',     bg:'#1a1520',accent:'#2a2030',ground:'#0e0c14',deco:[{icon:'💎'},{icon:'🪨'},{icon:'🦇'},{icon:'💀'}]},
+  {name:'Mountain', bg:'#1a1e28',accent:'#2a3040',ground:'#111620',deco:[{icon:'🗻'},{icon:'❄'},{icon:'🪨'},{icon:'🌨'}]},
+  {name:'Sky',      bg:'#142240',accent:'#1e3060',ground:'#0e1830',deco:[{icon:'☁'},{icon:'🌙'},{icon:'⭐'},{icon:'✦'}]},
+  {name:'Ocean',    bg:'#0d2035',accent:'#1a3a5c',ground:'#081524',deco:[{icon:'🐚'},{icon:'🪸'},{icon:'🐠'},{icon:'🌊'}]},
+  {name:'Hell',     bg:'#2a0a00',accent:'#400e00',ground:'#1a0500',deco:[{icon:'💀'},{icon:'🔥'},{icon:'😈'},{icon:'🩸'}]},
+  {name:'Heaven',   bg:'#1a1a30',accent:'#2a2a50',ground:'#101025',deco:[{icon:'⭐'},{icon:'✦'},{icon:'🌟'},{icon:'💫'}]},
+  {name:'Desert',   bg:'#2a1e0a',accent:'#3a2e14',ground:'#1c1206',deco:[{icon:'🌵'},{icon:'🪨'},{icon:'🌞'},{icon:'🏜'}]},
+  {name:'Snow',     bg:'#101828',accent:'#1a2840',ground:'#0a1018',deco:[{icon:'❄'},{icon:'🌨'},{icon:'⛄'},{icon:'🏔'}]},
+  {name:'Space',    bg:'#000010',accent:'#0a0a2a',ground:'#000008',deco:[{icon:'🌑'},{icon:'✦'},{icon:'🚀'},{icon:'🌌'}]},
 ];
 function getBiome(floor){return BIOMES[Math.floor((floor-1)/1000)%BIOMES.length];}
 
-// ─── [FIX 1] OBSTACLE SYSTEM — Circular collision ──────────
-// ใช้ radius-based collision แทน AABB เพื่อให้ตัวละครและมอนสเตอร์ไม่ติด
-let currentObstacles=[];
+// ─── FIX 1: BORDER DECORATION ONLY — no collision ──────────
+// สิ่งกีดขวางอยู่รอบนอกฉาก เพื่อสร้างบรรยากาศเท่านั้น
+let currentDecorations=[];
 
-function generateObstacles(floor){
-  const biome=getBiome(floor);
+function generateDecorations(floor){
   if(!canvas) return [];
+  const biome=getBiome(floor);
   const W=canvas.width,H=canvas.height;
-  const obs=[];
-  const count=6+Math.floor(Math.random()*6);
+  const decs=[];
+  const margin=28; // วางใกล้ขอบ
+  const count=20+Math.floor(Math.random()*10);
   for(let i=0;i<count;i++){
-    const tmpl=biome.obstacles[Math.floor(Math.random()*biome.obstacles.length)];
-    let x,y,tries=0;
-    do{
-      x=60+Math.random()*(W-120);
-      y=60+Math.random()*(H-120);
-      tries++;
-    }while(Math.hypot(x-W/2,y-H/2)<100&&tries<30); // safe zone ใหญ่ขึ้น
-    // radius = ค่าเฉลี่ยของ w/h หารครึ่ง + padding เล็กน้อย
-    const r=Math.max(tmpl.w,tmpl.h)/2+4;
-    obs.push({x,y,w:tmpl.w,h:tmpl.h,r,icon:tmpl.icon});
+    const tmpl=biome.deco[Math.floor(Math.random()*biome.deco.length)];
+    let x,y;
+    const side=Math.floor(Math.random()*4);
+    if(side===0){x=Math.random()*W;y=margin*(0.3+Math.random()*0.7);}      // top
+    else if(side===1){x=Math.random()*W;y=H-margin*(0.3+Math.random()*0.7);} // bottom
+    else if(side===2){x=margin*(0.3+Math.random()*0.7);y=Math.random()*H;}   // left
+    else{x=W-margin*(0.3+Math.random()*0.7);y=Math.random()*H;}              // right
+    decs.push({x,y,icon:tmpl.icon,size:14+Math.floor(Math.random()*10),alpha:0.25+Math.random()*0.35});
   }
-  return obs;
+  return decs;
 }
 
-// [FIX 1] Circular collision check — ใช้ radius แทน box
-function collideObs(x,y,entityR){
-  return currentObstacles.some(o=>Math.hypot(x-o.x,y-o.y)<(entityR+o.r));
+// ─── NEW MONSTER TYPES ──────────────────────────────────────
+const MOB_TYPES=[
+  {name:'Slime',   icon:'🟢',baseHp:40, speed:1.1,atk:6, range:22,type:'melee'},
+  {name:'Bat',     icon:'🦇',baseHp:30, speed:2.2,atk:10,range:30,type:'melee'},
+  {name:'Rat',     icon:'🐀',baseHp:25, speed:2.5,atk:8, range:20,type:'melee'},
+  {name:'Skeleton',icon:'💀',baseHp:60, speed:1.0,atk:14,range:90,type:'bow'},
+  {name:'Zombie',  icon:'🧟',baseHp:90, speed:0.7,atk:16,range:22,type:'melee'},
+  {name:'Orc',     icon:'👹',baseHp:100,speed:0.9,atk:22,range:22,type:'melee'},
+  {name:'Goblin',  icon:'👺',baseHp:55, speed:1.8,atk:18,range:25,type:'melee'},
+  {name:'Spider',  icon:'🕷',baseHp:70, speed:1.6,atk:20,range:28,type:'melee'},
+  {name:'Mage',    icon:'🧙',baseHp:80, speed:0.9,atk:35,range:160,type:'aoe'},
+  {name:'Golem',   icon:'🗿',baseHp:250,speed:0.5,atk:30,range:22,type:'melee'},
+  {name:'Vampire', icon:'🧛',baseHp:130,speed:1.4,atk:28,range:35,type:'melee'},
+  {name:'Witch',   icon:'🧙‍♀️',baseHp:95,speed:1.0,atk:40,range:150,type:'aoe'},
+  {name:'Knight',  icon:'⚔️',baseHp:180,speed:0.8,atk:35,range:30,type:'melee'},
+  {name:'Demon',   icon:'😈',baseHp:300,speed:1.2,atk:55,range:40,type:'melee'},
+  {name:'Dragon',  icon:'🐉',baseHp:800,speed:1.5,atk:70,range:120,type:'boss'},
+  {name:'Phoenix', icon:'🦅',baseHp:600,speed:2.0,atk:60,range:100,type:'boss'},
+  {name:'Lich',    icon:'💀',baseHp:700,speed:0.8,atk:80,range:200,type:'boss'},
+];
+
+function getMobForFloor(floor){
+  if(floor<=10)  return MOB_TYPES.slice(0,3);
+  if(floor<=50)  return MOB_TYPES.slice(0,5);
+  if(floor<=200) return MOB_TYPES.slice(2,8);
+  if(floor<=500) return MOB_TYPES.slice(4,11);
+  if(floor<=2000)return MOB_TYPES.slice(6,13);
+  return MOB_TYPES.slice(9,14);
 }
 
-// Slide along obstacle — ถ้าชนแล้วลองเคลื่อนที่แค่แกนเดียว
-function moveWithSlide(entity,dx,dy,W,H,entityR){
-  let nx=entity.x+dx, ny=entity.y+dy;
-  nx=Math.max(entityR,Math.min(W-entityR,nx));
-  ny=Math.max(entityR,Math.min(H-entityR,ny));
-  if(!collideObs(nx,ny,entityR)){
-    entity.x=nx;entity.y=ny;return;
+// ─── DROP RATES BY FLOOR TIER ───────────────────────────────
+// Equip sub-rarity rates based on floor range
+function getEquipRarityRates(floor){
+  if(floor<=500){
+    // Junk 30% / Normal 50% / Rare 12% / Leg 5% / GOD 2% / Soma 1%
+    return [0.30,0.50,0.00,0.12,0.05,0.02,0.01];
+  } else if(floor<=5000){
+    // Junk 40% / Normal 30% / Rare 20% / Leg 5% / GOD 3% / Soma 2%
+    return [0.40,0.30,0.00,0.20,0.05,0.03,0.02];
+  } else {
+    // Junk 5% / Normal 30% / Rare 35% / Leg 20% / GOD 5% / Soma 5%
+    return [0.05,0.30,0.00,0.35,0.20,0.05,0.05];
   }
-  // ลองแค่แกน X
-  const tx=entity.x+dx, ty2=entity.y;
-  const cx=Math.max(entityR,Math.min(W-entityR,tx));
-  if(!collideObs(cx,ty2,entityR)){entity.x=cx;return;}
-  // ลองแค่แกน Y
-  const tx2=entity.x, ty=entity.y+dy;
-  const cy=Math.max(entityR,Math.min(H-entityR,ty));
-  if(!collideObs(tx2,cy,entityR)){entity.y=cy;return;}
-  // ค้างอยู่กับที่ถ้าชนทั้งคู่
+}
+
+function rollEquipRarity(floor){
+  const rates=getEquipRarityRates(floor);
+  let r=Math.random(),acc=0;
+  for(let i=0;i<RARITY.length;i++){acc+=rates[i];if(r<acc)return RARITY[i];}
+  return 'Normal';
+}
+
+// ─── EXP FORMULA ─────────────────────────────────────────────
+// Lv1→2 需要 10 EXP, ×1.3 ต่อเลเวล, สูงสุด 9,999,999
+function calcExpNext(lv){
+  return Math.min(9999999, Math.floor(10*Math.pow(1.3,lv-1)));
+}
+
+// ─── STATE ──────────────────────────────────────────────────
+let G={};
+let canvas,ctx,raf,paused=false;
+let autoMode=false,noBossMode=false;
+let currentScreen=null;
+let selectedClass='Knight';
+let dmgNumbers=[];
+let qtyModalCb=null,qtyModalMax=100;
+let blessingUntil=0,blessingBonus=0;
+let buybackList=[];
+
+function freshPlayer(name,cls){
+  const cb={Knight:{vit:5,str:3},Archer:{agi:5,str:2},Priest:{int:5,vit:2},
+    Excalibur:{str:10,vit:8,agi:5,int:5},'.50 Calibre':{agi:12,str:6,int:4,vit:4},'Merlin Bloodline':{int:12,vit:6,str:4,agi:4}};
+  const b=cb[cls]||{};
+  return{
+    name,class:cls,lv:1,exp:0,expNext:calcExpNext(1),
+    gold:500,pts:5,skillPts:0,
+    str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),
+    hp:0,maxHp:0,mp:0,maxMp:0,x:0,y:0,angle:0,
+    equips:{Weapon:null,Shield:null,Head:null,Chest:null,Legs:null,Cloak:null,Pendant:null,Necklace:null,Ring:null},
+    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0},
+    gears:[],
+    learnedSkills:[],
+    skillLevels:{},
+    hotbarSkills:[null,null,null,null],
+    statusEffects:{},
+    floor:1,
+    clearedFloors:new Set(),
+    hiddenClassUnlocked:false,
+    isHidden:false,
+    moveSpeedPct:100,
+  };
+}
+
+function calcStats(p){
+  let str=p.str,agi=p.agi,int_=p.int,vit=p.vit,hpB=0,mpB=0;
+  Object.values(p.equips).forEach(eq=>{
+    if(!eq)return;
+    str+=eq.effects?.buffs?.str||0;agi+=eq.effects?.buffs?.agi||0;
+    int_+=eq.effects?.buffs?.int||0;vit+=eq.effects?.buffs?.vit||0;
+    hpB+=eq.effects?.hpMod||0;mpB+=eq.effects?.mpMod||0;
+  });
+  const maxHp=Math.max(1,100+vit*20+p.lv*10+hpB);
+  const maxMp=Math.max(10,50+int_*10+p.lv*5+mpB);
+  const atk=(str*2+agi)+p.lv*2;
+  const def=vit+Math.floor(agi/2);
+  const spd=3+agi*0.05;
+  const critR=Math.min(60,agi*0.5);
+  const dodgeR=Math.min(40,agi*0.3);
+  const moveSpd=Math.max(1.5,2.8*(Math.min(200,p.moveSpeedPct||100)/100));
+  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,moveSpd};
+}
+
+// ─── MONSTER SPAWN ──────────────────────────────────────────
+function isBossFloor(f){return f%11===0&&f>0;}
+function enemyCount(f){return Math.min(f,80);}
+function floorScale(f){
+  if(f<=100)return f;
+  if(f<=1000)return 100+(f-100)*5;
+  return 100+900*5+(f-1000)*10;
+}
+
+// FIX 2: Elite level ranges
+function getEliteLvBonus(floor){
+  if(floor>=1000) return 200+Math.floor(Math.random()*300); // +200~500
+  return 5+Math.floor(Math.random()*16); // +5~20
+}
+
+function spawnEnemies(floor){
+  const count=enemyCount(floor);
+  const isBoss=isBossFloor(floor);
+  const scale=floorScale(floor);
+  const mobs=[];
+  const W=canvas.width,H=canvas.height;
+  const isSecret=!isBoss&&Math.random()<0.005;
+  const PLAY_R=30; // safe radius around center spawn point
+
+  if(isBoss||isSecret){
+    const bossPool=MOB_TYPES.filter(m=>m.type==='boss');
+    const boss=bossPool[Math.floor(Math.random()*bossPool.length)];
+    const bs=isSecret?scale*2:scale;
+    const hp=boss.baseHp*bs*20;
+    mobs.push({id:Math.random(),name:(isSecret?'★SECRET★ ':'')+boss.name+' LV'+floor,
+      icon:boss.icon,x:W*0.65+Math.random()*60,y:H*0.4+Math.random()*60,
+      hp,maxHp:hp,atk:boss.atk*bs*2,speed:boss.speed*(isSecret?1.5:1),
+      range:boss.range,type:'boss',cd:0,isBoss:true,isSecret,lv:floor,dropMult:isSecret?5:3,stunUntil:0,
+      wanderTarget:null,wanderCd:0});
+  }
+  if(!isBoss){
+    const mobPool=getMobForFloor(floor);
+    for(let i=0;i<count;i++){
+      const t=mobPool[Math.floor(Math.random()*mobPool.length)];
+      // FIX 2: Elite boost
+      const isElite=floor>20&&Math.random()<0.12;
+      const eliteLvBonus=isElite?getEliteLvBonus(floor):0;
+      const mobLv=floor+eliteLvBonus;
+      const mobScale=floorScale(mobLv);
+      const hp=t.baseHp*mobScale*(isElite?2:1);
+
+      // Spawn distributed across arena (no obstacles to worry about)
+      let mx,my,tries=0;
+      do{
+        mx=80+Math.random()*(W-160);
+        my=80+Math.random()*(H-160);
+        tries++;
+      }while(Math.hypot(mx-W/2,my-H/2)<PLAY_R+20&&tries<15);
+
+      mobs.push({id:Math.random(),name:t.name,icon:t.icon,x:mx,y:my,
+        hp,maxHp:hp,atk:t.atk*Math.max(1,mobScale*0.5)*(isElite?1.5:1),
+        speed:t.speed*(isElite?1.2:1),range:t.range,
+        type:t.type,cd:0,wanderTarget:null,wanderCd:0,isBoss:false,isSecret:false,
+        lv:mobLv,dropMult:isElite?2:1,stunUntil:0,isElite,
+        dot:null});
+    }
+  }
+  return mobs;
+}
+
+// ─── ITEM GEN ───────────────────────────────────────────────
+function rollQuality(){
+  const r=Math.random();
+  return r<0.001?'heavenly':r<0.01?'hell':'soso';
+}
+function qualLabel(q){
+  return q==='heavenly'?'<span class="q-heavenly">✦Heavenly</span>':q==='hell'?'<span class="q-hell">☠Hell</span>':'<span class="q-soso">◈SoSo</span>';
+}
+
+function genItem(floor,forceRarity=null){
+  const rarity=forceRarity||rollEquipRarity(floor);
+  const slot=SLOT_TYPES[Math.floor(Math.random()*SLOT_TYPES.length)];
+  const quality=rollQuality();
+  const rm={Junk:1,Normal:3,Fine:10,Rare:30,Legendary:80,GOD:200,SOMA:500};
+  const base=floor*2*(rm[rarity]||1);
+  const atkMult=quality==='hell'?1.5+Math.random()*0.5:quality==='heavenly'?1.2+Math.random()*0.4:0.9+Math.random()*0.3;
+  const buffs={
+    str:quality!=='hell'?Math.floor(base*0.08):0,
+    agi:quality!=='hell'?Math.floor(base*0.06):0,
+    int:quality!=='hell'?Math.floor(base*0.06):0,
+    vit:quality!=='hell'?Math.floor(base*0.10):0,
+  };
+  const hpMod=quality==='heavenly'?Math.floor(base*0.12):quality==='hell'?-Math.floor(base*0.08):0;
+  const reqStr=(['Legendary','GOD','SOMA'].includes(rarity))?Math.max(10,Math.floor(floor*0.5)):(['Rare','Fine'].includes(rarity))?Math.max(5,Math.floor(floor*0.2)):0;
+  const reqAgi=slot==='Weapon'&&rarity!=='Junk'?Math.max(5,Math.floor(floor*0.15)):0;
+  const reqInt=(slot==='Necklace'||slot==='Pendant')?Math.max(5,Math.floor(floor*0.15)):0;
+  const sellMult={Junk:1,Normal:1,Fine:1,Rare:1,Legendary:0.5,GOD:0.35,SOMA:0.25};
+  const value=base*(rm[rarity]||1)*(sellMult[rarity]||1);
+  return{
+    id:Math.random().toString(36).slice(2),
+    stackKey:`${rarity}_${slot}_${quality}`,
+    name:`${RANK[rarity]} ${slot}`,
+    fullName:`${rarity} ${slot}`,
+    rarity,slot,quality,floor,itemLv:floor,
+    atk:Math.floor(base*atkMult),
+    def:Math.floor(base*atkMult*0.6),
+    effects:{buffs,hpMod,mpMod:0,statusEffects:[]},
+    reqStr,reqAgi,reqInt,value,count:1,
+  };
+}
+
+function addToBag(item){
+  const p=G.p;
+  const ex=p.gears.find(g=>g.stackKey===item.stackKey&&g.count<999);
+  if(ex){ex.count=Math.min(999,ex.count+item.count);updateUI();return true;}
+  if(p.gears.length>=BAG_SIZE){notify('Bag full! (199)','#f44');return false;}
+  p.gears.push(item);updateUI();return true;
+}
+
+// ─── EQUIP ──────────────────────────────────────────────────
+function canEquip(item){
+  const cs=calcStats(G.p);
+  if(item.itemLv&&G.p.lv<Math.floor(item.itemLv*0.1))return`Req LV ${Math.floor(item.itemLv*0.1)}`;
+  if(item.reqStr&&cs.str<item.reqStr)return`Req STR ${item.reqStr}`;
+  if(item.reqAgi&&cs.agi<item.reqAgi)return`Req AGI ${item.reqAgi}`;
+  if(item.reqInt&&cs.int<item.reqInt)return`Req INT ${item.reqInt}`;
+  return null;
+}
+
+function equipItem(idx){
+  const p=G.p;const item=p.gears[idx];if(!item)return;
+  const err=canEquip(item);if(err){notify(err,'#f44');return;}
+  if(item.count>1){
+    item.count--;
+    const eq={...item,count:1,id:Math.random().toString(36).slice(2)};
+    const old=p.equips[eq.slot];p.equips[eq.slot]=eq;if(old)addToBag(old);
+  }else{
+    const old=p.equips[item.slot];p.equips[item.slot]=item;p.gears.splice(idx,1);if(old)addToBag(old);
+  }
+  notify(`Equipped: ${item.fullName}`,RCOL[item.rarity]);
+  updateUI();
+  if(equipOpenedFromBag){equipOpenedFromBag=false;resumeGame();}
+  else renderEquipScreen();
+}
+
+function unequipSlot(slot){
+  const item=G.p.equips[slot];if(!item)return;
+  if(addToBag(item)){G.p.equips[slot]=null;updateUI();renderEquipScreen();}
+}
+
+function openEquipFromMenu(){equipOpenedFromBag=false;openScreen('equip');}
+function closeEquipScreen(){equipOpenedFromBag=false;resumeGame();}
+
+// ─── LEVELING ───────────────────────────────────────────────
+function giveExp(amount){
+  const p=G.p;
+  const mult=(p.isHidden&&p.floor>500)?2:1;
+  p.exp+=amount*mult;
+  while(p.lv<MAX_LV&&p.exp>=p.expNext){
+    p.exp-=p.expNext;p.lv++;p.pts+=5;p.skillPts++;
+    p.expNext=calcExpNext(p.lv);
+    // AGI speed bonus per level
+    if((p.moveSpeedPct||100)<200){
+      p.moveSpeedPct=Math.min(200,(p.moveSpeedPct||100)+(0.1+Math.random()*1.9));
+    }
+    notify(`Level Up! LV ${p.lv}`,'var(--lux2)');
+    const cs=calcStats(p);p.hp=cs.maxHp;p.mp=cs.maxMp;
+    if(!p.hiddenClassUnlocked&&p.lv>=9999&&p.str>=9999&&p.agi>=9999&&p.int>=9999&&p.vit>=9999){
+      p.hiddenClassUnlocked=true;notify('✦ HIDDEN CLASS UNLOCKED!','var(--god)');
+    }
+  }
+  updateUI();
+}
+
+function addStat(stat,amount){
+  const p=G.p;
+  if(p.pts<amount){notify(`Need ${amount} pts!`,'#f44');return;}
+  p[stat]=Math.min(MAX_STAT,p[stat]+amount);p.pts-=amount;
+  const cs=calcStats(p);if(p.hp>cs.maxHp)p.hp=cs.maxHp;if(p.mp>cs.maxMp)p.mp=cs.maxMp;
+  updateUI();
+}
+
+function ascendHiddenClass(){
+  const p=G.p;const hc=HIDDEN_CLASS[p.class];if(!hc)return;
+  p.class=hc;p.isHidden=true;
+  p.str=Math.min(MAX_STAT,p.str+500);p.agi=Math.min(MAX_STAT,p.agi+500);
+  p.int=Math.min(MAX_STAT,p.int+500);p.vit=Math.min(MAX_STAT,p.vit+500);
+  const cs=calcStats(p);p.hp=cs.maxHp;p.mp=cs.maxMp;
+  notify(`✦ Ascended to ${hc}!`,'var(--god)');
+  document.getElementById('hidden-class-notice').classList.add('hidden');
+  updateUI();renderSkills();
 }
 
 // ─── SKILL DB ───────────────────────────────────────────────
@@ -704,7 +865,6 @@ const SKILL_DB={
   ],
 };
 
-// ─── [FIX 7] SHOP ITEMS — Blessing price: 9999 → 100000 ────
 const SHOP_ITEMS=[
   {id:'HP_POT',name:'HP Potion',icon:'🧪',desc:'Restore 40% HP',price:50},
   {id:'MP_POT',name:'MP Potion',icon:'💧',desc:'Restore 40% MP',price:50},
@@ -713,289 +873,8 @@ const SHOP_ITEMS=[
   {id:'MP_POT_L',name:'MP Elixir',icon:'🌀',desc:'Restore 80% MP',price:200},
   {id:'EXP_SCROLL',name:'EXP Scroll',icon:'📜',desc:'Gain 5000 EXP',price:500},
   {id:'JUNK',name:'Junk ×10',icon:'🔩',desc:'Used in forge',price:20,qty:10},
-  {id:'BLESSING',name:'เสริมบุญ',icon:'🙏',desc:'+1.5~3% drop 15min',price:100000}, // [FIX 7]
+  {id:'BLESSING',name:'เสริมบุญ',icon:'🙏',desc:'+1.5~3% drop 15min',price:100000},
 ];
-
-const MOB_TYPES=[
-  {name:'Slime',icon:'🟢',baseHp:30,speed:1.2,atk:5,range:20,type:'melee'},
-  {name:'Bat',icon:'🦇',baseHp:20,speed:2.0,atk:8,range:30,type:'melee'},
-  {name:'Skeleton',icon:'💀',baseHp:50,speed:1.0,atk:12,range:80,type:'bow'},
-  {name:'Orc',icon:'👹',baseHp:80,speed:0.8,atk:18,range:20,type:'melee'},
-  {name:'Golem',icon:'🗿',baseHp:200,speed:0.5,atk:25,range:20,type:'melee'},
-  {name:'Mage',icon:'🧙',baseHp:60,speed:1.0,atk:30,range:150,type:'aoe'},
-  {name:'Dragon',icon:'🐉',baseHp:500,speed:1.5,atk:50,range:100,type:'boss'},
-];
-
-// ─── [FIX 3] AGI → Movement Speed Formula ──────────────────
-// Lv1 = 100% base, Lv500 = 200% (สุ่ม +0.1–2% ต่อเลเวลก่อนถึง500)
-// Lv5000 = 200% (cap)
-// ค่า speedBonus ถูกสุ่มเก็บต่อเลเวลเมื่อเลเวลอัพ
-const BASE_MOVE_SPEED = 2.8; // px/frame ที่ 100%
-
-// คำนวณความเร็วเดินจาก AGI และเลเวล (สำหรับ display)
-function calcMoveSpeed(p){
-  // AGI bonus: เพิ่มความเร็วตี + dodge (ไม่ใช่ความเร็วเดินแล้ว)
-  // ความเร็วเดิน = BASE * (p.moveSpeedPct / 100)
-  const pct = Math.min(200, p.moveSpeedPct || 100);
-  return BASE_MOVE_SPEED * (pct / 100);
-}
-
-// ─── STATE ──────────────────────────────────────────────────
-let G={};
-let canvas,ctx,raf,paused=false;
-let autoMode=false,noBossMode=false;
-let currentScreen=null;
-let selectedClass='Knight';
-let dmgNumbers=[];
-let qtyModalCb=null,qtyModalMax=100;
-let blessingUntil=0,blessingBonus=0;
-let buybackList=[];
-
-function freshPlayer(name,cls){
-  const cb={Knight:{vit:5,str:3},Archer:{agi:5,str:2},Priest:{int:5,vit:2},
-    Excalibur:{str:10,vit:8,agi:5,int:5},'.50 Calibre':{agi:12,str:6,int:4,vit:4},'Merlin Bloodline':{int:12,vit:6,str:4,agi:4}};
-  const b=cb[cls]||{};
-  return {
-    name,class:cls,lv:1,exp:0,expNext:150,
-    gold:500,pts:5,skillPts:0,
-    str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),
-    hp:0,maxHp:0,mp:0,maxMp:0,x:0,y:0,angle:0,
-    equips:{Weapon:null,Shield:null,Head:null,Chest:null,Legs:null,Cloak:null,Pendant:null,Necklace:null,Ring:null},
-    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0},
-    gears:[],
-    learnedSkills:[],
-    skillLevels:{},
-    hotbarSkills:[null,null,null,null],
-    statusEffects:{},
-    floor:1,
-    clearedFloors:new Set(),
-    hiddenClassUnlocked:false,
-    isHidden:false,
-    // [FIX 3] ความเร็วเดิน เริ่มที่ 100% สุ่มเพิ่มต่อเลเวล
-    moveSpeedPct: 100,
-    moveSpeedBonusLog: [], // เก็บ bonus แต่ละเลเวล
-  };
-}
-
-// [FIX 3] คำนวณ moveSpeedPct จากประวัติ (สุ่มต่อเลเวล 0.1–2%)
-function rollMoveSpeedBonus(p){
-  if(p.lv <= 1) return;
-  if((p.moveSpeedPct||100) >= 200) return; // cap ที่ 200%
-  const bonus = 0.1 + Math.random() * 1.9; // 0.1 ~ 2.0
-  p.moveSpeedPct = Math.min(200, (p.moveSpeedPct||100) + bonus);
-  p.moveSpeedBonusLog = p.moveSpeedBonusLog || [];
-  p.moveSpeedBonusLog.push(+bonus.toFixed(2));
-}
-
-function calcStats(p){
-  let str=p.str,agi=p.agi,int_=p.int,vit=p.vit,hpB=0,mpB=0;
-  Object.values(p.equips).forEach(eq=>{
-    if(!eq) return;
-    str+=eq.effects?.buffs?.str||0; agi+=eq.effects?.buffs?.agi||0;
-    int_+=eq.effects?.buffs?.int||0; vit+=eq.effects?.buffs?.vit||0;
-    hpB+=eq.effects?.hpMod||0; mpB+=eq.effects?.mpMod||0;
-  });
-  const maxHp=Math.max(1,100+vit*20+p.lv*10+hpB);
-  const maxMp=Math.max(10,50+int_*10+p.lv*5+mpB);
-  const atk=(str*2+agi)+p.lv*2;
-  const def=vit+Math.floor(agi/2);
-  // [FIX 3] spd ใช้สำหรับ attack speed และ dodge เท่านั้น ไม่ใช่ movement
-  const spd=3+agi*0.05;
-  const critR=Math.min(60,agi*0.5);
-  // [FIX 3] dodge bonus จาก AGI
-  const dodgeR=Math.min(40,agi*0.3);
-  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit};
-}
-
-// ─── DUNGEON ────────────────────────────────────────────────
-function isBossFloor(f){return f%11===0&&f>0;}
-function enemyCount(f){return Math.min(f,100);}
-function floorScale(f){
-  if(f<=100) return f;
-  if(f<=1000) return 100+(f-100)*5;
-  return 100+900*5+(f-1000)*10;
-}
-
-function spawnEnemies(floor){
-  const count=enemyCount(floor);
-  const isBoss=isBossFloor(floor);
-  const scale=floorScale(floor);
-  const mobs=[];
-  const W=canvas.width,H=canvas.height;
-  const isSecret=!isBoss&&Math.random()<0.005;
-
-  if(isBoss||isSecret){
-    const boss=MOB_TYPES[6];
-    const bs=isSecret?scale*2:scale;
-    const hp=boss.baseHp*bs*20;
-    mobs.push({id:Math.random(),name:(isSecret?'★SECRET★ ':'')+boss.name+' LV'+floor,
-      icon:boss.icon,x:W*0.7+Math.random()*80,y:H*0.35+Math.random()*80,
-      hp,maxHp:hp,atk:boss.atk*bs*2,speed:boss.speed*(isSecret?1.5:1),
-      range:boss.range,type:'boss',cd:0,isBoss:true,isSecret,lv:floor,dropMult:isSecret?5:3,stunUntil:0});
-  }
-  if(!isBoss){
-    for(let i=0;i<count;i++){
-      const t=MOB_TYPES[Math.min(5,Math.floor(floor/20))];
-      const hp=t.baseHp*scale;
-      let mx=W/2+Math.random()*100-50,my=H/2+Math.random()*100-50,tries=0;
-      // [FIX 1] ใช้ collideObs แบบ circular และ spawn ให้ห่างผู้เล่น
-      do{mx=60+Math.random()*(W-120);my=60+Math.random()*(H-120);tries++;}
-      while((collideObs(mx,my,12)||Math.hypot(mx-W/2,my-H/2)<80)&&tries<20);
-      mobs.push({id:Math.random(),name:t.name,icon:t.icon,x:mx,y:my,
-        hp,maxHp:hp,atk:t.atk*Math.max(1,scale*0.5),speed:t.speed,range:t.range,
-        type:t.type,cd:0,wanderTarget:null,wanderCd:0,isBoss:false,isSecret:false,
-        lv:floor,dropMult:1,stunUntil:0,isElite:floor>50&&Math.random()<0.1});
-    }
-  }
-  return mobs;
-}
-
-// ─── ITEM GEN ───────────────────────────────────────────────
-function rollRarity(rates){
-  let r=Math.random(),acc=0;
-  for(let i=0;i<RARITY.length;i++){acc+=rates[i];if(r<acc)return RARITY[i];}
-  return 'Junk';
-}
-function rollQuality(){
-  const r=Math.random();
-  return r<0.001?'heavenly':r<0.01?'hell':'soso';
-}
-function qualLabel(q){
-  return q==='heavenly'?'<span class="q-heavenly">✦Heavenly</span>':q==='hell'?'<span class="q-hell">☠Hell</span>':'<span class="q-soso">◈SoSo</span>';
-}
-
-function genItem(floor,forceSlot=null){
-  const rates=getDropRarityRates(floor);
-  const rarity=rollRarity(rates);
-  const slot=forceSlot||SLOT_TYPES[Math.floor(Math.random()*SLOT_TYPES.length)];
-  const quality=rollQuality();
-  const rm={Junk:1,Normal:3,Fine:10,Rare:30,Legendary:80,GOD:200,SOMA:500};
-  const base=floor*2*(rm[rarity]||1);
-  const atkMult=quality==='hell'?1.5+Math.random()*0.5:quality==='heavenly'?1.2+Math.random()*0.4:0.9+Math.random()*0.3;
-  const buffs={
-    str:quality!=='hell'?Math.floor(base*0.08):0,
-    agi:quality!=='hell'?Math.floor(base*0.06):0,
-    int:quality!=='hell'?Math.floor(base*0.06):0,
-    vit:quality!=='hell'?Math.floor(base*0.10):0,
-  };
-  const hpMod=quality==='heavenly'?Math.floor(base*0.12):quality==='hell'?-Math.floor(base*0.08):0;
-  const reqStr=(['Legendary','GOD','SOMA'].includes(rarity))?Math.max(10,Math.floor(floor*0.5)):(['Rare','Fine'].includes(rarity))?Math.max(5,Math.floor(floor*0.2)):0;
-  const reqAgi=slot==='Weapon'&&rarity!=='Junk'?Math.max(5,Math.floor(floor*0.15)):0;
-  const reqInt=(slot==='Necklace'||slot==='Pendant')?Math.max(5,Math.floor(floor*0.15)):0;
-
-  // [FIX 6] ลดราคาขาย Legendary-SOMA
-  const sellMult={Junk:1,Normal:1,Fine:1,Rare:1,Legendary:0.5,GOD:0.35,SOMA:0.25};
-  const value=base*(rm[rarity]||1)*(sellMult[rarity]||1);
-
-  return{
-    id:Math.random().toString(36).slice(2),
-    stackKey:`${rarity}_${slot}_${quality}`,
-    name:`${RANK[rarity]} ${slot}`,
-    fullName:`${rarity} ${slot}`,
-    rarity,slot,quality,floor,itemLv:floor,
-    atk:Math.floor(base*atkMult),
-    def:Math.floor(base*atkMult*0.6),
-    effects:{buffs,hpMod,mpMod:0,statusEffects:[]},
-    reqStr,reqAgi,reqInt,
-    value,
-    count:1,
-  };
-}
-
-function addToBag(item){
-  const p=G.p;
-  const ex=p.gears.find(g=>g.stackKey===item.stackKey&&g.count<999);
-  if(ex){ex.count=Math.min(999,ex.count+item.count);updateUI();return true;}
-  if(p.gears.length>=BAG_SIZE){notify('Bag full! (199)','#f44');return false;}
-  p.gears.push(item);updateUI();return true;
-}
-
-// ─── EQUIP ──────────────────────────────────────────────────
-function canEquip(item){
-  const cs=calcStats(G.p);
-  if(item.itemLv&&G.p.lv<Math.floor(item.itemLv*0.1))return`Req LV ${Math.floor(item.itemLv*0.1)}`;
-  if(item.reqStr&&cs.str<item.reqStr)return`Req STR ${item.reqStr}`;
-  if(item.reqAgi&&cs.agi<item.reqAgi)return`Req AGI ${item.reqAgi}`;
-  if(item.reqInt&&cs.int<item.reqInt)return`Req INT ${item.reqInt}`;
-  return null;
-}
-
-// [FIX 4] equipItem — ถ้า openedFromBag → ปิดแล้วกลับต่อสู้
-function equipItem(idx){
-  const p=G.p;const item=p.gears[idx];if(!item)return;
-  const err=canEquip(item);if(err){notify(err,'#f44');return;}
-  if(item.count>1){
-    item.count--;
-    const eq={...item,count:1,id:Math.random().toString(36).slice(2)};
-    const old=p.equips[eq.slot];p.equips[eq.slot]=eq;if(old)addToBag(old);
-  }else{
-    const old=p.equips[item.slot];p.equips[item.slot]=item;p.gears.splice(idx,1);if(old)addToBag(old);
-  }
-  notify(`Equipped: ${item.fullName}`,RCOL[item.rarity]);
-  updateUI();
-  // [FIX 4] ถ้ากด Equip จาก Bag (ผ่าน bag-item onclick) → ปิดหน้าต่างกลับต่อสู้
-  if(equipOpenedFromBag){
-    equipOpenedFromBag=false;
-    resumeGame();
-  }else{
-    renderEquipScreen();
-  }
-}
-
-function unequipSlot(slot){
-  const item=G.p.equips[slot];if(!item)return;
-  if(addToBag(item)){G.p.equips[slot]=null;updateUI();renderEquipScreen();}
-}
-
-// [FIX 4] เปิดหน้า Equip จาก Menu (ไม่ใช่จาก Bag)
-function openEquipFromMenu(){
-  equipOpenedFromBag=false;
-  openScreen('equip');
-}
-
-// [FIX 4] ปิดหน้า Equip กลับต่อสู้
-function closeEquipScreen(){
-  equipOpenedFromBag=false;
-  resumeGame();
-}
-
-// ─── LEVELING ───────────────────────────────────────────────
-function giveExp(amount){
-  const p=G.p;
-  const mult=(p.isHidden&&p.floor>500)?2:1;
-  p.exp+=amount*mult;
-  while(p.lv<MAX_LV&&p.exp>=p.expNext){
-    p.exp-=p.expNext;p.lv++;p.pts+=5;p.skillPts++;
-    p.expNext=Math.floor(150*Math.pow(1.07,Math.min(p.lv,300)));
-    // [FIX 3] สุ่ม moveSpeed bonus ต่อเลเวล
-    rollMoveSpeedBonus(p);
-    notify(`Level Up! LV ${p.lv}`,'var(--lux2)');
-    const cs=calcStats(p);p.hp=cs.maxHp;p.mp=cs.maxMp;
-    if(!p.hiddenClassUnlocked&&p.lv>=9999&&p.str>=9999&&p.agi>=9999&&p.int>=9999&&p.vit>=9999){
-      p.hiddenClassUnlocked=true;notify('✦ HIDDEN CLASS UNLOCKED!','var(--god)');
-    }
-  }
-  updateUI();
-}
-
-function addStat(stat,amount){
-  const p=G.p;
-  if(p.pts<amount){notify(`Need ${amount} pts!`,'#f44');return;}
-  p[stat]=Math.min(MAX_STAT,p[stat]+amount);p.pts-=amount;
-  const cs=calcStats(p);if(p.hp>cs.maxHp)p.hp=cs.maxHp;if(p.mp>cs.maxMp)p.mp=cs.maxMp;
-  updateUI();
-}
-
-function ascendHiddenClass(){
-  const p=G.p;const hc=HIDDEN_CLASS[p.class];if(!hc)return;
-  p.class=hc;p.isHidden=true;
-  p.str=Math.min(MAX_STAT,p.str+500);p.agi=Math.min(MAX_STAT,p.agi+500);
-  p.int=Math.min(MAX_STAT,p.int+500);p.vit=Math.min(MAX_STAT,p.vit+500);
-  const cs=calcStats(p);p.hp=cs.maxHp;p.mp=cs.maxMp;
-  notify(`✦ Ascended to ${hc}!`,'var(--god)');
-  document.getElementById('hidden-class-notice').classList.add('hidden');
-  updateUI();renderSkills();
-}
 
 // ─── SKILLS ─────────────────────────────────────────────────
 function baseClass(cls){
@@ -1021,7 +900,7 @@ function learnSkill(id){
     p.learnedSkills.push(id);
     for(let i=0;i<4;i++){if(!p.hotbarSkills[i]){p.hotbarSkills[i]=id;break;}}
     notify(`Learned: ${sk.name}`,'var(--lux2)');
-  }else{notify(`${sk.name} Lv ${lv+1}!`,'var(--lux2)');}
+  }else notify(`${sk.name} Lv ${lv+1}!`,'var(--lux2)');
   p.skillLevels=p.skillLevels||{};p.skillLevels[id]=(lv+1);p.skillPts--;
   renderSkills();updateHotbar();
 }
@@ -1041,7 +920,7 @@ function applySkill(sk){
   const p=G.p,cs=calcStats(p);
   if(sk.type==='heal'){const h=cs.maxHp*sk.healPct;p.hp=Math.min(cs.maxHp,p.hp+h);logMsg(`${sk.name}: +${Math.floor(h)} HP`,'#2f2');}
   else if(sk.type==='fullheal'){p.hp=cs.maxHp;p.mp=cs.maxMp;logMsg(`${sk.name}: Full!`,'#2f2');}
-  else if(sk.type==='cleanse'){p.statusEffects={};if(sk.buffKey)p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg(`Cleansed!`,'#0ff');}
+  else if(sk.type==='cleanse'){p.statusEffects={};if(sk.buffKey)p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg('Cleansed!','#0ff');}
   else if(sk.type==='buff'){p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg(`${sk.name} active!`,'#0ff');}
   else if(sk.type==='hot'){p.statusEffects.hot={until:Date.now()+sk.hotDur,pct:sk.hotPct,last:Date.now()};logMsg(`${sk.name}: Regen`,'#2f2');}
   else if(sk.type==='atk'||sk.type==='stun'||sk.type==='pierce'){
@@ -1072,7 +951,6 @@ let atkCd=0;
 function playerAttack(){
   const now=Date.now();if(now<atkCd)return;
   const p=G.p,cs=calcStats(p);
-  // [FIX 3] attack speed ขึ้นกับ AGI (spd stat)
   const spd=Math.max(50,400-Math.min(350,cs.spd*20));
   atkCd=now+spd;
   const crit=Math.random()*100<cs.critR;
@@ -1097,7 +975,6 @@ function mobAttackPlayer(m){
   const shielded=p.statusEffects.shield&&now<p.statusEffects.shield.until;
   const barrier=p.statusEffects.barrier&&now<p.statusEffects.barrier.until;
   const evading=p.statusEffects.evade&&now<p.statusEffects.evade.until;
-  // [FIX 3] dodge จาก AGI (dodgeR)
   const agiDodge=Math.random()*100<cs.dodgeR;
   if((evading&&Math.random()<0.5)||agiDodge){logMsg('Dodge!','#0ff');return;}
   let dmg=Math.max(1,m.atk-def);
@@ -1116,6 +993,7 @@ function playerDead(){
   if(autoMode){
     let f=p.floor;if(isBossFloor(f))f--;else f=Math.max(1,f-1);
     p.floor=f;const cs=calcStats(p);p.hp=Math.floor(cs.maxHp*0.5);
+    currentDecorations=generateDecorations(f);
     G.mobs=spawnEnemies(f);
   }else{
     autoMode=false;paused=true;cancelAnimationFrame(raf);
@@ -1127,9 +1005,13 @@ function playerDead(){
 function mobDied(m){
   const p=G.p;
   const mult=(p.isHidden&&p.floor>500)?2:1;
-  const baseExp=m.isBoss?p.floor*40:p.floor*4;
-  const baseGold=m.isBoss?p.floor*20:p.floor*2;
-  const exp=baseExp*(m.isElite?3:1)*mult;
+  // FIX 3: Exp ตามเลเวลมอนสเตอร์ตัวเอง
+  const mobLv=m.lv||p.floor;
+  const baseExp=m.isBoss?mobLv*40:mobLv*4;
+  // FIX 7: Gold ×2 × mobLv
+  const baseGold=m.isBoss?mobLv*40:mobLv*4;
+
+  const exp=baseExp*(m.isElite?2:1)*mult;
   const gold=Math.floor(baseGold*(m.isElite?2:1)*mult);
 
   const now=Date.now();
@@ -1137,7 +1019,18 @@ function mobDied(m){
   p.gold=Math.min(MAX_GOLD,p.gold+gold);
   giveExp(exp);
 
-  const equipChance=(m.isBoss?0.50:m.isElite?0.20:0.10)*(m.dropMult||1)+bless;
+  // FIX 3: Drop rates per tier
+  // ไอเทม consumable 20–30%
+  const consumChance=0.20+Math.random()*0.10+bless;
+  if(Math.random()<consumChance){
+    const consumPool=['HP_POT','MP_POT','CLEANSE'];
+    const chosen=consumPool[Math.floor(Math.random()*consumPool.length)];
+    p.inv[chosen]=(p.inv[chosen]||0)+1;
+    logMsg(`+1 ${chosen}`,'#2f2');
+  }
+
+  // อุปกรณ์สวมใส่ 10–25%
+  const equipChance=(m.isBoss?0.40:m.isElite?0.25:0.10+Math.random()*0.15)*(m.dropMult||1)+bless;
   if(Math.random()<equipChance){
     const item=genItem(p.floor);
     if(addToBag(item)){
@@ -1146,7 +1039,8 @@ function mobDied(m){
       logMsg(`[${RANK[item.rarity]}] ${item.slot} ${item.quality}`,'#fa0');
       if(['Legendary','GOD','SOMA'].includes(item.rarity))showEpicBanner(item);
     }
-  }else if(Math.random()<0.15+bless){
+  } else if(Math.random()<0.20+bless){
+    // Junk drop separate
     p.inv.JUNK=(p.inv.JUNK||0)+1;
   }
 
@@ -1172,7 +1066,7 @@ function advanceFloor(){
   p.clearedFloors.add(p.floor);
   if(p.floor>=10000){notify('MAX FLOOR CLEARED!','var(--soma)');return;}
   p.floor++;
-  currentObstacles=generateObstacles(p.floor);
+  currentDecorations=generateDecorations(p.floor);
   G.mobs=spawnEnemies(p.floor);
   updateUI();
 }
@@ -1224,30 +1118,31 @@ function loop(){
   // Biome background
   const biome=getBiome(p.floor);
   ctx.fillStyle=biome.bg;ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle=biome.accent;ctx.lineWidth=.5;ctx.globalAlpha=0.3;
+  ctx.strokeStyle=biome.accent;ctx.lineWidth=.5;ctx.globalAlpha=0.2;
   for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   ctx.globalAlpha=1;
 
-  // Draw obstacles
-  currentObstacles.forEach(o=>{
-    ctx.font=`${Math.max(o.h,14)}px serif`;
+  // FIX 1: Draw border decorations only (no collision)
+  currentDecorations.forEach(d=>{
+    ctx.globalAlpha=d.alpha;
+    ctx.font=`${d.size}px serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.globalAlpha=0.7;ctx.fillText(o.icon,o.x,o.y);
-    ctx.globalAlpha=1;
-    // Debug: วาดวงกลม collision (ปิดไว้)
-    // ctx.strokeStyle='rgba(255,0,0,0.3)';ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.stroke();
+    ctx.fillText(d.icon,d.x,d.y);
   });
+  ctx.globalAlpha=1;
 
-  // [FIX 3] Player movement — ความเร็ว = moveSpeedPct / 100 * BASE_MOVE_SPEED
-  const moveSpd = calcMoveSpeed(p);
+  // Player movement — NO obstacle collision, free movement
+  const moveSpd=cs.moveSpd;
   let dx=0,dy=0;
   if(keys['w']||keys['arrowup'])dy-=moveSpd;
   if(keys['s']||keys['arrowdown'])dy+=moveSpd;
   if(keys['a']||keys['arrowleft'])dx-=moveSpd;
   if(keys['d']||keys['arrowright'])dx+=moveSpd;
-  // [FIX 1] Slide collision
-  if(dx!==0||dy!==0) moveWithSlide(p,dx,dy,W,H,14);
+  if(dx!==0||dy!==0){
+    p.x=Math.max(14,Math.min(W-14,p.x+dx));
+    p.y=Math.max(14,Math.min(H-14,p.y+dy));
+  }
 
   p.angle=Math.atan2(mouse.y-p.y,mouse.x-p.x);
 
@@ -1257,9 +1152,8 @@ function loop(){
     const tx=t.x-p.x,ty=t.y-p.y,d=Math.hypot(tx,ty);
     p.angle=Math.atan2(ty,tx);
     if(d>70){
-      // [FIX 1] Auto mode ใช้ slide ด้วย
-      const adx=tx/d*moveSpd, ady=ty/d*moveSpd;
-      moveWithSlide(p,adx,ady,W,H,14);
+      p.x=Math.max(14,Math.min(W-14,p.x+tx/d*moveSpd));
+      p.y=Math.max(14,Math.min(H-14,p.y+ty/d*moveSpd));
     }
     playerAttack();
     p.hotbarSkills.forEach((_,i)=>{const id=p.hotbarSkills[i];if(!id)return;if(!skillCDs[id]||now>skillCDs[id])useSkillSlot(i);});
@@ -1288,7 +1182,7 @@ function loop(){
   if(G.mobs.length===0&&!isBossFloor(p.floor)){
     p.clearedFloors.add(p.floor);
     if(!noBossMode)advanceFloor();
-    else{currentObstacles=generateObstacles(p.floor);G.mobs=spawnEnemies(p.floor);}
+    else{currentDecorations=generateDecorations(p.floor);G.mobs=spawnEnemies(p.floor);}
   }
 
   // Mobs
@@ -1300,16 +1194,16 @@ function loop(){
     const stunned=now<m.stunUntil;
     if(!stunned){
       if(d>m.range+14){
-        if(d<420){
+        if(d<450){
           const mx=p.x-m.x,my2=p.y-m.y,md=Math.hypot(mx,my2);
-          // [FIX 1] มอนสเตอร์ก็ใช้ slide collision
-          moveWithSlide(m,mx/md*m.speed,my2/md*m.speed,W,H,10);
+          m.x=Math.max(10,Math.min(W-10,m.x+mx/md*m.speed));
+          m.y=Math.max(10,Math.min(H-10,m.y+my2/md*m.speed));
         }else{
           if(!m.wanderTarget||now>m.wanderCd||Math.hypot(m.x-m.wanderTarget.x,m.y-m.wanderTarget.y)<20){
-            m.wanderTarget={x:50+Math.random()*(W-100),y:50+Math.random()*(H-100)};m.wanderCd=now+2000;
+            m.wanderTarget={x:60+Math.random()*(W-120),y:60+Math.random()*(H-120)};m.wanderCd=now+2500;
           }
           const wx=m.wanderTarget.x-m.x,wy=m.wanderTarget.y-m.y,wd=Math.hypot(wx,wy);
-          if(wd>2) moveWithSlide(m,wx/wd*m.speed*0.5,wy/wd*m.speed*0.5,W,H,10);
+          if(wd>2){m.x=Math.max(10,Math.min(W-10,m.x+wx/wd*m.speed*0.6));m.y=Math.max(10,Math.min(H-10,m.y+wy/wd*m.speed*0.6));}
         }
       }else{
         mobAttackPlayer(m);
@@ -1322,16 +1216,17 @@ function loop(){
     ctx.font=`${m.isBoss?22:16}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.shadowColor='rgba(255,255,255,0.3)';ctx.shadowBlur=4;
     ctx.fillText(m.icon,0,0);ctx.shadowBlur=0;
-    if(m.isElite){ctx.strokeStyle='#9fa8da';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.stroke();}
+    if(m.isElite){ctx.strokeStyle='#f0c040';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,13,0,Math.PI*2);ctx.stroke();}
     if(m.isSecret){ctx.strokeStyle='#ce93d8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.stroke();}
     ctx.globalAlpha=1;
     const mhp=m.hp/m.maxHp;
-    const bw=m.isBoss?60:28,bx=m.isBoss?-30:-14,by=m.isBoss?-34:-23;
+    const bw=m.isBoss?60:32,bx=m.isBoss?-30:-16,by=m.isBoss?-34:-25;
     ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(bx,by,bw,4);
     ctx.fillStyle=mhp>.5?'#2f2':mhp>.25?'#fa0':'#f22';ctx.fillRect(bx,by,bw*mhp,4);
-    if(m.isBoss){
-      ctx.fillStyle=m.isSecret?'#ce93d8':'#ef9a9a';ctx.font='7px monospace';
-      ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(m.name,0,by-3);
+    if(m.isBoss||m.isElite){
+      ctx.fillStyle=m.isSecret?'#ce93d8':m.isElite?'#f0c040':'#ef9a9a';
+      ctx.font='7px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
+      ctx.fillText(m.isElite?`⚡LV${m.lv} ${m.name}`:m.name,0,by-3);
     }
     ctx.restore();
   });
@@ -1350,7 +1245,7 @@ function loop(){
   });
   dmgNumbers=alive;
 
-  document.getElementById('enemy-count').textContent=`${G.mobs.length}/${enemyCount(p.floor)} | ${getBiome(p.floor).name}`;
+  document.getElementById('enemy-count').textContent=`${G.mobs.length} enemies | ${getBiome(p.floor).name}`;
   const bl=document.getElementById('blessing-ind');
   if(bl)bl.style.display=now<blessingUntil?'inline':'none';
   updateHotbar();
@@ -1398,7 +1293,6 @@ function updateUI(){
   document.getElementById('p-gold').textContent=p.gold.toLocaleString();
   document.getElementById('p-pts').textContent=p.pts;
 
-  // Stats
   const si=document.getElementById('stat-ui');
   si.innerHTML=[['STR','str'],['AGI','agi'],['INT','int'],['VIT','vit']].map(([n,k])=>`
     <div class="stat-row">
@@ -1412,31 +1306,23 @@ function updateUI(){
       </div>
     </div>`).join('');
 
-  // [FIX 3] แสดง AGI Speed Info
   const asi=document.getElementById('agi-speed-info');
   if(asi){
     const pct=Math.min(200,p.moveSpeedPct||100);
     const atkSpd=Math.max(50,400-Math.min(350,cs.spd*20));
-    asi.innerHTML=`
-      <span style="color:var(--lux2)">Move: ${pct.toFixed(1)}%</span>
-      <span style="color:var(--text3)"> (LV${p.lv>5000?'5000+':p.lv})</span><br>
-      ATK SPD: <span style="color:var(--lux2)">${atkSpd}ms</span><br>
-      Dodge: <span style="color:var(--lux2)">${cs.dodgeR.toFixed(1)}%</span> (AGI)`;
+    asi.innerHTML=`Move: <span style="color:var(--lux2)">${pct.toFixed(1)}%</span> (LV${p.lv})<br>ATK SPD: <span style="color:var(--lux2)">${atkSpd}ms</span><br>Dodge: <span style="color:var(--lux2)">${cs.dodgeR.toFixed(1)}%</span>`;
   }
 
   document.getElementById('combat-stats').innerHTML=
-    `ATK:<b style="color:var(--lux2)">${cs.atk}</b> DEF:<b>${cs.def}</b><br>`+
-    `CRIT:<b>${cs.critR.toFixed(0)}%</b> AGI:<b>${cs.agi}</b>`;
+    `ATK:<b style="color:var(--lux2)">${cs.atk}</b> DEF:<b>${cs.def}</b><br>CRIT:<b>${cs.critR.toFixed(0)}%</b> AGI:<b>${cs.agi}</b>`;
 
   document.getElementById('floor-info').textContent=`FLOOR ${p.floor}${isBossFloor(p.floor)?' ⚠BOSS':''}`;
 
-  // Status panel
   const now=Date.now();
   const effs=Object.entries(p.statusEffects).filter(([k,v])=>now<v.until).map(([k])=>k.toUpperCase());
   const sp=document.getElementById('status-effects-panel');
   if(sp)sp.innerHTML=effs.length?effs.map(e=>`<span style="color:var(--lux2)">${e}</span>`).join(' · '):'<span style="color:var(--text3)">Normal</span>';
 
-  // Bag
   document.getElementById('bag-count').textContent=`(${p.gears.length}/199)`;
   const bg=document.getElementById('gear-list');
   bg.innerHTML=p.gears.map((g,i)=>`
@@ -1449,17 +1335,9 @@ function updateUI(){
       ${g.count>1?`<div style="font-size:6px;color:var(--lux2)">×${g.count}</div>`:''}
     </div>`).join('');
 
-  // Pause stats
   const ps=document.getElementById('pause-stats');
-  if(ps)ps.innerHTML=`
-    LV: <b style="color:var(--lux)">${p.lv}</b><br>
-    💰 <b class="soma-txt">${p.gold.toLocaleString()}G</b><br>
-    HP: ${Math.floor(p.hp)}/${cs.maxHp}<br>
-    MP: ${Math.floor(p.mp)}/${cs.maxMp}<br>
-    ATK: ${cs.atk} | DEF: ${cs.def}<br>
-    Floor: ${p.floor} [${getBiome(p.floor).name}]`;
+  if(ps)ps.innerHTML=`LV: <b style="color:var(--lux)">${p.lv}</b><br>💰 <b class="soma-txt">${p.gold.toLocaleString()}G</b><br>HP: ${Math.floor(p.hp)}/${cs.maxHp}<br>MP: ${Math.floor(p.mp)}/${cs.maxMp}<br>ATK: ${cs.atk} | DEF: ${cs.def}<br>Floor: ${p.floor} [${getBiome(p.floor).name}]`;
 
-  // Inv in pause
   const il=document.getElementById('inv-list');
   if(il)il.innerHTML=Object.entries(p.inv).filter(([k,v])=>v>0).map(([k,v])=>`
     <div class="shop-item" onclick="useItem('${k}')">
@@ -1468,7 +1346,6 @@ function updateUI(){
       <span class="shop-price">×${v}</span>
     </div>`).join('');
 
-  // Hidden class
   const hn=document.getElementById('hidden-class-notice');
   if(hn){
     if(p.hiddenClassUnlocked&&!p.isHidden){
@@ -1502,16 +1379,13 @@ function updateHotbar(){
   });
 }
 
-// [FIX 4] เปิดไอเทมจาก Bag → ไปที่หน้า Equip แบบ "from bag"
 function openItemFromBag(idx){
   equipOpenedFromBag=true;
   openScreen('equip');
-  // scroll to item หรือ highlight
 }
 
 function showBagTip(e,idx){
   const g=G.p.gears[idx];if(!g)return;
-  const cs=calcStats(G.p);
   const equipped=G.p.equips[g.slot];
   const dAtk=equipped?g.atk-equipped.atk:null;
   const dDef=equipped?g.def-equipped.def:null;
@@ -1526,8 +1400,7 @@ function showBagTip(e,idx){
     ${g.effects.hpMod?`<div>HP: <span style="color:${g.effects.hpMod>0?'#2f2':'#f44'}">${g.effects.hpMod>0?'+':''}${g.effects.hpMod}</span></div>`:''}
     ${g.reqStr?`<div style="color:var(--text3)">Req STR ${g.reqStr}</div>`:''}
     ${err?`<div style="color:#f44">${err}</div>`:''}
-    <div style="color:var(--text3);margin-top:3px">Sell: ${Math.floor(g.value*0.5).toLocaleString()}G</div>
-  `;
+    <div style="color:var(--text3);margin-top:3px">Sell: ${Math.floor(g.value*0.5).toLocaleString()}G</div>`;
   const x=Math.min(e.clientX+8,window.innerWidth-230);
   const y=Math.max(e.clientY-120,5);
   tt.style.left=x+'px';tt.style.top=y+'px';tt.style.display='block';
@@ -1543,9 +1416,7 @@ function openScreen(name){
     if(!paused&&name!=='none'){paused=true;cancelAnimationFrame(raf);}
     document.getElementById(name+'-screen').classList.remove('hidden');
     currentScreen=name;
-  }else{
-    currentScreen=null;
-  }
+  }else{currentScreen=null;}
   if(name==='skill')renderSkills();
   if(name==='shop'){renderShopBuy();renderSellTab();renderBuybackTab();renderReforgeTab();switchShopTab('buy');}
   if(name==='dungeon')renderDungeons();
@@ -1554,14 +1425,12 @@ function openScreen(name){
   if(name==='saveload')renderSaveLoad();
 }
 
-// Click outside overlay to resume
 document.addEventListener('mousedown',function(e){
   if(!currentScreen)return;
   const screen=document.getElementById(currentScreen+'-screen');
   if(!screen)return;
   const panel=screen.querySelector('.panel-box');
   if(panel&&!panel.contains(e.target)&&screen.contains(e.target)){
-    // [FIX 4] ถ้าอยู่หน้า equip ที่เปิดจาก bag → reset flag
     if(currentScreen==='equip')equipOpenedFromBag=false;
     resumeGame();
   }
@@ -1592,12 +1461,11 @@ function renderEquipScreen(){
   const sortBy=document.getElementById('equip-sort')?.value||'rarity';
   const filterSlot=document.getElementById('equip-filter-slot')?.value||'all';
   const filterRar=document.getElementById('equip-filter-rar')?.value||'all';
-
   const eu=document.getElementById('equip-slots-ui');
   if(eu)eu.innerHTML=SLOT_TYPES.map(slot=>{
     const item=p.equips[slot];
     const col=item?RCOL[item.rarity]:'#333';
-    return `<div class="eslot" onclick="unequipSlot('${slot}')"
+    return`<div class="eslot" onclick="unequipSlot('${slot}')"
               onmouseenter="${item?'showEquipTip(event,\''+slot+'\')':''}" onmouseleave="hideTip()">
       <span class="sl">${SLOT_ICONS[slot]} ${slot}</span>
       <span class="sn" style="color:${col}">${item?`<span class="rank-${RANK[item.rarity]}">[${RANK[item.rarity]}]</span> ${item.slot}`:'—'}</span>
@@ -1616,9 +1484,8 @@ function renderEquipScreen(){
   const inv=document.getElementById('equip-inv-ui');
   if(inv)inv.innerHTML=filtered.map(({g,i})=>{
     const err=canEquip(g);const col=RCOL[g.rarity];
-    const eq=p.equips[g.slot];
-    const dA=eq?g.atk-eq.atk:null;
-    return `<div class="equip-inv-item" onclick="equipItem(${i})"
+    const eq=p.equips[g.slot];const dA=eq?g.atk-eq.atk:null;
+    return`<div class="equip-inv-item" onclick="equipItem(${i})"
                  onmouseenter="showBagTip(event,${i})" onmouseleave="hideTip()"
                  style="border-color:${err?'#2a2a2a':col}">
       <span style="font-size:13px">${SLOT_ICONS[g.slot]}</span>
@@ -1638,16 +1505,14 @@ function renderEquipScreen(){
 function showEquipTip(e,slot){
   const item=G.p.equips[slot];if(!item)return;
   const tt=document.getElementById('tooltip');
-  tt.innerHTML=`
-    <div style="color:${RCOL[item.rarity]};font-weight:bold">[${RANK[item.rarity]}] ${item.slot}</div>
+  tt.innerHTML=`<div style="color:${RCOL[item.rarity]};font-weight:bold">[${RANK[item.rarity]}] ${item.slot}</div>
     <div>${qualLabel(item.quality)} · Lv${item.itemLv}</div>
     <div>ATK: <b>${item.atk}</b> DEF: <b>${item.def}</b></div>
     <div>STR:+${item.effects.buffs.str} AGI:+${item.effects.buffs.agi} INT:+${item.effects.buffs.int} VIT:+${item.effects.buffs.vit}</div>
     ${item.effects.hpMod?`<div>HP: ${item.effects.hpMod>0?'+':''}${item.effects.hpMod}</div>`:''}
     <div style="color:var(--text3);margin-top:3px">Click to unequip</div>`;
   tt.style.left=Math.min(e.clientX+8,window.innerWidth-230)+'px';
-  tt.style.top=Math.max(e.clientY-100,5)+'px';
-  tt.style.display='block';
+  tt.style.top=Math.max(e.clientY-100,5)+'px';tt.style.display='block';
 }
 
 // ─── SKILLS ─────────────────────────────────────────────────
@@ -1662,7 +1527,7 @@ function renderSkills(){
       <div class="sk-desc">${sk.desc}</div>
       ${sk.dmgMult?`<div style="color:var(--lux);font-size:8px">DMG: ${dmgD}</div>`:''}
       <div class="sk-cost">MP:${sk.mp} CD:${sk.cd}s | Req LV${sk.lv}</div>
-      ${isLearned?`<div style="color:var(--lux2);font-size:8px">Lv${slv}/${MAX_SKILL_LV}${slv<MAX_SKILL_LV?' · click to up':'· MAX'}</div>`:''}
+      ${isLearned?`<div style="color:var(--lux2);font-size:8px">Lv${slv}/${MAX_SKILL_LV}${slv<MAX_SKILL_LV?' · click to up':' · MAX'}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -1708,7 +1573,6 @@ function renderSellTab(){
     <div class="shop-item" onclick="sellItemPrompt(${i})">
       <span style="color:${RCOL[g.rarity]}">${SLOT_ICONS[g.slot]}</span>
       <span class="rank-${RANK[g.rarity]}">[${RANK[g.rarity]}] ${g.slot}${g.count>1?' ×'+g.count:''}</span>
-      <!-- [FIX 5] แสดงปุ่ม Max ต่อชิ้น -->
       <span class="shop-price" style="display:flex;align-items:center;gap:4px">
         ${Math.floor(g.value*0.5).toLocaleString()}G ea
         <button class="btn sm" style="padding:1px 5px;font-size:8px" onclick="event.stopPropagation();sellAllOfItem(${i})">MAX</button>
@@ -1716,7 +1580,6 @@ function renderSellTab(){
     </div>`).join('')||'<div style="color:var(--text3);font-size:9px;padding:8px">No items to sell</div>';
 }
 
-// [FIX 5] ขายของ item นั้นทั้งหมดทันที (MAX per item)
 function sellAllOfItem(idx){
   const p=G.p,g=p.gears[idx];if(!g)return;
   const qty=g.count||1;
@@ -1730,7 +1593,6 @@ function sellAllOfItem(idx){
   renderSellTab();updateUI();
 }
 
-// [FIX 5] ขายทุกชิ้นที่กรองอยู่ (SELL ALL)
 function sellAllFiltered(){
   const p=G.p;
   const filterRar=document.getElementById('sell-filter-rar')?.value||'all';
@@ -1739,13 +1601,10 @@ function sellAllFiltered(){
   if(filterRar!=='all')indices=indices.filter(i=>p.gears[i].rarity===filterRar);
   if(filterSlot!=='all')indices=indices.filter(i=>p.gears[i].slot===filterSlot);
   if(indices.length===0){notify('ไม่มีของที่ตรงกับ filter','#888');return;}
-
   let totalGold=0,totalQty=0;
-  // ขายจากท้ายไปหน้าเพื่อไม่ให้ index เพี้ยน
   [...indices].sort((a,b)=>b-a).forEach(idx=>{
     const g=p.gears[idx];if(!g)return;
-    const qty=g.count||1;
-    const priceEach=Math.floor(g.value*0.5);
+    const qty=g.count||1;const priceEach=Math.floor(g.value*0.5);
     totalGold+=priceEach*qty;totalQty+=qty;
     buybackList.push({item:{...g,count:1},qty,buybackPrice:Math.floor(priceEach*1.25)});
     if(buybackList.length>50)buybackList.shift();
@@ -1778,14 +1637,14 @@ function buybackItem(idx){
   renderBuybackTab();updateUI();
 }
 
-// [FIX 5] Re-Forge tab — แปลงอุปกรณ์ใน Bag เป็น Junk
-const REFORGE_JUNK={Junk:2,Normal:5,Fine:20,Rare:20,Legendary:50,GOD:200,SOMA:200};
+// FIX 6: Updated Re-Forge junk rates
+const REFORGE_JUNK={Junk:1,Normal:2,Fine:2,Rare:5,Legendary:10,GOD:20,SOMA:20};
 function renderReforgeTab(){
   const p=G.p;
   const rl=document.getElementById('reforge-list');if(!rl)return;
   if(p.gears.length===0){rl.innerHTML='<div style="color:var(--text3);font-size:9px;padding:8px">ไม่มีของใน Bag</div>';return;}
   rl.innerHTML=p.gears.map((g,i)=>{
-    const junk=REFORGE_JUNK[g.rarity]||5;
+    const junk=REFORGE_JUNK[g.rarity]||2;
     const total=junk*(g.count||1);
     return`<div class="shop-item" onclick="reforgeItem(${i})">
       <span style="color:${RCOL[g.rarity]}">${SLOT_ICONS[g.slot]}</span>
@@ -1797,9 +1656,8 @@ function renderReforgeTab(){
 
 function reforgeItem(idx){
   const p=G.p,g=p.gears[idx];if(!g)return;
-  const junkEach=REFORGE_JUNK[g.rarity]||5;
-  const qty=g.count||1;
-  const total=junkEach*qty;
+  const junkEach=REFORGE_JUNK[g.rarity]||2;
+  const qty=g.count||1;const total=junkEach*qty;
   if(!confirm(`Re-Forge [${g.rarity}] ${g.slot} ×${qty} → 🔩${total} Junk?`))return;
   p.inv.JUNK=(p.inv.JUNK||0)+total;
   p.gears.splice(idx,1);
@@ -1839,45 +1697,52 @@ function sellItemPrompt(idx){
   });
 }
 
-// ─── [FIX 2] JUNK FORGE — Legendary+ drop ลดลงเมื่อใช้ ×50/×100 ─
+// FIX 5: New forge rates
+// ×10: Normal 40% / Rare 20% / Leg 5% / God+Soma 5% / Break 15% / (rest=Junk/Fine)
+// ×50: same as ×10
+// ×100: Leg 25% / Break 25% (high risk)
+function getForgeRates(amount){
+  if(amount===100){
+    // HIGH RISK: Legendary 25%, GOD 3%, SOMA 2%, Break 25%, Normal 20%, Rare 20%, Junk 5%
+    return {Junk:0.05,Normal:0.20,Fine:0.00,Rare:0.20,Legendary:0.25,GOD:0.03,SOMA:0.02,Break:0.25};
+  } else {
+    // ×10 and ×50 same
+    return {Junk:0.15,Normal:0.40,Fine:0.00,Rare:0.20,Legendary:0.05,GOD:0.03,SOMA:0.02,Break:0.15};
+  }
+}
+
 function forgeJunk(amount){
   const p=G.p;
   if((p.inv.JUNK||0)<amount){notify(`Need ${amount} Junk!`,'#f44');return;}
   p.inv.JUNK-=amount;
 
-  // [FIX 2] penalty multiplier สำหรับ Legendary+
-  // ×10 = ปกติ, ×50 = -25% L+, ×100 = -50% L+
-  const penaltyMult = amount===100 ? 0.50 : amount===50 ? 0.75 : 1.0;
-
-  // Base forge rates
-  const baseRates=[0, 0.35, 0.32, 0.15, 0.09, 0.06, 0.03];
-  const adjustedRates=[...baseRates];
-  // ลด Legendary, GOD, SOMA
-  adjustedRates[4]*=penaltyMult;
-  adjustedRates[5]*=penaltyMult;
-  adjustedRates[6]*=penaltyMult;
-  // redistribute ส่วนที่ลดไปเติมที่ Junk/Normal
-  const lost = (baseRates[4]+baseRates[5]+baseRates[6]) - (adjustedRates[4]+adjustedRates[5]+adjustedRates[6]);
-  adjustedRates[1]+=lost*0.6; adjustedRates[2]+=lost*0.4;
-
+  const rates=getForgeRates(amount);
   const results=[];
   const numItems=amount===10?1:amount===50?3:7;
+
   for(let n=0;n<numItems;n++){
-    const r=Math.random();
-    if(r<0.05){results.push('<span style="color:#f44">💥 BREAK</span>');continue;}
-    if(r<0.08){p.inv.JUNK+=Math.floor(Math.random()*5);results.push('<span style="color:#ff0">🔄 Morphed (+junk)</span>');continue;}
-    let acc=0;let rar='Normal';const rr=Math.random();
-    for(let i=1;i<RARITY.length;i++){acc+=adjustedRates[i];if(rr<acc){rar=RARITY[i];break;}}
-    const item=genItem(G.p.floor);
-    item.rarity=rar;item.name=RANK[rar]+' '+item.slot;item.fullName=rar+' '+item.slot;
-    item.stackKey=`${rar}_${item.slot}_${item.quality}`;
+    const rr=Math.random();
+    let acc=0;
+    // check break first
+    if(rr<rates.Break){results.push('<span style="color:#f44">💥 BREAK</span>');continue;}
+    let rar='Normal';
+    const keys=['SOMA','GOD','Legendary','Rare','Fine','Normal','Junk'];
+    // skip break in roll
+    const rollR=Math.random();
+    let racc=0;
+    for(const k of keys){
+      racc+=rates[k]||0;
+      if(rollR<racc){rar=k;break;}
+    }
+    const item=genItem(G.p.floor,rar);
     addToBag(item);
     results.push(`<span style="color:${RCOL[rar]}">[${RANK[rar]}] ${item.slot} ${qualLabel(item.quality)}</span>`);
     if(['Legendary','GOD','SOMA'].includes(rar))showEpicBanner(item);
   }
-  const penLabel=amount===100?'-50% Legendary+':amount===50?'-25% Legendary+':'ปกติ';
+
   const fr=document.getElementById('forge-result');
-  if(fr)fr.innerHTML=`<div style="color:${amount>10?'#f44':'#888'}">⚒ ${amount} Junk [${penLabel}]:</div>`+results.map(r=>`<div>${r}</div>`).join('');
+  const label=amount===100?'HIGH RISK ×100':amount===50?'×50':'×10';
+  if(fr)fr.innerHTML=`<div style="color:${amount===100?'#f44':'#888'}">⚒ ${label}:</div>`+results.map(r=>`<div>${r}</div>`).join('');
   const jc=document.getElementById('junk-count');if(jc)jc.textContent=p.inv.JUNK||0;
   updateUI();
 }
@@ -1898,10 +1763,9 @@ function renderDungeons(){
 
 function goFloor(f){
   G.p.floor=f;
-  currentObstacles=generateObstacles(f);
+  currentDecorations=generateDecorations(f);
   G.mobs=spawnEnemies(f);
-  resumeGame();
-  updateUI();
+  resumeGame();updateUI();
 }
 
 // ─── ITEM DETAIL ────────────────────────────────────────────
@@ -1932,8 +1796,7 @@ function renderSaveLoad(){
   let html='';
   for(let i=1;i<=SAVE_SLOTS;i++){
     const raw=localStorage.getItem(`soma_save_${i}`);
-    let info='<span style="color:var(--text3)">— Empty —</span>';
-    let has=false;
+    let info='<span style="color:var(--text3)">— Empty —</span>';let has=false;
     if(raw){try{const s=JSON.parse(raw);const p=s.p;
       info=`<div class="ss-name">${p.name} [${p.class}] LV${p.lv}</div><div>Floor ${p.floor} · ${(p.gold||0).toLocaleString()}G · ${new Date(s.savedAt).toLocaleString()}</div>`;has=true;}catch{}
     }
@@ -1952,7 +1815,7 @@ function renderSaveLoad(){
 
 function saveToSlot(slot){
   if(!G.p){notify('Start a game first!','#f44');return;}
-  const save={p:{...G.p,clearedFloors:[...G.p.clearedFloors]},version:11.1,savedAt:Date.now()};
+  const save={p:{...G.p,clearedFloors:[...G.p.clearedFloors]},version:11.2,savedAt:Date.now()};
   localStorage.setItem(`soma_save_${slot}`,JSON.stringify(save));
   notify(`Saved to Slot ${slot}!`,'var(--lux2)');renderSaveLoad();
 }
@@ -1964,7 +1827,6 @@ function loadFromSlot(slot){
     p.clearedFloors=new Set(p.clearedFloors||[]);
     p.skillLevels=p.skillLevels||{};
     if(!p.inv.BLESSING)p.inv.BLESSING=0;
-    // [FIX 3] compat: ถ้า save เก่าไม่มี moveSpeedPct
     if(!p.moveSpeedPct)p.moveSpeedPct=100;
     G.p=p;
     document.getElementById('start-screen').classList.add('hidden');
@@ -1989,7 +1851,6 @@ function notify(msg,color='var(--lux2)'){
   el.className='notif-item';el.style.borderLeftColor=color;el.style.color=color;el.textContent=msg;
   n.appendChild(el);setTimeout(()=>el.remove(),3100);
 }
-
 function logMsg(msg,color='#888'){
   const l=document.getElementById('log');if(!l)return;
   const d=document.createElement('div');d.className='log-line';d.style.color=color;d.textContent='> '+msg;
@@ -2004,7 +1865,6 @@ function toggleAuto(){
   document.getElementById('noboss-btn').style.display=autoMode?'block':'none';
   notify(autoMode?'Auto-farm ON':'Manual mode','#888');
 }
-
 function toggleNoBoss(){
   noBossMode=!noBossMode;
   document.getElementById('noboss-btn').classList.toggle('active',noBossMode);
@@ -2031,7 +1891,7 @@ function initGame(isNew){
   ctx=canvas.getContext('2d');
   resizeCanvas();
   G.p.x=canvas.width/2;G.p.y=canvas.height/2;
-  currentObstacles=generateObstacles(G.p.floor);
+  currentDecorations=generateDecorations(G.p.floor);
   G.mobs=spawnEnemies(G.p.floor);
   dmgNumbers=[];
   window.addEventListener('resize',resizeCanvas);
@@ -2062,30 +1922,11 @@ function onKey(e){
 
 function resizeCanvas(){
   if(!canvas)return;
-  canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;
+  canvas.width=canvas.offsetWidth;
+  canvas.height=canvas.offsetHeight;
+  // Re-generate decorations on resize
+  if(G.p)currentDecorations=generateDecorations(G.p.floor);
 }
-</script>
-
-<div id="debug-console" style="position:fixed;bottom:0;left:0;width:100%;height:150px;background:rgba(0,0,0,0.8);color:#0f0;font-family:monospace;font-size:10px;overflow-y:auto;z-index:9999;pointer-events:none;border-top:1px solid #333;display:none;">
-  <div style="padding:5px;">-- Debug Log (K to toggle) --</div>
-  <div id="debug-content" style="padding:5px;"></div>
-</div>
-<script>
-window.addEventListener('keydown',(e)=>{
-  if(e.key.toLowerCase()==='k'){
-    const c=document.getElementById('debug-console');
-    c.style.display=c.style.display==='none'?'block':'none';
-  }
-});
-const oldLog=console.log;
-const dc=document.getElementById('debug-content');
-console.log=function(...args){
-  oldLog.apply(console,args);
-  const m=document.createElement('div');
-  m.innerText=`[${new Date().toLocaleTimeString()}] ${args.join(' ')}`;
-  dc.appendChild(m);dc.scrollTop=dc.scrollHeight;
-};
-console.log('SOMA SLAYER v11.1 — Patch loaded. Press K for debug.');
 </script>
 </body>
 </html>
