@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SOMA SLAYER v11.3</title>
+<title>SOMA SLAYER v11.2</title>
 <style>
 :root{
   --bg:#050505;--bg2:#0a0a0a;--bg3:#111;--panel:#0d0d0d;
@@ -19,10 +19,10 @@
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',monospace;font-size:12px;overflow:hidden;height:100vh;display:flex;flex-direction:column}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:center;justify-content:center}
 .hidden{display:none!important}
-.panel-box{background:var(--bg3);border:1px solid var(--lux);padding:14px;width:95%}
+.panel-box{background:var(--bg3);border:1px solid var(--lux);padding:22px;width:95%}
 .panel-box h1{color:var(--lux);font-size:22px;letter-spacing:4px;margin-bottom:4px;text-align:center}
-.panel-box h2{color:var(--lux);font-size:14px;letter-spacing:2px;margin-bottom:6px}
-.panel-box h3{color:var(--lux2);font-size:10px;letter-spacing:1px;margin-bottom:4px}
+.panel-box h2{color:var(--lux);font-size:16px;letter-spacing:3px;margin-bottom:10px}
+.panel-box h3{color:var(--lux2);font-size:11px;letter-spacing:2px;margin-bottom:6px}
 .sub-title{color:var(--text2);text-align:center;font-size:10px;letter-spacing:3px;margin-bottom:16px}
 input,select{background:#111;color:var(--text);border:1px solid var(--border2);padding:7px 10px;outline:none;font-family:inherit;font-size:11px;width:100%}
 input:focus,select:focus{border-color:var(--lux)}
@@ -89,22 +89,22 @@ canvas{display:block;width:100%;height:100%}
 .rank-R{color:var(--rare)}.rank-L{color:var(--legendary)}.rank-G{color:var(--god)}.rank-S{color:var(--soma)}
 .equip-main{display:grid;grid-template-columns:230px 1fr;gap:12px}
 .equip-slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.eslot{border:1px solid var(--border2);background:#0a0a0a;padding:3px;cursor:pointer;text-align:center;transition:border-color .15s;min-height:38px}
+.eslot{border:1px solid var(--border2);background:#0a0a0a;padding:5px;cursor:pointer;text-align:center;transition:border-color .15s;min-height:52px}
 .eslot:hover{border-color:var(--lux)}
 .eslot .sl{font-size:7px;color:var(--text3);letter-spacing:1px;display:block;margin-bottom:1px}
 .eslot .sn{font-size:8px;font-weight:bold}
 .eslot .sq{font-size:7px;margin-top:1px}
-.equip-inv-list{display:flex;flex-direction:column;gap:2px;max-height:240px;overflow-y:auto}
+.equip-inv-list{display:flex;flex-direction:column;gap:2px;max-height:360px;overflow-y:auto}
 .equip-inv-item{display:flex;align-items:center;gap:5px;border:1px solid var(--border2);background:#0a0a0a;padding:4px;cursor:pointer;transition:border-color .15s;font-size:8px}
 .equip-inv-item:hover{border-color:var(--lux)}
 .pause-layout{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.shop-list{display:flex;flex-direction:column;gap:2px;max-height:180px;overflow-y:auto}
-.shop-item{display:flex;align-items:center;gap:5px;border:1px solid var(--border2);background:#0a0a0a;padding:3px 5px;cursor:pointer;transition:border-color .15s;font-size:8px}
+.shop-list{display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto}
+.shop-item{display:flex;align-items:center;gap:6px;border:1px solid var(--border2);background:#0a0a0a;padding:5px;cursor:pointer;transition:border-color .15s;font-size:9px}
 .shop-item:hover{border-color:var(--lux)}
 .shop-price{margin-left:auto;color:var(--lux2);font-size:9px;white-space:nowrap}
-.skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;max-height:260px;overflow-y:auto}
-.skill-card{border:1px solid var(--border2);background:#0a0a0a;padding:4px;cursor:pointer;transition:all .15s}
+.skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:340px;overflow-y:auto}
+.skill-card{border:1px solid var(--border2);background:#0a0a0a;padding:6px;cursor:pointer;transition:all .15s}
 .skill-card:hover{border-color:var(--lux)}.skill-card.learned{border-color:var(--lux2)}
 .skill-card .sk-name{color:var(--lux2);font-size:9px;font-weight:bold;margin-bottom:2px}
 .skill-card .sk-desc{color:var(--text2);font-size:8px;line-height:1.3}
@@ -142,6 +142,9 @@ canvas{display:block;width:100%;height:100%}
 .bb-item:hover{border-color:var(--lux2)}
 .btn-reforge{background:#1a0a1a;border-color:#ab47bc;color:#ce93d8;}
 .btn-reforge:hover{background:#ab47bc;color:#fff;border-color:#ab47bc;}
+.picker-row{display:flex;align-items:center;gap:6px;padding:4px 6px;cursor:pointer;font-size:8px;border-radius:2px;transition:background .1s}
+.picker-row:hover{background:var(--lux);color:#000}
+.item-slot{border-color:#336!important}
 </style>
 </head>
 <body>
@@ -175,7 +178,7 @@ canvas{display:block;width:100%;height:100%}
 <div id="start-screen" class="overlay">
   <div class="panel-box" style="max-width:500px">
     <h1>⚔ SOMA SLAYER</h1>
-    <div class="sub-title">V 11.3 · FULL EDITION</div>
+    <div class="sub-title">V 11.2 · FULL EDITION</div>
     <input type="text" id="in-name" placeholder="Hero Name..." style="margin-bottom:10px">
     <div class="class-grid">
       <div class="class-card selected" data-class="Knight" onclick="selectClass(this)">
@@ -243,7 +246,7 @@ canvas{display:block;width:100%;height:100%}
 </div>
 
 <div id="equip-screen" class="overlay hidden">
-  <div class="panel-box" style="max-width:780px">
+  <div class="panel-box" style="max-width:860px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <h2 style="margin:0">⚔ EQUIPMENT</h2>
       <div style="display:flex;gap:4px;align-items:center">
@@ -284,7 +287,7 @@ canvas{display:block;width:100%;height:100%}
 </div>
 
 <div id="skill-screen" class="overlay hidden">
-  <div class="panel-box" style="max-width:540px">
+  <div class="panel-box" style="max-width:660px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <h2 style="margin:0">🧙 SKILL TREE</h2>
       <div style="display:flex;gap:8px;align-items:center">
@@ -292,13 +295,13 @@ canvas{display:block;width:100%;height:100%}
         <button class="btn sm" onclick="resumeGame()">← FIGHT</button>
       </div>
     </div>
-    <div style="font-size:8px;color:var(--text3);margin-bottom:4px">คลิกเพื่อเรียน · คลิกอีกครั้งเพื่ออัพเลเวล (max 99) · +2% DMG ต่อ Skill Lv · สกิลสำคัญมากใน Lv 50+ เพราะ auto-attack อาจไม่พอ</div>
+    <div style="font-size:8px;color:var(--text3);margin-bottom:6px">Click to learn · Click again to level up (max 99) · +2% dmg per level</div>
     <div class="skill-grid" id="skill-list"></div>
   </div>
 </div>
 
 <div id="shop-screen" class="overlay hidden">
-  <div class="panel-box" style="max-width:640px">
+  <div class="panel-box" style="max-width:780px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <h2 style="margin:0">🏪 SHOP</h2>
       <div style="display:flex;gap:8px;align-items:center">
@@ -343,29 +346,25 @@ canvas{display:block;width:100%;height:100%}
     </div>
     <div id="shop-tab-forge" class="hidden">
       <h3>⚒ JUNK FORGE</h3>
-      <div style="font-size:8px;color:var(--text2);margin-bottom:5px;line-height:1.5">
-        รวม Junk → อุปกรณ์สุ่ม (per slot ต่อครั้ง):<br>
-        <b style="color:#aaa">×10 &amp; ×50:</b> Normal 40% · Rare 10% · Leg 5% · God 3% · Soma 2% · Break 15% · Junk 25%<br>
-        <b style="color:#f44">×100 [HIGH RISK]:</b> Leg 25% · God+Soma 5% · Normal 20% · Rare 15% · Break 25% · Junk 5%
+      <div style="font-size:8px;color:var(--text2);margin-bottom:6px">
+        Combine Junk → forge random equipment.<br>
+        <b style="color:#fa0">×10:</b> Normal 40% / Rare 20% / Leg 5% / God+Soma 5% / Break 15%<br>
+        <b style="color:#f80">×50:</b> เหมือน ×10 แต่ Drop rate เท่ากัน<br>
+        <b style="color:#f44">×100:</b> Leg 25% / Break 25% สูงขึ้น ความเสี่ยงสูง
       </div>
-      <div style="font-size:8px;color:var(--text2);margin-bottom:4px">Junk: <span id="junk-count" style="color:var(--lux2)">0</span></div>
-      <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">
+      <div style="font-size:8px;color:var(--text2);margin-bottom:5px">Junk: <span id="junk-count" style="color:var(--lux2)">0</span></div>
+      <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
         <button class="btn sm" onclick="forgeJunk(10)">⚒ FORGE ×10</button>
         <button class="btn sm" onclick="forgeJunk(50)">⚒ FORGE ×50</button>
         <button class="btn sm" onclick="forgeJunk(100)">⚒ FORGE ×100 <span style="color:#f44">[HIGH RISK]</span></button>
       </div>
-      <div id="forge-result" style="font-size:9px;min-height:28px"></div>
+      <div id="forge-result" style="font-size:9px;min-height:30px"></div>
     </div>
     <div id="shop-tab-reforge" class="hidden">
-      <h3>♻ RE-FORGE <span style="color:var(--text3);font-size:8px">(แปลงอุปกรณ์ใน Bag → Junk)</span></h3>
-      <div style="font-size:8px;color:var(--text2);margin-bottom:5px;line-height:1.5">
+      <h3>♻ RE-FORGE <span style="color:var(--text3);font-size:8px">(แปลงอุปกรณ์ → Junk)</span></h3>
+      <div style="font-size:8px;color:var(--text2);margin-bottom:8px;line-height:1.6">
         อัตราแลก: Normal=2🔩 · Rare=5🔩 · Legendary=10🔩 · GOD/SOMA=20🔩<br>
-        <span style="color:#fa0">⚠ อุปกรณ์ที่ดีกว่าที่สวมใส่อยู่จะถูกข้ามใน Re-Forge All</span><br>
-        <span style="color:#888">Junk–Legendary ไม่มีการยืนยัน · GOD/SOMA ยืนยันก่อน</span>
-      </div>
-      <div style="display:flex;gap:4px;margin-bottom:5px">
-        <button class="btn sm btn-reforge" onclick="reforgeAll()">♻ RE-FORGE ALL</button>
-        <span style="font-size:8px;color:var(--text3);align-self:center">ข้ามของดีกว่าที่ใส่อยู่โดยอัตโนมัติ</span>
+        <span style="color:#f44">⚠ ถอดอุปกรณ์ออกจาก slot ก่อนแล้วกด Re-Forge จาก Bag</span>
       </div>
       <div class="shop-list" id="reforge-list"></div>
     </div>
@@ -444,13 +443,22 @@ canvas{display:block;width:100%;height:100%}
     <canvas id="gameCanvas"></canvas>
     <div id="status-icons"></div>
     <div id="hotbar">
-      <div class="hslot" onclick="useItem('HP_POT')" title="[1]"><span class="hkey">1</span><span class="hicon">🧪</span><span class="hval" id="h1">0</span></div>
-      <div class="hslot" onclick="useItem('MP_POT')" title="[2]"><span class="hkey">2</span><span class="hicon">💧</span><span class="hval" id="h2">0</span></div>
-      <div class="hslot" onclick="useItem('CLEANSE')" title="[3]"><span class="hkey">3</span><span class="hicon">✨</span><span class="hval" id="h3">0</span></div>
-      <div class="hslot" onclick="useSkillSlot(0)" id="hs0"><span class="hkey">Q</span><span class="hicon" id="hsi0">—</span><span class="hval" id="hsn0"></span><div class="skill-cooldown hidden" id="hsc0"></div></div>
-      <div class="hslot" onclick="useSkillSlot(1)" id="hs1"><span class="hkey">E</span><span class="hicon" id="hsi1">—</span><span class="hval" id="hsn1"></span><div class="skill-cooldown hidden" id="hsc1"></div></div>
-      <div class="hslot" onclick="useSkillSlot(2)" id="hs2"><span class="hkey">R</span><span class="hicon" id="hsi2">—</span><span class="hval" id="hsn2"></span><div class="skill-cooldown hidden" id="hsc2"></div></div>
-      <div class="hslot" onclick="useSkillSlot(3)" id="hs3"><span class="hkey">F</span><span class="hicon" id="hsi3">—</span><span class="hval" id="hsn3"></span><div class="skill-cooldown hidden" id="hsc3"></div></div>
+      <!-- Item slots 1-4: right-click to change item -->
+      <div class="hslot item-slot" id="isl0" onclick="hotbarItemUse(0)" oncontextmenu="hotbarItemPick(0,event)" title="[1] Right-click: เปลี่ยนไอเทม"><span class="hkey">1</span><span class="hicon" id="hii0">🧪</span><span class="hval" id="hiv0">0</span></div>
+      <div class="hslot item-slot" id="isl1" onclick="hotbarItemUse(1)" oncontextmenu="hotbarItemPick(1,event)" title="[2] Right-click: เปลี่ยนไอเทม"><span class="hkey">2</span><span class="hicon" id="hii1">💧</span><span class="hval" id="hiv1">0</span></div>
+      <div class="hslot item-slot" id="isl2" onclick="hotbarItemUse(2)" oncontextmenu="hotbarItemPick(2,event)" title="[3] Right-click: เปลี่ยนไอเทม"><span class="hkey">3</span><span class="hicon" id="hii2">✨</span><span class="hval" id="hiv2">0</span></div>
+      <div class="hslot item-slot" id="isl3" onclick="hotbarItemUse(3)" oncontextmenu="hotbarItemPick(3,event)" title="[4] Right-click: เปลี่ยนไอเทม"><span class="hkey">4</span><span class="hicon" id="hii3">—</span><span class="hval" id="hiv3">0</span></div>
+      <div style="width:2px;background:var(--border2);margin:4px 2px"></div>
+      <!-- Skill slots Q/E/R/F: right-click to change skill -->
+      <div class="hslot" id="hs0" onclick="useSkillSlot(0)" oncontextmenu="hotbarSkillPick(0,event)" title="[Q] Right-click: เปลี่ยนสกิล"><span class="hkey">Q</span><span class="hicon" id="hsi0">—</span><span class="hval" id="hsn0"></span><div class="skill-cooldown hidden" id="hsc0"></div></div>
+      <div class="hslot" id="hs1" onclick="useSkillSlot(1)" oncontextmenu="hotbarSkillPick(1,event)" title="[E] Right-click: เปลี่ยนสกิล"><span class="hkey">E</span><span class="hicon" id="hsi1">—</span><span class="hval" id="hsn1"></span><div class="skill-cooldown hidden" id="hsc1"></div></div>
+      <div class="hslot" id="hs2" onclick="useSkillSlot(2)" oncontextmenu="hotbarSkillPick(2,event)" title="[R] Right-click: เปลี่ยนสกิล"><span class="hkey">R</span><span class="hicon" id="hsi2">—</span><span class="hval" id="hsn2"></span><div class="skill-cooldown hidden" id="hsc2"></div></div>
+      <div class="hslot" id="hs3" onclick="useSkillSlot(3)" oncontextmenu="hotbarSkillPick(3,event)" title="[F] Right-click: เปลี่ยนสกิล"><span class="hkey">F</span><span class="hicon" id="hsi3">—</span><span class="hval" id="hsn3"></span><div class="skill-cooldown hidden" id="hsc3"></div></div>
+    </div>
+    <!-- Hotbar picker popup -->
+    <div id="hotbar-picker" class="hidden" style="position:fixed;background:#111;border:1px solid var(--lux);padding:8px;z-index:400;min-width:180px;max-height:260px;overflow-y:auto">
+      <div id="picker-title" style="font-size:9px;color:var(--lux2);margin-bottom:6px;letter-spacing:1px"></div>
+      <div id="picker-list"></div>
     </div>
   </div>
 
@@ -600,10 +608,6 @@ let dmgNumbers=[];
 let qtyModalCb=null,qtyModalMax=100;
 let blessingUntil=0,blessingBonus=0;
 let buybackList=[];
-// FIX 8: MP skill use counter — reset when MP refilled
-let skillUseCount=0;
-const MAX_SKILL_USES_PER_FILL=20;
-let lastMpFillThreshold=0; // track when mp was refilled
 
 function freshPlayer(name,cls){
   const cb={Knight:{vit:5,str:3},Archer:{agi:5,str:2},Priest:{int:5,vit:2},
@@ -615,11 +619,12 @@ function freshPlayer(name,cls){
     str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),
     hp:0,maxHp:0,mp:0,maxMp:0,x:0,y:0,angle:0,
     equips:{Weapon:null,Shield:null,Head:null,Chest:null,Legs:null,Cloak:null,Pendant:null,Necklace:null,Ring:null},
-    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0},
+    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0,STAT_PT:0,SKILL_PT:0},
     gears:[],
     learnedSkills:[],
     skillLevels:{},
     hotbarSkills:[null,null,null,null],
+    hotbarItems:['HP_POT','MP_POT','CLEANSE',null], // 4 item slots
     statusEffects:{},
     floor:1,
     clearedFloors:new Set(),
@@ -633,20 +638,17 @@ function calcStats(p){
   let str=p.str,agi=p.agi,int_=p.int,vit=p.vit,hpB=0,mpB=0;
   Object.values(p.equips).forEach(eq=>{
     if(!eq)return;
-    str+=Math.floor((eq.effects?.buffs?.str||0)*0.4);
-    agi+=Math.floor((eq.effects?.buffs?.agi||0)*0.4);
-    int_+=Math.floor((eq.effects?.buffs?.int||0)*0.4);
-    vit+=Math.floor((eq.effects?.buffs?.vit||0)*0.4);
+    str+=eq.effects?.buffs?.str||0;agi+=eq.effects?.buffs?.agi||0;
+    int_+=eq.effects?.buffs?.int||0;vit+=eq.effects?.buffs?.vit||0;
     hpB+=eq.effects?.hpMod||0;mpB+=eq.effects?.mpMod||0;
   });
-  // FIX 5: ลดค่า stat per lv (จาก *10 → *4, จาก *5 → *2)
-  const maxHp=Math.max(1,60+vit*12+p.lv*4+hpB);
-  const maxMp=Math.max(10,30+int_*6+p.lv*2+mpB);
-  const atk=(str*1.5+agi*0.5)+p.lv*1;
-  const def=Math.floor(vit*0.6+agi*0.3);
-  const spd=2+agi*0.04;
-  const critR=Math.min(50,agi*0.35);
-  const dodgeR=Math.min(30,agi*0.2);
+  const maxHp=Math.max(1,100+vit*20+p.lv*10+hpB);
+  const maxMp=Math.max(10,50+int_*10+p.lv*5+mpB);
+  const atk=(str*2+agi)+p.lv*2;
+  const def=vit+Math.floor(agi/2);
+  const spd=3+agi*0.05;
+  const critR=Math.min(60,agi*0.5);
+  const dodgeR=Math.min(40,agi*0.3);
   const moveSpd=Math.max(1.5,2.8*(Math.min(200,p.moveSpeedPct||100)/100));
   return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,moveSpd};
 }
@@ -679,7 +681,7 @@ function spawnEnemies(floor){
     const bossPool=MOB_TYPES.filter(m=>m.type==='boss');
     const boss=bossPool[Math.floor(Math.random()*bossPool.length)];
     const bs=isSecret?scale*2:scale;
-    const hp=boss.baseHp*bs*20;
+    const hp=Math.floor(boss.baseHp*bs*20*0.9); // ลด boss HP 10%
     mobs.push({id:Math.random(),name:(isSecret?'★SECRET★ ':'')+boss.name+' LV'+floor,
       icon:boss.icon,x:W*0.65+Math.random()*60,y:H*0.4+Math.random()*60,
       hp,maxHp:hp,atk:boss.atk*bs*2,speed:boss.speed*(isSecret?1.5:1),
@@ -877,14 +879,16 @@ const SKILL_DB={
 };
 
 const SHOP_ITEMS=[
-  {id:'HP_POT',name:'HP Potion',icon:'🧪',desc:'Restore 40% HP',price:50},
-  {id:'MP_POT',name:'MP Potion',icon:'💧',desc:'Restore 40% MP',price:50},
-  {id:'CLEANSE',name:'Cleanse',icon:'✨',desc:'Remove all effects',price:80},
-  {id:'HP_POT_L',name:'HP Elixir',icon:'🍷',desc:'Restore 80% HP',price:200},
-  {id:'MP_POT_L',name:'MP Elixir',icon:'🌀',desc:'Restore 80% MP',price:200},
-  {id:'EXP_SCROLL',name:'EXP Scroll',icon:'📜',desc:'Gain 5000 EXP',price:100000},
-  {id:'JUNK',name:'Junk ×10',icon:'🔩',desc:'Used in forge',price:20,qty:10},
-  {id:'BLESSING',name:'เสริมบุญ',icon:'🙏',desc:'+1.5~3% drop 15min',price:1000000},
+  {id:'HP_POT',   name:'HP Potion',   icon:'🧪', desc:'Restore 40% HP',          price:200},
+  {id:'MP_POT',   name:'MP Potion',   icon:'💧', desc:'Restore 40% MP',          price:50},
+  {id:'CLEANSE',  name:'Cleanse',     icon:'✨', desc:'Remove all status effects', price:80},
+  {id:'HP_POT_L', name:'HP Elixir',   icon:'🍷', desc:'Restore 80% HP',          price:1000},
+  {id:'MP_POT_L', name:'MP Elixir',   icon:'🌀', desc:'Restore 80% MP',          price:1000},
+  {id:'EXP_SCROLL',name:'EXP Scroll', icon:'📜', desc:'Gain 5000 EXP',           price:100000},
+  {id:'STAT_PT',  name:'Stat Orb',    icon:'🔮', desc:'+1 Stat Point ทันที',      price:10000},
+  {id:'SKILL_PT', name:'Skill Orb',   icon:'💎', desc:'+1 Skill Point ทันที',     price:50000},
+  {id:'JUNK',     name:'Junk ×10',    icon:'🔩', desc:'Used in forge',            price:20, qty:10},
+  {id:'BLESSING', name:'เสริมบุญ',    icon:'🙏', desc:'+1.5~3% drop rate 15min',  price:1000000},
 ];
 
 // ─── SKILLS ─────────────────────────────────────────────────
@@ -913,46 +917,38 @@ function learnSkill(id){
     notify(`Learned: ${sk.name}`,'var(--lux2)');
   }else notify(`${sk.name} Lv ${lv+1}!`,'var(--lux2)');
   p.skillLevels=p.skillLevels||{};p.skillLevels[id]=(lv+1);p.skillPts--;
-  // FIX 6: update SP display real-time
-  const spts=document.getElementById('skill-pts');if(spts)spts.textContent=p.skillPts;
   renderSkills();updateHotbar();
 }
 
 let skillCDs={};
-function useSkillSlot(slot,fromAuto=false){
+function useSkillSlot(slot){
   const p=G.p,id=p.hotbarSkills[slot];if(!id)return;
   const bc=baseClass(p.class);const sk=(SKILL_DB[bc]||[]).find(s=>s.id===id);if(!sk)return;
   const now=Date.now();
-  if(skillCDs[id]&&now<skillCDs[id]){if(!fromAuto)notify('Cooldown','#888');return;}
-  if(p.mp<sk.mp){if(!fromAuto)notify('No MP!','#44f');return;}
-  // FIX 8: cap skill uses per MP fill
-  if(fromAuto&&skillUseCount>=MAX_SKILL_USES_PER_FILL)return;
+  if(skillCDs[id]&&now<skillCDs[id]){notify('Cooldown','#888');return;}
+  if(p.mp<sk.mp){notify('No MP!','#44f');return;}
   p.mp-=sk.mp;skillCDs[id]=now+(sk.cd*1000);
-  if(fromAuto)skillUseCount++;
   applySkill(sk);updateHotbar();
 }
 
 function applySkill(sk){
   const p=G.p,cs=calcStats(p);
-  if(sk.type==='heal'){
-    const h=(cs.maxHp*sk.healPct||0.3)+cs.int*3;
-    p.hp=Math.min(cs.maxHp,p.hp+h);logMsg(`${sk.name}: +${Math.floor(h)} HP`,'#2f2');
-  }
-  else if(sk.type==='fullheal'){
-    const healAmt=Math.floor(cs.maxHp*0.7);
-    p.hp=Math.min(cs.maxHp,p.hp+healAmt);
-    p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.2);
-    logMsg(`${sk.name}: Massive Heal!`,'#2f2');
-  }
+  if(sk.type==='heal'){const h = (cs.maxHp * 0.1) + (cs.int * 5); // ฮีล 10% ของเลือด + 5 เท่าของค่า INT
+p.hp = Math.min(cs.maxHp, p.hp + h);logMsg(`${sk.name}: +${Math.floor(h)} HP`,'#2f2');}
+  // เดิม: p.hp=cs.maxHp; p.mp=cs.maxMp;
+// แก้เป็น: ฮีลแรงขึ้นตามค่า INT แต่ไม่เกิน 80% และไม่เติม MP จนเต็ม
+else if(sk.type==='fullheal'){
+  const healAmt = Math.floor(cs.maxHp * 0.7); // ฮีล 70% ของเลือดสูงสุด
+  p.hp = Math.min(cs.maxHp, p.hp + healAmt);
+  p.mp = Math.min(cs.maxMp, p.mp + (cs.maxMp * 0.2)); // คืนมานาแค่ 20%
+  logMsg(`${sk.name}: Massive Heal!`, '#2f2');
+}
   else if(sk.type==='cleanse'){p.statusEffects={};if(sk.buffKey)p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg('Cleansed!','#0ff');}
   else if(sk.type==='buff'){p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg(`${sk.name} active!`,'#0ff');}
   else if(sk.type==='hot'){p.statusEffects.hot={until:Date.now()+sk.hotDur,pct:sk.hotPct,last:Date.now()};logMsg(`${sk.name}: Regen`,'#2f2');}
   else if(sk.type==='atk'||sk.type==='stun'||sk.type==='pierce'){
     const sv=sk.stat==='str'?cs.str:sk.stat==='agi'?cs.agi:cs.int;
-    // FIX 4: สกิลสำคัญขึ้นเมื่อ Lv 50+ — สเกลขึ้นตามเลเวล
-    const lvBonus=p.lv>=50?1+Math.floor(p.lv/50)*0.25:1; // +25% ทุก 50 เลเวล หลังจาก Lv 50
-    const base=Math.floor(sv*getSkillDmg(sk)*lvBonus);
-    let hits=0;
+    const base = Math.floor(Math.sqrt(sv) * 15 * getSkillDmg(sk));
     const rep=sk.repeat||1;
     for(let r=0;r<rep;r++){
       G.mobs.forEach(m=>{
@@ -968,8 +964,7 @@ function applySkill(sk){
   }
   else if(sk.type==='dot'){
     const sv=sk.stat==='agi'?cs.agi:cs.str;
-    const lvBonus=p.lv>=50?1+Math.floor(p.lv/50)*0.15:1;
-    G.mobs.forEach(m=>{if(Math.hypot(p.x-m.x,p.y-m.y)<(sk.range||200))m.dot={dmg:sv*sk.dotDmg*lvBonus,until:Date.now()+sk.dotDur,last:Date.now()};});
+    G.mobs.forEach(m=>{if(Math.hypot(p.x-m.x,p.y-m.y)<(sk.range||200))m.dot={dmg:sv*sk.dotDmg,until:Date.now()+sk.dotDur,last:Date.now()};});
     logMsg(`${sk.name}: Poison!`,'#0f0');
   }
 }
@@ -1036,8 +1031,8 @@ function mobDied(m){
   // FIX 3: Exp ตามเลเวลมอนสเตอร์ตัวเอง
   const mobLv=m.lv||p.floor;
   const baseExp=m.isBoss?mobLv*40:mobLv*4;
-  // FIX 7: Gold ×2 × mobLv
-  const baseGold=m.isBoss?mobLv*40:mobLv*4;
+  // Gold -20% ตาม req
+  const baseGold=m.isBoss?mobLv*32:mobLv*3.2; // ลด 20% จาก *40/*4
 
   const exp=baseExp*(m.isElite?2:1)*mult;
   const gold=Math.floor(baseGold*(m.isElite?2:1)*mult);
@@ -1103,12 +1098,14 @@ function advanceFloor(){
 function useItem(id){
   const p=G.p;if(!(p.inv[id]>0)){notify('None left!','#f44');return;}
   const cs=calcStats(p);
-  if(id==='HP_POT'){p.hp=Math.min(cs.maxHp,p.hp+cs.maxHp*0.4);logMsg('HP Potion','#2f2');}
-  else if(id==='MP_POT'){p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.4);logMsg('MP Potion','#44f');}
-  else if(id==='HP_POT_L'){p.hp=Math.min(cs.maxHp,p.hp+cs.maxHp*0.8);logMsg('HP Elixir','#2f2');}
-  else if(id==='MP_POT_L'){p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.8);logMsg('MP Elixir','#44f');}
+  if(id==='HP_POT'){p.hp=Math.min(cs.maxHp,p.hp+cs.maxHp*0.4);logMsg('HP Potion +40% HP','#2f2');}
+  else if(id==='MP_POT'){p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.4);logMsg('MP Potion +40% MP','#44f');}
+  else if(id==='HP_POT_L'){p.hp=Math.min(cs.maxHp,p.hp+cs.maxHp*0.8);logMsg('HP Elixir +80% HP','#2f2');}
+  else if(id==='MP_POT_L'){p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.8);logMsg('MP Elixir +80% MP','#44f');}
   else if(id==='CLEANSE'){p.statusEffects={};logMsg('Cleansed!','#0ff');}
-  else if(id==='EXP_SCROLL'){giveExp(5000);logMsg('EXP Scroll','var(--lux2)');}
+  else if(id==='EXP_SCROLL'){giveExp(5000);logMsg('EXP Scroll +5000 EXP','var(--lux2)');}
+  else if(id==='STAT_PT'){p.pts=Math.min(MAX_STAT,p.pts+1);logMsg('Stat Orb +1 Stat PT','var(--lux2)');notify('+1 Stat Point!','var(--lux2)');}
+  else if(id==='SKILL_PT'){p.skillPts=(p.skillPts||0)+1;logMsg('Skill Orb +1 Skill PT','#ce93d8');notify('+1 Skill Point!','#ce93d8');}
   else if(id==='BLESSING'){
     blessingBonus=0.015+Math.random()*0.015;
     blessingUntil=Date.now()+15*60*1000;
@@ -1185,34 +1182,37 @@ function loop(){
     }
     playerAttack();
 
-    // FIX 8: reset skill use counter when MP was refilled (mp back near max)
-    if(p.mp>lastMpFillThreshold*0.95&&p.mp>cs.maxMp*0.8){
-      skillUseCount=0;lastMpFillThreshold=p.mp;
-    }
+    // ใช้สกิลก่อนถ้ามี MP
+    p.hotbarSkills.forEach((_,i)=>{
+      const id=p.hotbarSkills[i];if(!id)return;
+      if(!skillCDs[id]||now>skillCDs[id])useSkillSlot(i,true);
+    });
 
-    // FIX 7: Auto skill use — ใช้สกิลก่อนถ้ามี MP และไม่เกิน cap
-    if(skillUseCount<MAX_SKILL_USES_PER_FILL){
-      p.hotbarSkills.forEach((_,i)=>{
-        const id=p.hotbarSkills[i];if(!id)return;
-        if(!skillCDs[id]||now>skillCDs[id])useSkillSlot(i,true);
-      });
-    }
-
-    // FIX 7: Auto item use — ลำดับความสำคัญ:
-    // 1. Cleanse ถ้ามี debuff
-    const hasDebuff=Object.keys(p.statusEffects).some(k=>['poison','burn','stun','bleed'].includes(k)&&now<p.statusEffects[k]?.until);
-    if(hasDebuff&&p.inv.CLEANSE>0)useItem('CLEANSE');
-
-    // 2. HP Potion ถ้า HP < 40%
+    // Auto item use via hotbarItems — ลำดับความสำคัญ
+    const hi=p.hotbarItems||['HP_POT','MP_POT','CLEANSE',null];
+    // 1. หาไอเทม Cleanse/HP/MP ใน hotbarItems ตามลำดับสถานการณ์
+    const findHotbarItem=(types)=>{
+      for(const t of types){
+        const si=hi.indexOf(t);
+        if(si>=0&&(p.inv[t]||0)>0)return si;
+      }
+      return -1;
+    };
+    // Cleanse ถ้ามี debuff
+    const hasDebuff=Object.keys(p.statusEffects).some(k=>['poison','burn','bleed'].includes(k)&&now<(p.statusEffects[k]?.until||0));
+    if(hasDebuff){const si=findHotbarItem(['CLEANSE']);if(si>=0)hotbarItemUse(si);}
+    // HP ต่ำ < 40%
     if(p.hp<cs.maxHp*0.4){
-      if(p.inv.HP_POT_L>0)useItem('HP_POT_L');
-      else if(p.inv.HP_POT>0)useItem('HP_POT');
-    } else if(p.hp<cs.maxHp*0.6&&p.inv.HP_POT>0){useItem('HP_POT');}
-
-    // 3. MP Potion ถ้า MP < 25% และยังใช้สกิลไม่เกิน cap
-    if(p.mp<cs.maxMp*0.25&&skillUseCount<MAX_SKILL_USES_PER_FILL){
-      if(p.inv.MP_POT_L>0){useItem('MP_POT_L');skillUseCount=0;}
-      else if(p.inv.MP_POT>0){useItem('MP_POT');skillUseCount=0;}
+      const si=findHotbarItem(['HP_POT_L','HP_POT']);
+      if(si>=0)hotbarItemUse(si);
+    } else if(p.hp<cs.maxHp*0.65){
+      const si=findHotbarItem(['HP_POT']);
+      if(si>=0)hotbarItemUse(si);
+    }
+    // MP ต่ำ < 25%
+    if(p.mp<cs.maxMp*0.25){
+      const si=findHotbarItem(['MP_POT_L','MP_POT']);
+      if(si>=0)hotbarItemUse(si);
     }
   }else if(mouse.down){playerAttack();}
 
@@ -1422,17 +1422,107 @@ function updateUI(){
   updateHotbar();
 }
 
+// ─── HOTBAR ITEM SYSTEM ──────────────────────────────────────
+function hotbarItemUse(slot){
+  if(!G.p)return;
+  const id=G.p.hotbarItems[slot];
+  if(!id){notify('ไม่มีไอเทมใน slot นี้ คลิกขวาเพื่อเลือก','#888');return;}
+  useItem(id);
+}
+
+let pickerSlot=-1,pickerMode='item';
+function hotbarItemPick(slot,e){
+  e.preventDefault();
+  pickerSlot=slot;pickerMode='item';
+  showPicker(e.clientX,e.clientY);
+}
+function hotbarSkillPick(slot,e){
+  e.preventDefault();
+  pickerSlot=slot;pickerMode='skill';
+  showPicker(e.clientX,e.clientY);
+}
+function showPicker(x,y){
+  const picker=document.getElementById('hotbar-picker');
+  const title=document.getElementById('picker-title');
+  const list=document.getElementById('picker-list');
+  const p=G.p;
+  picker.classList.remove('hidden');
+  // position picker above hotbar
+  const ph=220;
+  picker.style.left=Math.min(x,window.innerWidth-200)+'px';
+  picker.style.top=Math.max(y-ph-10,5)+'px';
+
+  if(pickerMode==='item'){
+    title.textContent='เลือกไอเทมสำหรับ slot '+(pickerSlot+1);
+    const items=SHOP_ITEMS.filter(s=>s.id!=='JUNK'&&s.id!=='BLESSING'&&s.id!=='EXP_SCROLL'&&(p.inv[s.id]||0)>=0);
+    list.innerHTML=`<div class="picker-row" onclick="assignHotbarItem(${pickerSlot},null)" style="color:var(--text3)">— ลบออก —</div>`+
+      items.map(s=>`
+        <div class="picker-row" onclick="assignHotbarItem(${pickerSlot},'${s.id}')">
+          <span>${s.icon}</span>
+          <span style="flex:1">${s.name}</span>
+          <span style="color:var(--lux2)">×${p.inv[s.id]||0}</span>
+        </div>`).join('');
+  } else {
+    title.textContent='เลือกสกิลสำหรับ slot '+(pickerSlot+1);
+    const learned=p.learnedSkills||[];
+    const bc=baseClass(p.class);
+    const sks=(SKILL_DB[bc]||[]).filter(sk=>learned.includes(sk.id));
+    list.innerHTML=`<div class="picker-row" onclick="assignHotbarSkill(${pickerSlot},null)" style="color:var(--text3)">— ลบออก —</div>`+
+      sks.map(sk=>`
+        <div class="picker-row" onclick="assignHotbarSkill(${pickerSlot},'${sk.id}')">
+          <span>${sk.icon}</span>
+          <span style="flex:1">${sk.name}</span>
+          <span style="color:#4488ff">Lv${getSkillLv(sk.id)}</span>
+        </div>`).join('');
+    if(!sks.length)list.innerHTML+='<div style="color:var(--text3);font-size:8px;padding:4px">ยังไม่มีสกิล</div>';
+  }
+}
+function assignHotbarItem(slot,id){
+  G.p.hotbarItems[slot]=id;
+  closePicker();updateHotbar();
+}
+function assignHotbarSkill(slot,id){
+  G.p.hotbarSkills[slot]=id;
+  closePicker();updateHotbar();
+}
+function closePicker(){
+  document.getElementById('hotbar-picker').classList.add('hidden');
+}
+// Close picker on outside click
+document.addEventListener('click',function(e){
+  const picker=document.getElementById('hotbar-picker');
+  if(picker&&!picker.contains(e.target)&&!e.target.closest('.hslot')){
+    picker.classList.add('hidden');
+  }
+});
+
 function updateHotbar(){
   if(!G.p)return;
   const p=G.p,now=Date.now(),bc=baseClass(p.class);
+
+  // Item slots
+  p.hotbarItems=p.hotbarItems||['HP_POT','MP_POT','CLEANSE',null];
+  p.hotbarItems.forEach((id,i)=>{
+    const s=id?SHOP_ITEMS.find(x=>x.id===id):null;
+    const iconEl=document.getElementById(`hii${i}`);
+    const valEl=document.getElementById(`hiv${i}`);
+    if(iconEl)iconEl.textContent=s?s.icon:'—';
+    if(valEl)valEl.textContent=s?(p.inv[id]||0):'';
+  });
+
+  // Skill slots
   p.hotbarSkills.forEach((id,i)=>{
     const sk=id?(SKILL_DB[bc]||[]).find(s=>s.id===id):null;
-    document.getElementById(`hsi${i}`).textContent=sk?sk.icon:'—';
-    document.getElementById(`hsn${i}`).textContent=sk?sk.name.slice(0,5):'';
+    const iconEl=document.getElementById(`hsi${i}`);
+    const nameEl=document.getElementById(`hsn${i}`);
+    if(iconEl)iconEl.textContent=sk?sk.icon:'—';
+    if(nameEl)nameEl.textContent=sk?sk.name.slice(0,5):'';
     const cd=id&&skillCDs[id]?skillCDs[id]-now:0;
     const cdEl=document.getElementById(`hsc${i}`);
-    if(cd>0){cdEl.classList.remove('hidden');cdEl.textContent=Math.ceil(cd/1000)+'s';}
-    else cdEl.classList.add('hidden');
+    if(cdEl){
+      if(cd>0){cdEl.classList.remove('hidden');cdEl.textContent=Math.ceil(cd/1000)+'s';}
+      else cdEl.classList.add('hidden');
+    }
   });
 }
 
@@ -1694,6 +1784,7 @@ function buybackItem(idx){
   renderBuybackTab();updateUI();
 }
 
+// FIX 6: Updated Re-Forge junk rates
 const REFORGE_JUNK={Junk:1,Normal:2,Fine:2,Rare:5,Legendary:10,GOD:20,SOMA:20};
 function renderReforgeTab(){
   const p=G.p;
@@ -1701,86 +1792,23 @@ function renderReforgeTab(){
   if(p.gears.length===0){rl.innerHTML='<div style="color:var(--text3);font-size:9px;padding:8px">ไม่มีของใน Bag</div>';return;}
   rl.innerHTML=p.gears.map((g,i)=>{
     const junk=REFORGE_JUNK[g.rarity]||2;
-    const qty=g.count||1;
-    const total=junk*qty;
-    const equipped=p.equips[g.slot];
-    // เช็คว่าดีกว่าของที่สวม
-    const isBetter=equipped&&(g.atk>equipped.atk||g.def>equipped.def);
-    const betterTag=isBetter?`<span style="color:#2f2;font-size:7px">▲ ดีกว่าที่ใส่</span>`:'';
-    return`<div class="shop-item" style="${isBetter?'border-color:#2f2':''}" onclick="reforgeItem(${i})">
+    const total=junk*(g.count||1);
+    return`<div class="shop-item" onclick="reforgeItem(${i})">
       <span style="color:${RCOL[g.rarity]}">${SLOT_ICONS[g.slot]}</span>
-      <span class="rank-${RANK[g.rarity]}">[${RANK[g.rarity]}] ${g.slot}${qty>1?' ×'+qty:''} ${betterTag}</span>
-      <span class="shop-price" style="display:flex;align-items:center;gap:3px;color:#888">
-        🔩${total}
-        ${qty>1?`<button class="btn sm" style="padding:1px 4px;font-size:7px" onclick="event.stopPropagation();reforgeAllOfItem(${i})">MAX</button>`:''}
-      </span>
+      <span class="rank-${RANK[g.rarity]}">[${RANK[g.rarity]}] ${g.slot}${g.count>1?' ×'+g.count:''}</span>
+      <span class="shop-price" style="color:#888">🔩 ${total} Junk</span>
     </div>`;
   }).join('');
 }
 
-// Re-forge all stacks of a single item
-function reforgeAllOfItem(idx){
-  const p=G.p,g=p.gears[idx];if(!g)return;
-  const junkEach=REFORGE_JUNK[g.rarity]||2;
-  const qty=g.count||1;const total=junkEach*qty;
-  const needConfirm=['GOD','SOMA'].includes(g.rarity);
-  if(needConfirm&&!confirm(`Re-Forge [${g.rarity}] ${g.slot} ×${qty} → 🔩${total} Junk?`))return;
-  p.inv.JUNK=(p.inv.JUNK||0)+total;
-  p.gears.splice(idx,1);
-  notify(`Re-Forged ×${qty} → +${total} 🔩 Junk`,'#ab47bc');
-  renderReforgeTab();updateUI();
-  const jc=document.getElementById('junk-count');if(jc)jc.textContent=p.inv.JUNK||0;
-}
-
-// FIX 2: Re-Forge single item — no confirm for Junk~Legendary, confirm for GOD/SOMA
-// FIX 2b: ถ้าของดีกว่าที่สวม → warn + double confirm
 function reforgeItem(idx){
   const p=G.p,g=p.gears[idx];if(!g)return;
   const junkEach=REFORGE_JUNK[g.rarity]||2;
   const qty=g.count||1;const total=junkEach*qty;
-  const equipped=p.equips[g.slot];
-  const isBetter=equipped&&(g.atk>equipped.atk||g.def>equipped.def);
-  if(isBetter){
-    if(!confirm(`⚠ [${g.rarity}] ${g.slot} มีสเตตัสดีกว่าที่สวมอยู่!\nATK:${g.atk}>${equipped.atk} / DEF:${g.def}>${equipped.def}\nแน่ใจหรือไม่ที่จะ Re-Forge?`))return;
-  } else if(['GOD','SOMA'].includes(g.rarity)){
-    if(!confirm(`Re-Forge [${g.rarity}] ${g.slot} → 🔩${total} Junk?`))return;
-  }
-  // Junk~Legendary: ไม่ถาม
+  if(!confirm(`Re-Forge [${g.rarity}] ${g.slot} ×${qty} → 🔩${total} Junk?`))return;
   p.inv.JUNK=(p.inv.JUNK||0)+total;
   p.gears.splice(idx,1);
   notify(`Re-Forged → +${total} 🔩 Junk`,'#ab47bc');
-  renderReforgeTab();updateUI();
-  const jc=document.getElementById('junk-count');if(jc)jc.textContent=p.inv.JUNK||0;
-}
-
-// FIX 2: Re-Forge All — skip items better than equipped
-function reforgeAll(){
-  const p=G.p;
-  if(p.gears.length===0){notify('ไม่มีของใน Bag','#888');return;}
-  // ตรวจหาของที่ดีกว่า equipped
-  const skippedNames=[];
-  const toReforge=[];
-  p.gears.forEach((g,i)=>{
-    const equipped=p.equips[g.slot];
-    const isBetter=equipped&&(g.atk>equipped.atk||g.def>equipped.def);
-    if(isBetter){skippedNames.push(`[${RANK[g.rarity]}]${g.slot}`);}
-    else toReforge.push(i);
-  });
-  if(toReforge.length===0){notify('ไม่มีของที่จะ Re-Forge (ทุกชิ้นดีกว่าที่ใส่อยู่)','#fa0');return;}
-  let totalJunk=0,totalQty=0;
-  // ลบจากท้ายไปหน้า
-  [...toReforge].sort((a,b)=>b-a).forEach(idx=>{
-    const g=p.gears[idx];if(!g)return;
-    const junk=REFORGE_JUNK[g.rarity]||2;
-    const qty=g.count||1;
-    totalJunk+=junk*qty;totalQty+=qty;
-    p.gears.splice(idx,1);
-  });
-  p.inv.JUNK=(p.inv.JUNK||0)+totalJunk;
-  let msg=`Re-Forge All ×${totalQty} → +${totalJunk} 🔩 Junk`;
-  if(skippedNames.length>0)msg+=`\n⚠ ข้าม ${skippedNames.length} ชิ้นที่ดีกว่า: ${skippedNames.slice(0,3).join(', ')}${skippedNames.length>3?'...':''}`;
-  notify(msg,'#ab47bc');
-  if(skippedNames.length>0)notify(`ข้าม ${skippedNames.length} ชิ้น (ดีกว่าที่ใส่)  ถ้าอยากแปลงกด Re-Forge ชิ้นนั้นเอง`,'#fa0');
   renderReforgeTab();updateUI();
   const jc=document.getElementById('junk-count');if(jc)jc.textContent=p.inv.JUNK||0;
 }
@@ -2030,9 +2058,12 @@ function initGame(isNew){
 function onKey(e){
   keys[e.key.toLowerCase()]=true;
   if(e.key==='Escape'){paused?resumeGame():togglePause();}
-  if(e.key==='1')useItem('HP_POT');
-  if(e.key==='2')useItem('MP_POT');
-  if(e.key==='3')useItem('CLEANSE');
+  // Keys 1-4: item slots (customizable)
+  if(e.key==='1')hotbarItemUse(0);
+  if(e.key==='2')hotbarItemUse(1);
+  if(e.key==='3')hotbarItemUse(2);
+  if(e.key==='4')hotbarItemUse(3);
+  // Q/E/R/F: skill slots
   if(e.key.toLowerCase()==='q')useSkillSlot(0);
   if(e.key.toLowerCase()==='e')useSkillSlot(1);
   if(e.key.toLowerCase()==='r')useSkillSlot(2);
