@@ -145,7 +145,7 @@ canvas{display:block;width:100%;height:100%}
 .picker-row{display:flex;align-items:center;gap:6px;padding:4px 6px;cursor:pointer;font-size:8px;border-radius:2px;transition:background .1s}
 .picker-row:hover{background:var(--lux);color:#000}
 .item-slot{border-color:#336!important}
-.hotkey-slot{border:1px solid var(--border2);background:#0a0a0a;padding:5px 8px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:border-color .15s;min-height:42px}
+.hotkey-slot{border:1px solid var(--border2);background:#0a0a0a;padding:3px 6px;display:flex;align-items:center;gap:6px;cursor:pointer;transition:border-color .15s;min-height:32px}
 .hotkey-slot:hover{border-color:var(--lux)}.hotkey-slot.filled{border-color:var(--lux2)}
 .hk-key{font-size:9px;font-weight:bold;color:var(--lux);min-width:20px;text-align:center;background:#1a1a1a;border:1px solid var(--border2);padding:2px 4px}
 .hk-icon{font-size:16px;min-width:22px;text-align:center}
@@ -417,25 +417,23 @@ canvas{display:block;width:100%;height:100%}
 </div>
 
 <div id="hotkey-screen" class="overlay hidden">
-  <div class="panel-box" style="max-width:700px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <h2 style="margin:0">🎮 EQUIP HOTKEYS</h2>
+  <div class="panel-box" style="max-width:520px;padding:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2 style="margin:0;font-size:13px">🎮 HOTKEYS SETUP</h2>
       <button class="btn sm" onclick="resumeGame()">← FIGHT</button>
     </div>
-    <div style="font-size:8px;color:var(--text3);margin-bottom:10px">คลิก slot ซ้ายเพื่อเลือกสิ่งที่จะใส่ · คลิกรายการขวาเพื่อกำหนด</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <!-- LEFT: slot list -->
+    <div style="font-size:7px;color:var(--text3);margin-bottom:8px">คลิก slot เพื่อเลือก · ไอเทม: เฉพาะ HP/MP Potion/Elixir & Cleanse ที่มีในกระเป๋า</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div>
-        <div class="hk-title">🔵 SKILL SLOTS (Q/E/R/F)</div>
-        <div id="hk-skill-slots" style="display:flex;flex-direction:column;gap:3px;margin-bottom:10px"></div>
-        <div class="hk-title">🟡 ITEM SLOTS (1/2/3/4)</div>
-        <div id="hk-item-slots" style="display:flex;flex-direction:column;gap:3px"></div>
+        <div class="hk-title" style="font-size:7px">🔵 SKILL (Q/E/R/F)</div>
+        <div id="hk-skill-slots" style="display:flex;flex-direction:column;gap:2px;margin-bottom:8px"></div>
+        <div class="hk-title" style="font-size:7px">🟡 ITEM (1/2/3/4)</div>
+        <div id="hk-item-slots" style="display:flex;flex-direction:column;gap:2px"></div>
       </div>
-      <!-- RIGHT: pick list -->
       <div>
-        <div class="hk-title" id="hk-pick-title">เลือก slot ด้านซ้ายเพื่อกำหนด</div>
-        <div id="hk-pick-list" class="pick-list">
-          <div style="color:var(--text3);font-size:9px;padding:8px">← เลือก slot ก่อน</div>
+        <div class="hk-title" id="hk-pick-title" style="font-size:7px">เลือก slot ด้านซ้าย</div>
+        <div id="hk-pick-list" class="pick-list" style="max-height:300px">
+          <div style="color:var(--text3);font-size:8px;padding:6px">← เลือก slot ก่อน</div>
         </div>
       </div>
     </div>
@@ -1609,11 +1607,15 @@ function openScreen(name){
   all.forEach(n=>{const el=document.getElementById(n+'-screen');if(el)el.classList.add('hidden');});
   hideTip();
   if(name&&name!=='none'&&name!=='game'){
-    if(!paused){paused=true;cancelAnimationFrame(raf);}
+    // pause game only if not already paused
+    if(!paused){paused=true;if(raf){cancelAnimationFrame(raf);raf=null;}}
     const el=document.getElementById(name+'-screen');
     if(el)el.classList.remove('hidden');
     currentScreen=name;
-  }else{currentScreen=null;}
+  }else{
+    // resuming — clear screen reference
+    currentScreen=null;
+  }
   if(name==='skill')renderSkills();
   if(name==='shop'){renderShopBuy();renderSellTab();renderBuybackTab();renderReforgeTab();renderJewelForge();switchShopTab('buy');}
   if(name==='dungeon')renderDungeons();
@@ -1623,7 +1625,40 @@ function openScreen(name){
   if(name==='hotkey')renderHotkeyScreen();
 }
 
-// ─── HOTKEY SCREEN ──────────────────────────────────────────
+function resumeGame(){
+  equipOpenedFromBag=false;
+  // hide ALL screens first
+  const all=['pause','skill','shop','dungeon','item','equip','saveload','hotkey'];
+  all.forEach(n=>{const el=document.getElementById(n+'-screen');if(el)el.classList.add('hidden');});
+  currentScreen=null;
+  hideTip();
+  // restart loop only if paused
+  if(paused){
+    paused=false;
+    if(raf){cancelAnimationFrame(raf);raf=null;}
+    loop();
+  }
+}
+
+function togglePause(){
+  if(paused&&currentScreen==='pause'){
+    // already on pause screen → resume
+    resumeGame();
+  } else if(!paused){
+    // pause and show pause screen
+    paused=true;
+    if(raf){cancelAnimationFrame(raf);raf=null;}
+    const all=['skill','shop','dungeon','item','equip','saveload','hotkey'];
+    all.forEach(n=>{const el=document.getElementById(n+'-screen');if(el)el.classList.add('hidden');});
+    const ps=document.getElementById('pause-screen');
+    if(ps)ps.classList.remove('hidden');
+    currentScreen='pause';
+    updateUI();
+  } else {
+    // paused on some other screen → just resume
+    resumeGame();
+  }
+}
 let hkActiveSlot=null,hkActiveMode=null;
 
 function renderHotkeyScreen(){
@@ -1703,39 +1738,34 @@ function renderHkPickList(){
   } else {
     title.textContent='เลือกไอเทมสำหรับ ['+(hkActiveSlot+1)+']';
     const cur=p.hotbarItems[hkActiveSlot];
-    const items=SHOP_ITEMS.filter(s=>s.id!=='JUNK'&&s.id!=='JUNK_YARD');
+    // เฉพาะไอเทม Heal/Cleanse และต้องมีในกระเป๋า
+    const ALLOWED_ITEMS=['HP_POT','HP_POT_L','MP_POT','MP_POT_L','CLEANSE'];
+    const items=SHOP_ITEMS.filter(s=>ALLOWED_ITEMS.includes(s.id)&&(p.inv[s.id]||0)>0);
+    if(!items.length){
+      list.innerHTML='<div class="pick-item" onclick="assignHotbarItem('+hkActiveSlot+',null)" style="color:var(--text3)">✕ ลบออก</div>'+
+        '<div style="color:var(--text3);font-size:9px;padding:8px">ไม่มีไอเทมในกระเป๋า</div>';
+      return;
+    }
     list.innerHTML='<div class="pick-item" onclick="assignHotbarItem('+hkActiveSlot+',null)" style="color:var(--text3)">✕ ลบออก</div>'+
       items.map(s=>'<div class="pick-item'+(s.id===cur?' active-slot':'')+'" onclick="assignHotbarItem('+hkActiveSlot+',\''+s.id+'\')">'+
         '<span style="font-size:15px">'+s.icon+'</span>'+
         '<div style="flex:1"><div style="font-weight:bold">'+s.name+'</div>'+
-        '<div style="font-size:7px;color:var(--text3)">'+s.desc+' · bag: ×'+(p.inv[s.id]||0)+'</div></div>'+
+        '<div style="font-size:7px;color:var(--text3)">'+s.desc+' · มี ×'+(p.inv[s.id]||0)+'</div></div>'+
         (s.id===cur?'<span style="color:var(--lux2);font-size:8px">✓</span>':'')+
         '</div>').join('');
   }
 }
 
+// Click outside panel → resume game
 document.addEventListener('mousedown',function(e){
   if(!currentScreen)return;
   const screen=document.getElementById(currentScreen+'-screen');
-  if(!screen)return;
+  if(!screen||screen.classList.contains('hidden'))return;
   const panel=screen.querySelector('.panel-box');
-  if(panel&&!panel.contains(e.target)&&screen.contains(e.target)){
-    if(currentScreen==='equip')equipOpenedFromBag=false;
+  if(panel&&!panel.contains(e.target)){
     resumeGame();
   }
 });
-
-function resumeGame(){
-  equipOpenedFromBag=false;
-  openScreen('none');
-  if(paused){paused=false;loop();}
-}
-
-function togglePause(){
-  paused=!paused;
-  if(!paused){openScreen('none');loop();}
-  else{cancelAnimationFrame(raf);openScreen('pause');}
-}
 
 // ─── EQUIP SCREEN ───────────────────────────────────────────
 function itemSortScore(item,sortBy){
