@@ -927,11 +927,11 @@ const SHOP_ITEMS=[
   {id:'HP_POT',    name:'HP Potion',        icon:'🧪', desc:'Restore 40% HP',                 price:200},
   {id:'MP_POT',    name:'MP Potion',         icon:'💧', desc:'Restore 40% MP',                 price:200},
   {id:'CLEANSE',   name:'Cleanse',           icon:'✨', desc:'Remove all status effects',       price:80},
-  {id:'HP_POT_L',  name:'HP Elixir',         icon:'🍷', desc:'Restore 80% HP',                 price:1000},
-  {id:'MP_POT_L',  name:'MP Elixir',         icon:'🌀', desc:'Restore 80% MP',                 price:1000},
+  {id:'HP_POT_L',  name:'HP Elixir',         icon:'🍷', desc:'Restore 80% HP',                 price:800},
+  {id:'MP_POT_L',  name:'MP Elixir',         icon:'🌀', desc:'Restore 80% MP',                 price:800},
   {id:'EXP_SCROLL',name:'EXP Scroll',        icon:'📜', desc:'Gain 5000 EXP',                  price:100000},
   {id:'JUNK',      name:'Junk ×10',          icon:'🔩', desc:'Used in forge',                  price:20, qty:10},
-  {id:'JUNK_YARD', name:'Junk Yard ×1000',   icon:'🏭', desc:'Junk 1,000 ชิ้น',               price:18000, qty:1000},
+  {id:'JUNK_YARD', name:'Junk Yard ×1000',   icon:'🏭', desc:'Junk 1,000 ชิ้น',               price:2000, qty:1000},
   {id:'BLESSING',  name:'เสริมบุญ',          icon:'🙏', desc:'+1.5~3% drop rate 15min',        price:1000000},
   {id:'SKILL_PT1', name:'Skill Point+',      icon:'🔷', desc:'+1 Skill Point สำหรับอัพสกิล',  price:2500000},
   {id:'SKILL_PT10',name:'Skill Point++',     icon:'🔵', desc:'+10 Skill Point สำหรับอัพสกิล', price:20000000},
@@ -1419,6 +1419,40 @@ function loop(){
 
 function addDmgNum(x,y,val,color='#fff'){
   dmgNumbers.push({x:x+(Math.random()*20-10),y:y-18,text:Math.floor(val),color,life:800,size:11+(val>9999?3:0)});
+}
+
+// ฟังก์ชันจัดการ Auto Combat (วางไว้ก่อน function update)
+function handleAutoCombat() {
+  if(!autoMode || paused || G.mobs.length === 0) return;
+  
+  const p = G.p;
+  // ค้นหาศัตรูที่ใกล้ที่สุด
+  let closest = null;
+  let minDist = Infinity;
+  G.mobs.forEach(m => {
+    const d = Math.hypot(m.x - p.x, m.y - p.y);
+    if (d < minDist) { minDist = d; closest = m; }
+  });
+
+  if (closest) {
+    p.angle = Math.atan2(closest.y - p.y, closest.x - p.x);
+    // ระยะโจมตีปกติ
+    if (minDist <= 50) {
+      if (Date.now() > p.nextAtk) playerAttack();
+    } else {
+      // เดินเข้าหาศัตรู (ใช้ค่า Move Speed จากสเตตัสตัวละคร)
+      p.x += Math.cos(p.angle) * 2; 
+      p.y += Math.sin(p.angle) * 2;
+    }
+  }
+}
+
+function update() {
+  if (paused) return;
+  
+  handleAutoCombat(); // <--- ใส่บรรทัดนี้ลงไปที่นี่
+  
+  // ... โค้ดเดิมอื่นๆ ของฟังก์ชัน update ...
 }
 
 function updateStatusIcons(){
@@ -2319,13 +2353,22 @@ function selectClass(el){
   el.classList.add('selected');selectedClass=el.dataset.class;
 }
 
-function startGame(){
-  const name=document.getElementById('in-name').value.trim()||'SomaHero';
-  G.p=freshPlayer(name,selectedClass);
-  const cs=calcStats(G.p);G.p.hp=cs.maxHp;G.p.mp=cs.maxMp;
-  G.p.x=0;G.p.y=0;
+function startGame() {
+  const nameIn = document.getElementById('in-name').value;
+  if(nameIn) G.p.name = nameIn;
+  
+  // ปิดหน้าจอเริ่มเกม
   document.getElementById('start-screen').classList.add('hidden');
-  initGame(true);
+  
+  // บังคับสถานะให้พร้อมเล่น
+  paused = false; 
+  autoMode = true; // เปิด Auto ทันทีตามที่ต้องการ
+  
+  // ล้าง Loop เก่าทิ้งก่อนเริ่มใหม่ป้องกันการ Freeze
+  if(raf) cancelAnimationFrame(raf);
+  
+  initGame(true); // เรียกใช้การตั้งค่าเริ่มต้นเกม
+  addNotif("Quest Started: Auto Mode ON");
 }
 
 function initGame(isNew){
