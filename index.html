@@ -1201,7 +1201,7 @@ function loop(){
   for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   ctx.globalAlpha=1;
 
-  // FIX 1: Draw border decorations only (no collision)
+  // Draw border decorations only (no collision)
   currentDecorations.forEach(d=>{
     ctx.globalAlpha=d.alpha;
     ctx.font=`${d.size}px serif`;
@@ -1210,7 +1210,7 @@ function loop(){
   });
   ctx.globalAlpha=1;
 
-  // Player movement — NO obstacle collision, free movement
+  // Player movement
   const moveSpd=cs.moveSpd;
   let dx=0,dy=0;
   if(keys['w']||keys['arrowup'])dy-=moveSpd;
@@ -1224,14 +1224,15 @@ function loop(){
 
   p.angle=Math.atan2(mouse.y-p.y,mouse.x-p.x);
 
-  // AUTO MODE
-  if(autoMode&&G.mobs.length>0){
-    const t=G.mobs[0];
-    const tx=t.x-p.x,ty=t.y-p.y,d=Math.hypot(tx,ty);
+  // AUTO MODE — FIX: target only alive mobs
+  const aliveMobs=G.mobs.filter(m=>m.hp>0);
+  if(autoMode&&aliveMobs.length>0){
+    const t=aliveMobs[0];
+    const tx=t.x-p.x,ty=t.y-p.y,dd=Math.hypot(tx,ty);
     p.angle=Math.atan2(ty,tx);
-    if(d>70){
-      p.x=Math.max(14,Math.min(W-14,p.x+tx/d*moveSpd));
-      p.y=Math.max(14,Math.min(H-14,p.y+ty/d*moveSpd));
+    if(dd>70){
+      p.x=Math.max(14,Math.min(W-14,p.x+tx/dd*moveSpd));
+      p.y=Math.max(14,Math.min(H-14,p.y+ty/dd*moveSpd));
     }
     playerAttack();
 
@@ -1241,9 +1242,8 @@ function loop(){
       if(!skillCDs[id]||now>skillCDs[id])useSkillSlot(i,true);
     });
 
-    // Auto item use via hotbarItems — ลำดับความสำคัญ
+    // Auto item use
     const hi=p.hotbarItems||['HP_POT','MP_POT','CLEANSE',null];
-    // 1. หาไอเทม Cleanse/HP/MP ใน hotbarItems ตามลำดับสถานการณ์
     const findHotbarItem=(types)=>{
       for(const t of types){
         const si=hi.indexOf(t);
@@ -1251,10 +1251,8 @@ function loop(){
       }
       return -1;
     };
-    // Cleanse ถ้ามี debuff
     const hasDebuff=Object.keys(p.statusEffects).some(k=>['poison','burn','bleed'].includes(k)&&now<(p.statusEffects[k]?.until||0));
     if(hasDebuff){const si=findHotbarItem(['CLEANSE']);if(si>=0)hotbarItemUse(si,true);}
-    // HP ต่ำ < 40%
     if(p.hp<cs.maxHp*0.4){
       const si=findHotbarItem(['HP_POT_L','HP_POT']);
       if(si>=0)hotbarItemUse(si,true);
@@ -1262,12 +1260,11 @@ function loop(){
       const si=findHotbarItem(['HP_POT']);
       if(si>=0)hotbarItemUse(si,true);
     }
-    // MP ต่ำ < 25%
     if(p.mp<cs.maxMp*0.25){
       const si=findHotbarItem(['MP_POT_L','MP_POT']);
       if(si>=0)hotbarItemUse(si,true);
     }
-  }else if(mouse.down){playerAttack();}
+  }else if(!autoMode&&mouse.down){playerAttack();}
 
   // HoT
   const hot=p.statusEffects.hot;
@@ -1288,23 +1285,16 @@ function loop(){
   ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(p.x-16,p.y-22,32,4);
   ctx.fillStyle=hpP>.5?'#2f2':hpP>.25?'#fa0':'#f22';ctx.fillRect(p.x-16,p.y-22,32*hpP,4);
 
-  // Floor clear check
-  if(G.mobs.length===0&&!isBossFloor(p.floor)){
-    p.clearedFloors.add(p.floor);
-    if(!noBossMode)advanceFloor();
-    else{currentDecorations=generateDecorations(p.floor);G.mobs=spawnEnemies(p.floor);}
-  }
-
-  // Mobs
+  // ── Mobs: process then remove dead ──────────────────────────
   const toRm=[];
   G.mobs.forEach(m=>{
     if(m.hp<=0){toRm.push(m);return;}
     if(m.dot&&now<m.dot.until){if(now-m.dot.last>1000){m.hp-=m.dot.dmg;m.dot.last=now;}}
-    const d=Math.hypot(p.x-m.x,p.y-m.y);
+    const dist=Math.hypot(p.x-m.x,p.y-m.y);
     const stunned=now<m.stunUntil;
     if(!stunned){
-      if(d>m.range+14){
-        if(d<450){
+      if(dist>m.range+14){
+        if(dist<450){
           const mx=p.x-m.x,my2=p.y-m.y,md=Math.hypot(mx,my2);
           m.x=Math.max(10,Math.min(W-10,m.x+mx/md*m.speed));
           m.y=Math.max(10,Math.min(H-10,m.y+my2/md*m.speed));
@@ -1317,7 +1307,7 @@ function loop(){
         }
       }else{
         mobAttackPlayer(m);
-        if(m.type==='aoe'&&d<200)mobAttackPlayer(m);
+        if(m.type==='aoe'&&dist<200)mobAttackPlayer(m);
       }
     }
     // Draw mob
@@ -1340,26 +1330,40 @@ function loop(){
     }
     ctx.restore();
   });
+
+  // FIX: Remove dead mobs FIRST, then check floor clear
   toRm.forEach(m=>{G.mobs.splice(G.mobs.indexOf(m),1);mobDied(m);});
 
+  // FIX: Floor clear check AFTER dead mobs removed
+  if(G.mobs.length===0&&!isBossFloor(p.floor)){
+    p.clearedFloors.add(p.floor);
+    if(!noBossMode)advanceFloor();
+    else{currentDecorations=generateDecorations(p.floor);G.mobs=spawnEnemies(p.floor);}
+  }
+
   // Damage numbers
-  const alive=[];
-  dmgNumbers.forEach(d=>{
-    d.y-=1;d.life-=16;
-    if(d.life>0){
-      ctx.globalAlpha=d.life/800;
-      ctx.fillStyle=d.color;ctx.font=`bold ${d.size}px monospace`;
-      ctx.textAlign='center';ctx.fillText(d.text,d.x,d.y);ctx.globalAlpha=1;
-      alive.push(d);
+  const aliveNums=[];
+  dmgNumbers.forEach(dn=>{
+    dn.y-=1;dn.life-=16;
+    if(dn.life>0){
+      ctx.globalAlpha=dn.life/800;
+      ctx.fillStyle=dn.color;ctx.font=`bold ${dn.size}px monospace`;
+      ctx.textAlign='center';ctx.fillText(dn.text,dn.x,dn.y);ctx.globalAlpha=1;
+      aliveNums.push(dn);
     }
   });
-  dmgNumbers=alive;
+  dmgNumbers=aliveNums;
 
-  document.getElementById('enemy-count').textContent=`${G.mobs.length} enemies | ${getBiome(p.floor).name}`;
-  const bl=document.getElementById('blessing-ind');
-  if(bl)bl.style.display=now<blessingUntil?'inline':'none';
-  updateHotbar();
-  updateStatusIcons();
+  // FIX: Throttle DOM updates — only every 6 frames (~10fps for UI)
+  if(!loop._uiTick)loop._uiTick=0;
+  loop._uiTick++;
+  if(loop._uiTick%6===0){
+    document.getElementById('enemy-count').textContent=`${G.mobs.length} enemies | ${getBiome(p.floor).name}`;
+    const bl=document.getElementById('blessing-ind');
+    if(bl)bl.style.display=now<blessingUntil?'inline':'none';
+    updateHotbar();
+    updateStatusIcons();
+  }
 
   raf=requestAnimationFrame(loop);
 }
