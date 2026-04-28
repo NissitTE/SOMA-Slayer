@@ -715,7 +715,7 @@ function spawnEnemies(floor){
       mobs.push({id:Math.random(),name:t.name,icon:t.icon,x:mx,y:my,
         hp,maxHp:hp,atk:t.atk*Math.max(1,mobScale*0.5)*(isElite?1.5:1),
         speed:t.speed*(isElite?1.2:1),range:t.range,
-        type:t.type,cd:0,wanderTarget:null,wanderCd:0,isBoss:false,isSecret:false,
+        type:t.type,cd:Date.now()+1500,wanderTarget:null,wanderCd:0,isBoss:false,isSecret:false,
         lv:mobLv,dropMult:isElite?2:1,stunUntil:0,isElite,
         dot:null});
     }
@@ -935,28 +935,28 @@ function learnSkill(id){
 }
 
 let skillCDs={};
-function useSkillSlot(slot){
+function useSkillSlot(slot, silent=false){
   const p=G.p,id=p.hotbarSkills[slot];if(!id)return;
   const bc=baseClass(p.class);const sk=(SKILL_DB[bc]||[]).find(s=>s.id===id);if(!sk)return;
   const now=Date.now();
-  if(skillCDs[id]&&now<skillCDs[id]){notify('Cooldown','#888');return;}
-  if(p.mp<sk.mp){notify('No MP!','#44f');return;}
+  if(skillCDs[id]&&now<skillCDs[id]){if(!silent)notify('Cooldown','#888');return;}
+  if(p.mp<sk.mp){if(!silent)notify('No MP!','#44f');return;}
   p.mp-=sk.mp;skillCDs[id]=now+(sk.cd*1000);
   applySkill(sk);updateHotbar();
 }
 
 function applySkill(sk){
   const p=G.p,cs=calcStats(p);
-  if(sk.type==='heal'){const h = (cs.maxHp * 0.1) + (cs.int * 5); // ฮีล 10% ของเลือด + 5 เท่าของค่า INT
-p.hp = Math.min(cs.maxHp, p.hp + h);logMsg(`${sk.name}: +${Math.floor(h)} HP`,'#2f2');}
-  // เดิม: p.hp=cs.maxHp; p.mp=cs.maxMp;
-// แก้เป็น: ฮีลแรงขึ้นตามค่า INT แต่ไม่เกิน 80% และไม่เติม MP จนเต็ม
-else if(sk.type==='fullheal'){
-  const healAmt = Math.floor(cs.maxHp * 0.7); // ฮีล 70% ของเลือดสูงสุด
-  p.hp = Math.min(cs.maxHp, p.hp + healAmt);
-  p.mp = Math.min(cs.maxMp, p.mp + (cs.maxMp * 0.2)); // คืนมานาแค่ 20%
-  logMsg(`${sk.name}: Massive Heal!`, '#2f2');
-}
+  if(sk.type==='heal'){
+    const healPct=sk.healPct||0.30;
+    const intBonus=cs.int*2;
+    const h=Math.floor(cs.maxHp*healPct+intBonus);
+    p.hp=Math.min(cs.maxHp,p.hp+h);logMsg(`${sk.name}: +${h} HP`,'#2f2');
+  }
+  else if(sk.type==='fullheal'){
+    p.hp=cs.maxHp;p.mp=cs.maxMp;
+    logMsg(`${sk.name}: Full Restore!`,'#2f2');
+  }
   else if(sk.type==='cleanse'){p.statusEffects={};if(sk.buffKey)p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg('Cleansed!','#0ff');}
   else if(sk.type==='buff'){p.statusEffects[sk.buffKey]={until:Date.now()+sk.buffDur};logMsg(`${sk.name} active!`,'#0ff');}
   else if(sk.type==='hot'){p.statusEffects.hot={until:Date.now()+sk.hotDur,pct:sk.hotPct,last:Date.now()};logMsg(`${sk.name}: Regen`,'#2f2');}
@@ -964,6 +964,7 @@ else if(sk.type==='fullheal'){
     const sv=sk.stat==='str'?cs.str:sk.stat==='agi'?cs.agi:cs.int;
     const base = Math.floor(Math.sqrt(sv) * 15 * getSkillDmg(sk));
     const rep=sk.repeat||1;
+    let hits=0;
     for(let r=0;r<rep;r++){
       G.mobs.forEach(m=>{
         const d=Math.hypot(p.x-m.x,p.y-m.y);
@@ -1109,8 +1110,8 @@ function advanceFloor(){
 }
 
 // ─── CONSUMABLES ────────────────────────────────────────────
-function useItem(id){
-  const p=G.p;if(!(p.inv[id]>0)){notify('None left!','#f44');return;}
+function useItem(id, silent=false){
+  const p=G.p;if(!(p.inv[id]>0)){if(!silent)notify('None left!','#f44');return;}
   const cs=calcStats(p);
   if(id==='HP_POT'){p.hp=Math.min(cs.maxHp,p.hp+cs.maxHp*0.4);logMsg('HP Potion +40% HP','#2f2');}
   else if(id==='MP_POT'){p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.4);logMsg('MP Potion +40% MP','#44f');}
@@ -1252,19 +1253,19 @@ function loop(){
     };
     // Cleanse ถ้ามี debuff
     const hasDebuff=Object.keys(p.statusEffects).some(k=>['poison','burn','bleed'].includes(k)&&now<(p.statusEffects[k]?.until||0));
-    if(hasDebuff){const si=findHotbarItem(['CLEANSE']);if(si>=0)hotbarItemUse(si);}
+    if(hasDebuff){const si=findHotbarItem(['CLEANSE']);if(si>=0)hotbarItemUse(si,true);}
     // HP ต่ำ < 40%
     if(p.hp<cs.maxHp*0.4){
       const si=findHotbarItem(['HP_POT_L','HP_POT']);
-      if(si>=0)hotbarItemUse(si);
+      if(si>=0)hotbarItemUse(si,true);
     } else if(p.hp<cs.maxHp*0.65){
       const si=findHotbarItem(['HP_POT']);
-      if(si>=0)hotbarItemUse(si);
+      if(si>=0)hotbarItemUse(si,true);
     }
     // MP ต่ำ < 25%
     if(p.mp<cs.maxMp*0.25){
       const si=findHotbarItem(['MP_POT_L','MP_POT']);
-      if(si>=0)hotbarItemUse(si);
+      if(si>=0)hotbarItemUse(si,true);
     }
   }else if(mouse.down){playerAttack();}
 
@@ -1478,11 +1479,11 @@ function updateUI(){
 }
 
 // ─── HOTBAR ITEM SYSTEM ──────────────────────────────────────
-function hotbarItemUse(slot){
+function hotbarItemUse(slot, silent=false){
   if(!G.p)return;
   const id=G.p.hotbarItems[slot];
-  if(!id){notify('ไม่มีไอเทมใน slot นี้ คลิกขวาเพื่อเลือก','#888');return;}
-  useItem(id);
+  if(!id){if(!silent)notify('ไม่มีไอเทมใน slot นี้ คลิกขวาเพื่อเลือก','#888');return;}
+  useItem(id, silent);
 }
 
 let pickerSlot=-1,pickerMode='item';
