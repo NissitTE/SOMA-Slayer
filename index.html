@@ -145,6 +145,9 @@ canvas{display:block;width:100%;height:100%}
 .picker-row{display:flex;align-items:center;gap:6px;padding:4px 6px;cursor:pointer;font-size:8px;border-radius:2px;transition:background .1s}
 .picker-row:hover{background:var(--lux);color:#000}
 .item-slot{border-color:#336!important}
+.hslot.drag-over{border-color:var(--lux3)!important;background:#1a1500!important}
+.draggable-item{cursor:grab}.draggable-item:active{cursor:grabbing}
+.skill-card[draggable=true]:active{opacity:0.6}
 </style>
 </head>
 <body>
@@ -443,17 +446,17 @@ canvas{display:block;width:100%;height:100%}
     <canvas id="gameCanvas"></canvas>
     <div id="status-icons"></div>
     <div id="hotbar">
-      <!-- Item slots 1-4: right-click to change item -->
-      <div class="hslot item-slot" id="isl0" onclick="hotbarItemUse(0)" oncontextmenu="hotbarItemPick(0,event)" title="[1] Right-click: เปลี่ยนไอเทม"><span class="hkey">1</span><span class="hicon" id="hii0">🧪</span><span class="hval" id="hiv0">0</span></div>
-      <div class="hslot item-slot" id="isl1" onclick="hotbarItemUse(1)" oncontextmenu="hotbarItemPick(1,event)" title="[2] Right-click: เปลี่ยนไอเทม"><span class="hkey">2</span><span class="hicon" id="hii1">💧</span><span class="hval" id="hiv1">0</span></div>
-      <div class="hslot item-slot" id="isl2" onclick="hotbarItemUse(2)" oncontextmenu="hotbarItemPick(2,event)" title="[3] Right-click: เปลี่ยนไอเทม"><span class="hkey">3</span><span class="hicon" id="hii2">✨</span><span class="hval" id="hiv2">0</span></div>
-      <div class="hslot item-slot" id="isl3" onclick="hotbarItemUse(3)" oncontextmenu="hotbarItemPick(3,event)" title="[4] Right-click: เปลี่ยนไอเทม"><span class="hkey">4</span><span class="hicon" id="hii3">—</span><span class="hval" id="hiv3">0</span></div>
+      <!-- Item slots 1-4: right-click to change item, drag item from inventory -->
+      <div class="hslot item-slot" id="isl0" onclick="hotbarItemUse(0)" oncontextmenu="hotbarItemPick(0,event)" ondragover="event.preventDefault()" ondrop="dropOnItemSlot(event,0)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[1] Right-click/ลาก: เปลี่ยนไอเทม"><span class="hkey">1</span><span class="hicon" id="hii0">🧪</span><span class="hval" id="hiv0">0</span></div>
+      <div class="hslot item-slot" id="isl1" onclick="hotbarItemUse(1)" oncontextmenu="hotbarItemPick(1,event)" ondragover="event.preventDefault()" ondrop="dropOnItemSlot(event,1)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[2] Right-click/ลาก: เปลี่ยนไอเทม"><span class="hkey">2</span><span class="hicon" id="hii1">💧</span><span class="hval" id="hiv1">0</span></div>
+      <div class="hslot item-slot" id="isl2" onclick="hotbarItemUse(2)" oncontextmenu="hotbarItemPick(2,event)" ondragover="event.preventDefault()" ondrop="dropOnItemSlot(event,2)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[3] Right-click/ลาก: เปลี่ยนไอเทม"><span class="hkey">3</span><span class="hicon" id="hii2">✨</span><span class="hval" id="hiv2">0</span></div>
+      <div class="hslot item-slot" id="isl3" onclick="hotbarItemUse(3)" oncontextmenu="hotbarItemPick(3,event)" ondragover="event.preventDefault()" ondrop="dropOnItemSlot(event,3)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[4] Right-click/ลาก: เปลี่ยนไอเทม"><span class="hkey">4</span><span class="hicon" id="hii3">—</span><span class="hval" id="hiv3">0</span></div>
       <div style="width:2px;background:var(--border2);margin:4px 2px"></div>
-      <!-- Skill slots Q/E/R/F: right-click to change skill -->
-      <div class="hslot" id="hs0" onclick="useSkillSlot(0)" oncontextmenu="hotbarSkillPick(0,event)" title="[Q] Right-click: เปลี่ยนสกิล"><span class="hkey">Q</span><span class="hicon" id="hsi0">—</span><span class="hval" id="hsn0"></span><div class="skill-cooldown hidden" id="hsc0"></div></div>
-      <div class="hslot" id="hs1" onclick="useSkillSlot(1)" oncontextmenu="hotbarSkillPick(1,event)" title="[E] Right-click: เปลี่ยนสกิล"><span class="hkey">E</span><span class="hicon" id="hsi1">—</span><span class="hval" id="hsn1"></span><div class="skill-cooldown hidden" id="hsc1"></div></div>
-      <div class="hslot" id="hs2" onclick="useSkillSlot(2)" oncontextmenu="hotbarSkillPick(2,event)" title="[R] Right-click: เปลี่ยนสกิล"><span class="hkey">R</span><span class="hicon" id="hsi2">—</span><span class="hval" id="hsn2"></span><div class="skill-cooldown hidden" id="hsc2"></div></div>
-      <div class="hslot" id="hs3" onclick="useSkillSlot(3)" oncontextmenu="hotbarSkillPick(3,event)" title="[F] Right-click: เปลี่ยนสกิล"><span class="hkey">F</span><span class="hicon" id="hsi3">—</span><span class="hval" id="hsn3"></span><div class="skill-cooldown hidden" id="hsc3"></div></div>
+      <!-- Skill slots Q/E/R/F: right-click to change skill, drag skill from skill panel -->
+      <div class="hslot" id="hs0" onclick="useSkillSlot(0)" oncontextmenu="hotbarSkillPick(0,event)" ondragover="event.preventDefault()" ondrop="dropOnSkillSlot(event,0)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[Q] Right-click/ลาก: เปลี่ยนสกิล"><span class="hkey">Q</span><span class="hicon" id="hsi0">—</span><span class="hval" id="hsn0"></span><div class="skill-cooldown hidden" id="hsc0"></div></div>
+      <div class="hslot" id="hs1" onclick="useSkillSlot(1)" oncontextmenu="hotbarSkillPick(1,event)" ondragover="event.preventDefault()" ondrop="dropOnSkillSlot(event,1)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[E] Right-click/ลาก: เปลี่ยนสกิล"><span class="hkey">E</span><span class="hicon" id="hsi1">—</span><span class="hval" id="hsn1"></span><div class="skill-cooldown hidden" id="hsc1"></div></div>
+      <div class="hslot" id="hs2" onclick="useSkillSlot(2)" oncontextmenu="hotbarSkillPick(2,event)" ondragover="event.preventDefault()" ondrop="dropOnSkillSlot(event,2)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[R] Right-click/ลาก: เปลี่ยนสกิล"><span class="hkey">R</span><span class="hicon" id="hsi2">—</span><span class="hval" id="hsn2"></span><div class="skill-cooldown hidden" id="hsc2"></div></div>
+      <div class="hslot" id="hs3" onclick="useSkillSlot(3)" oncontextmenu="hotbarSkillPick(3,event)" ondragover="event.preventDefault()" ondrop="dropOnSkillSlot(event,3)" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" title="[F] Right-click/ลาก: เปลี่ยนสกิล"><span class="hkey">F</span><span class="hicon" id="hsi3">—</span><span class="hval" id="hsn3"></span><div class="skill-cooldown hidden" id="hsc3"></div></div>
     </div>
     <!-- Hotbar picker popup -->
     <div id="hotbar-picker" class="hidden" style="position:fixed;background:#111;border:1px solid var(--lux);padding:8px;z-index:400;min-width:180px;max-height:260px;overflow-y:auto">
@@ -619,7 +622,9 @@ function freshPlayer(name,cls){
     str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),
     hp:0,maxHp:0,mp:0,maxMp:0,x:0,y:0,angle:0,
     equips:{Weapon:null,Shield:null,Head:null,Chest:null,Legs:null,Cloak:null,Pendant:null,Necklace:null,Ring:null},
-    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0,STAT_PT:0,SKILL_PT:0},
+    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0,STAT_PT:0,SKILL_PT:0,
+         JUNK_YARD:0,SKILL_PT1:0,SKILL_PT10:0,SKILL_RST:0,STAT_PT1:0,STAT_PT10:0,STAT_RST:0},
+    spentStatPts:0, spentSkillPts:0,
     gears:[],
     learnedSkills:[],
     skillLevels:{},
@@ -826,6 +831,7 @@ function addStat(stat,amount){
   const p=G.p;
   if(p.pts<amount){notify(`Need ${amount} pts!`,'#f44');return;}
   p[stat]=Math.min(MAX_STAT,p[stat]+amount);p.pts-=amount;
+  p.spentStatPts=(p.spentStatPts||0)+amount;
   const cs=calcStats(p);if(p.hp>cs.maxHp)p.hp=cs.maxHp;if(p.mp>cs.maxMp)p.mp=cs.maxMp;
   updateUI();
 }
@@ -879,16 +885,23 @@ const SKILL_DB={
 };
 
 const SHOP_ITEMS=[
-  {id:'HP_POT',   name:'HP Potion',   icon:'🧪', desc:'Restore 40% HP',          price:200},
-  {id:'MP_POT',   name:'MP Potion',   icon:'💧', desc:'Restore 40% MP',          price:50},
-  {id:'CLEANSE',  name:'Cleanse',     icon:'✨', desc:'Remove all status effects', price:80},
-  {id:'HP_POT_L', name:'HP Elixir',   icon:'🍷', desc:'Restore 80% HP',          price:1000},
-  {id:'MP_POT_L', name:'MP Elixir',   icon:'🌀', desc:'Restore 80% MP',          price:1000},
-  {id:'EXP_SCROLL',name:'EXP Scroll', icon:'📜', desc:'Gain 5000 EXP',           price:100000},
-  {id:'STAT_PT',  name:'Stat Orb',    icon:'🔮', desc:'+1 Stat Point ทันที',      price:10000},
-  {id:'SKILL_PT', name:'Skill Orb',   icon:'💎', desc:'+1 Skill Point ทันที',     price:50000},
-  {id:'JUNK',     name:'Junk ×10',    icon:'🔩', desc:'Used in forge',            price:20, qty:10},
-  {id:'BLESSING', name:'เสริมบุญ',    icon:'🙏', desc:'+1.5~3% drop rate 15min',  price:1000000},
+  {id:'HP_POT',    name:'HP Potion',        icon:'🧪', desc:'Restore 40% HP',                 price:200},
+  {id:'MP_POT',    name:'MP Potion',        icon:'💧', desc:'Restore 40% MP',                 price:200},
+  {id:'CLEANSE',   name:'Cleanse',          icon:'✨', desc:'Remove all status effects',        price:80},
+  {id:'HP_POT_L',  name:'HP Elixir',        icon:'🍷', desc:'Restore 80% HP',                 price:1000},
+  {id:'MP_POT_L',  name:'MP Elixir',        icon:'🌀', desc:'Restore 80% MP',                 price:1000},
+  {id:'EXP_SCROLL',name:'EXP Scroll',       icon:'📜', desc:'Gain 5000 EXP',                  price:100000},
+  {id:'STAT_PT',   name:'Stat Orb',         icon:'🔮', desc:'+1 Stat Point ทันที',             price:10000},
+  {id:'SKILL_PT',  name:'Skill Orb',        icon:'💎', desc:'+1 Skill Point ทันที',            price:50000},
+  {id:'JUNK',      name:'Junk ×10',         icon:'🔩', desc:'Used in forge',                   price:20, qty:10},
+  {id:'JUNK_YARD', name:'Junk Yard ×1000',  icon:'🏭', desc:'Junk 1,000 ชิ้น',                price:18000, qty:1000},
+  {id:'BLESSING',  name:'เสริมบุญ',         icon:'🙏', desc:'+1.5~3% drop rate 15min',         price:1000000},
+  {id:'SKILL_PT1', name:'Skill Point+',     icon:'🔷', desc:'+1 Skill Point สำหรับอัพสกิล',   price:2500000},
+  {id:'SKILL_PT10',name:'Skill Point++',    icon:'🔵', desc:'+10 Skill Point สำหรับอัพสกิล',  price:20000000},
+  {id:'SKILL_RST', name:'Skill Point Reset',icon:'🔄', desc:'คืน Skill Point ทั้งหมดที่เคยอัพ', price:80000000},
+  {id:'STAT_PT1',  name:'Status Point+',    icon:'🟡', desc:'+1 Status Point สำหรับอัพสเตตัส', price:1000000},
+  {id:'STAT_PT10', name:'Status Point++',   icon:'🟠', desc:'+10 Status Point สำหรับอัพสเตตัส',price:8000000},
+  {id:'STAT_RST',  name:'Status Point Reset',icon:'♻', desc:'คืน Status Point ทั้งหมดที่เคยอัพ', price:100000000},
 ];
 
 // ─── SKILLS ─────────────────────────────────────────────────
@@ -917,6 +930,7 @@ function learnSkill(id){
     notify(`Learned: ${sk.name}`,'var(--lux2)');
   }else notify(`${sk.name} Lv ${lv+1}!`,'var(--lux2)');
   p.skillLevels=p.skillLevels||{};p.skillLevels[id]=(lv+1);p.skillPts--;
+  p.spentSkillPts=(p.spentSkillPts||0)+1;
   renderSkills();updateHotbar();
 }
 
@@ -1106,6 +1120,44 @@ function useItem(id){
   else if(id==='EXP_SCROLL'){giveExp(5000);logMsg('EXP Scroll +5000 EXP','var(--lux2)');}
   else if(id==='STAT_PT'){p.pts=Math.min(MAX_STAT,p.pts+1);logMsg('Stat Orb +1 Stat PT','var(--lux2)');notify('+1 Stat Point!','var(--lux2)');}
   else if(id==='SKILL_PT'){p.skillPts=(p.skillPts||0)+1;logMsg('Skill Orb +1 Skill PT','#ce93d8');notify('+1 Skill Point!','#ce93d8');}
+  else if(id==='JUNK_YARD'){p.inv.JUNK=(p.inv.JUNK||0)+1000;logMsg('Junk Yard +1000 Junk','#888');notify('+1,000 🔩 Junk!','#888');}
+  else if(id==='SKILL_PT1'){p.skillPts=(p.skillPts||0)+1;logMsg('Skill Point+ +1 Skill PT','#4488ff');notify('+1 Skill Point!','#4488ff');}
+  else if(id==='SKILL_PT10'){p.skillPts=(p.skillPts||0)+10;logMsg('Skill Point++ +10 Skill PT','#4488ff');notify('+10 Skill Points!','#4488ff');}
+  else if(id==='SKILL_RST'){
+    const spent=p.spentSkillPts||0;
+    if(spent<=0){notify('ยังไม่มี Skill Point ที่เคยอัพ!','#f44');return;}
+    // คืน skill points ตามที่เคยอัพ และล้างสกิลทั้งหมด
+    p.skillPts=(p.skillPts||0)+spent;
+    p.spentSkillPts=0;
+    p.learnedSkills=[];
+    p.skillLevels={};
+    p.hotbarSkills=[null,null,null,null];
+    notify(`Skill Reset! คืน ${spent} Skill Points`,'#4fc3f7');
+    logMsg(`Skill Reset: +${spent} SP คืน`,'#4fc3f7');
+    updateHotbar();renderSkills();
+  }
+  else if(id==='STAT_PT1'){p.pts=Math.min(MAX_STAT,p.pts+1);logMsg('Status Point+ +1 Stat PT','#ffa726');notify('+1 Status Point!','#ffa726');}
+  else if(id==='STAT_PT10'){p.pts=Math.min(MAX_STAT,p.pts+10);logMsg('Status Point++ +10 Stat PT','#ffa726');notify('+10 Status Points!','#ffa726');}
+  else if(id==='STAT_RST'){
+    const spent=p.spentStatPts||0;
+    if(spent<=0){notify('ยังไม่มี Stat Point ที่เคยอัพ!','#f44');return;}
+    // คืน stat points และล้างค่าสเตตัสที่เคยอัพ — ลด base stats ลงตามที่เคยอัพ
+    // สมมติ base stats เริ่มต้นจาก freshPlayer
+    const cb={Knight:{vit:5,str:3},Archer:{agi:5,str:2},Priest:{int:5,vit:2},
+      Excalibur:{str:10,vit:8,agi:5,int:5},'.50 Calibre':{agi:12,str:6,int:4,vit:4},'Merlin Bloodline':{int:12,vit:6,str:4,agi:4}};
+    const b=cb[p.class]||{};
+    const baseStr=10+(b.str||0),baseAgi=10+(b.agi||0),baseInt=10+(b.int||0),baseVit=10+(b.vit||0);
+    // ถอด stat ที่อัพเพิ่มจาก base ออก
+    const usedStr=Math.max(0,p.str-baseStr);const usedAgi=Math.max(0,p.agi-baseAgi);
+    const usedInt=Math.max(0,p.int-baseInt);const usedVit=Math.max(0,p.vit-baseVit);
+    const totalUsed=usedStr+usedAgi+usedInt+usedVit;
+    p.str=baseStr;p.agi=baseAgi;p.int=baseInt;p.vit=baseVit;
+    p.pts=(p.pts||0)+totalUsed;
+    p.spentStatPts=0;
+    const cs2=calcStats(p);p.hp=Math.min(p.hp,cs2.maxHp);p.mp=Math.min(p.mp,cs2.maxMp);
+    notify(`Stat Reset! คืน ${totalUsed} Stat Points`,'#ffcc00');
+    logMsg(`Stat Reset: +${totalUsed} SP คืน`,'#ffcc00');
+  }
   else if(id==='BLESSING'){
     blessingBonus=0.015+Math.random()*0.015;
     blessingUntil=Date.now()+15*60*1000;
@@ -1397,7 +1449,10 @@ function updateUI(){
 
   const il=document.getElementById('inv-list');
   if(il)il.innerHTML=Object.entries(p.inv).filter(([k,v])=>v>0).map(([k,v])=>`
-    <div class="shop-item" onclick="useItem('${k}')">
+    <div class="shop-item draggable-item" draggable="true"
+         ondragstart="dragItem(event,'${k}')"
+         onclick="useItem('${k}')"
+         title="ลากไปวางบน item slot 1-4">
       <span>${SHOP_ITEMS.find(s=>s.id===k)?.icon||'📦'}</span>
       <span>${SHOP_ITEMS.find(s=>s.id===k)?.name||k}</span>
       <span class="shop-price">×${v}</span>
@@ -1453,23 +1508,27 @@ function showPicker(x,y){
   picker.style.top=Math.max(y-ph-10,5)+'px';
 
   if(pickerMode==='item'){
-    title.textContent='เลือกไอเทมสำหรับ slot '+(pickerSlot+1);
+    title.textContent='เลือกไอเทมสำหรับ slot '+(pickerSlot+1)+' (คลิกหรือลาก)';
     const items=SHOP_ITEMS.filter(s=>s.id!=='JUNK'&&s.id!=='BLESSING'&&s.id!=='EXP_SCROLL'&&(p.inv[s.id]||0)>=0);
     list.innerHTML=`<div class="picker-row" onclick="assignHotbarItem(${pickerSlot},null)" style="color:var(--text3)">— ลบออก —</div>`+
       items.map(s=>`
-        <div class="picker-row" onclick="assignHotbarItem(${pickerSlot},'${s.id}')">
+        <div class="picker-row draggable-item" draggable="true"
+             ondragstart="dragItem(event,'${s.id}')"
+             onclick="assignHotbarItem(${pickerSlot},'${s.id}')">
           <span>${s.icon}</span>
           <span style="flex:1">${s.name}</span>
           <span style="color:var(--lux2)">×${p.inv[s.id]||0}</span>
         </div>`).join('');
   } else {
-    title.textContent='เลือกสกิลสำหรับ slot '+(pickerSlot+1);
+    title.textContent='เลือกสกิลสำหรับ slot '+(pickerSlot+1)+' (คลิกหรือลาก)';
     const learned=p.learnedSkills||[];
     const bc=baseClass(p.class);
     const sks=(SKILL_DB[bc]||[]).filter(sk=>learned.includes(sk.id));
     list.innerHTML=`<div class="picker-row" onclick="assignHotbarSkill(${pickerSlot},null)" style="color:var(--text3)">— ลบออก —</div>`+
       sks.map(sk=>`
-        <div class="picker-row" onclick="assignHotbarSkill(${pickerSlot},'${sk.id}')">
+        <div class="picker-row draggable-item" draggable="true"
+             ondragstart="dragSkill(event,'${sk.id}')"
+             onclick="assignHotbarSkill(${pickerSlot},'${sk.id}')">
           <span>${sk.icon}</span>
           <span style="flex:1">${sk.name}</span>
           <span style="color:#4488ff">Lv${getSkillLv(sk.id)}</span>
@@ -1485,6 +1544,53 @@ function assignHotbarSkill(slot,id){
   G.p.hotbarSkills[slot]=id;
   closePicker();updateHotbar();
 }
+// ─── DRAG AND DROP ──────────────────────────────────────────
+let dragData={type:null,id:null};
+
+function dragSkill(event,skillId){
+  dragData={type:'skill',id:skillId};
+  event.dataTransfer.effectAllowed='copy';
+  event.dataTransfer.setData('text/plain','skill:'+skillId);
+}
+
+function dragItem(event,itemId){
+  dragData={type:'item',id:itemId};
+  event.dataTransfer.effectAllowed='copy';
+  event.dataTransfer.setData('text/plain','item:'+itemId);
+}
+
+function dropOnSkillSlot(event,slot){
+  event.preventDefault();
+  document.getElementById('hs'+slot)?.classList.remove('drag-over');
+  const raw=event.dataTransfer.getData('text/plain')||'';
+  let id=null;
+  if(raw.startsWith('skill:'))id=raw.slice(6);
+  else if(dragData.type==='skill')id=dragData.id;
+  if(!id)return;
+  const p=G.p;const bc=baseClass(p.class);
+  const sk=(SKILL_DB[bc]||[]).find(s=>s.id===id);
+  if(!sk){notify('ไม่พบสกิลนี้','#f44');return;}
+  if(!p.learnedSkills.includes(id)){notify('ยังไม่ได้เรียนสกิลนี้!','#f44');return;}
+  p.hotbarSkills[slot]=id;
+  updateHotbar();notify(`${sk.icon} ${sk.name} → slot ${['Q','E','R','F'][slot]}`,'var(--lux2)');
+  dragData={type:null,id:null};
+}
+
+function dropOnItemSlot(event,slot){
+  event.preventDefault();
+  document.getElementById('isl'+slot)?.classList.remove('drag-over');
+  const raw=event.dataTransfer.getData('text/plain')||'';
+  let id=null;
+  if(raw.startsWith('item:'))id=raw.slice(5);
+  else if(dragData.type==='item')id=dragData.id;
+  if(!id)return;
+  const s=SHOP_ITEMS.find(x=>x.id===id);
+  if(!s){notify('ไม่พบไอเทมนี้','#f44');return;}
+  G.p.hotbarItems[slot]=id;
+  updateHotbar();notify(`${s.icon} ${s.name} → slot ${slot+1}`,'var(--lux2)');
+  dragData={type:null,id:null};
+}
+
 function closePicker(){
   document.getElementById('hotbar-picker').classList.add('hidden');
 }
@@ -1669,7 +1775,10 @@ function renderSkills(){
   sl.innerHTML=sks.map(sk=>{
     const slv=getSkillLv(sk.id),isLearned=learned.includes(sk.id);
     const dmgD=sk.dmgMult?`${(getSkillDmg(sk)*100).toFixed(0)}%`:'';
-    return`<div class="skill-card ${isLearned?'learned':''}" onclick="learnSkill('${sk.id}')">
+    return`<div class="skill-card ${isLearned?'learned':''}" onclick="learnSkill('${sk.id}')"
+      draggable="${isLearned?'true':'false'}"
+      ondragstart="dragSkill(event,'${sk.id}')"
+      title="${isLearned?'ลากไปวางบน skill slot Q/E/R/F ได้':''}">
       <div class="sk-name">${sk.icon} ${sk.name} ${sk.hiddenOnly?'<span style="color:var(--god)">[H]</span>':''}</div>
       <div class="sk-desc">${sk.desc}</div>
       ${sk.dmgMult?`<div style="color:var(--lux);font-size:8px">DMG: ${dmgD}</div>`:''}
@@ -1975,6 +2084,10 @@ function loadFromSlot(slot){
     p.skillLevels=p.skillLevels||{};
     if(!p.inv.BLESSING)p.inv.BLESSING=0;
     if(!p.moveSpeedPct)p.moveSpeedPct=100;
+    // Init new items
+    ['JUNK_YARD','SKILL_PT1','SKILL_PT10','SKILL_RST','STAT_PT1','STAT_PT10','STAT_RST'].forEach(k=>{if(!p.inv[k])p.inv[k]=0;});
+    if(!p.spentStatPts)p.spentStatPts=0;
+    if(!p.spentSkillPts)p.spentSkillPts=0;
     G.p=p;
     document.getElementById('start-screen').classList.add('hidden');
     initGame(false);
@@ -2010,7 +2123,32 @@ function toggleAuto(){
   const btn=document.getElementById('auto-btn');
   btn.textContent=autoMode?'AUTO ON':'AUTO OFF';btn.classList.toggle('active',autoMode);
   document.getElementById('noboss-btn').style.display=autoMode?'block':'none';
+  if(autoMode&&G.p)autoFillHotbar();
   notify(autoMode?'Auto-farm ON':'Manual mode','#888');
+}
+
+// ─── AUTO FILL HOTBAR ────────────────────────────────────────
+// ลำดับความสำคัญไอเทม (ดีที่สุดก่อน)
+const ITEM_PRIORITY=['HP_POT_L','MP_POT_L','HP_POT','MP_POT','CLEANSE','EXP_SCROLL','STAT_PT','SKILL_PT','STAT_PT10','STAT_PT1','SKILL_PT10','SKILL_PT1','STAT_RST','SKILL_RST','JUNK_YARD','BLESSING'];
+function autoFillHotbar(){
+  const p=G.p;if(!p)return;
+  // Fill skill slots first (ใส่สกิลที่เรียนแล้ว)
+  const learned=p.learnedSkills||[];
+  for(let i=0;i<4;i++){
+    if(!p.hotbarSkills[i]&&learned[i]){
+      p.hotbarSkills[i]=learned[i];
+    }
+  }
+  // Fill item slots: เลือกไอเทมที่มีในคลัง ตามลำดับความสำคัญ
+  const usedItems=new Set(p.hotbarItems.filter(Boolean));
+  for(let i=0;i<4;i++){
+    if(!p.hotbarItems[i]){
+      // หาไอเทมที่ดีที่สุดที่ยังไม่ได้ใช้
+      const best=ITEM_PRIORITY.find(id=>(p.inv[id]||0)>0&&!usedItems.has(id));
+      if(best){p.hotbarItems[i]=best;usedItems.add(best);}
+    }
+  }
+  updateHotbar();
 }
 function toggleNoBoss(){
   noBossMode=!noBossMode;
