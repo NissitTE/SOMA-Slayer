@@ -407,6 +407,32 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
+<div id="hotkey-screen" class="overlay hidden">
+  <div class="panel-box" style="max-width:700px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h2 style="margin:0">🎮 EQUIP HOTKEYS</h2>
+      <button class="btn sm" onclick="resumeGame()">← FIGHT</button>
+    </div>
+    <div style="font-size:8px;color:var(--text3);margin-bottom:10px">คลิก slot ซ้ายเพื่อเลือกสิ่งที่จะใส่ · คลิกรายการขวาเพื่อกำหนด</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <!-- LEFT: slot list -->
+      <div>
+        <div class="hk-title">🔵 SKILL SLOTS (Q/E/R/F)</div>
+        <div id="hk-skill-slots" style="display:flex;flex-direction:column;gap:3px;margin-bottom:10px"></div>
+        <div class="hk-title">🟡 ITEM SLOTS (1/2/3/4)</div>
+        <div id="hk-item-slots" style="display:flex;flex-direction:column;gap:3px"></div>
+      </div>
+      <!-- RIGHT: pick list -->
+      <div>
+        <div class="hk-title" id="hk-pick-title">เลือก slot ด้านซ้ายเพื่อกำหนด</div>
+        <div id="hk-pick-list" class="pick-list">
+          <div style="color:var(--text3);font-size:9px;padding:8px">← เลือก slot ก่อน</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="topbar">
   <span class="floor-info" id="floor-info">FLOOR 1</span>
   <span id="enemy-count" style="font-size:8px;color:var(--text2)"></span>
@@ -415,6 +441,7 @@ canvas{display:block;width:100%;height:100%}
     <button class="btn sm" id="auto-btn" onclick="toggleAuto()">AUTO OFF</button>
     <button class="btn sm" id="noboss-btn" onclick="toggleNoBoss()" style="display:none">NO BOSS</button>
     <button class="btn sm" onclick="openEquipFromMenu()">⚔EQUIP</button>
+    <button class="btn sm" onclick="openScreen('hotkey')">🎮HOTKEY</button>
     <button class="btn sm" onclick="openScreen('skill')">SKILL</button>
     <button class="btn sm" onclick="openScreen('shop')">SHOP</button>
     <button class="btn sm" onclick="openScreen('dungeon')">MAP</button>
@@ -467,11 +494,6 @@ canvas{display:block;width:100%;height:100%}
       <div class="hslot" id="hs1" onclick="useSkillSlot(1)" title="[E] ใช้สกิล"><span class="hkey">E</span><span class="hicon" id="hsi1">—</span><span class="hval" id="hsn1"></span><div class="skill-cooldown hidden" id="hsc1"></div></div>
       <div class="hslot" id="hs2" onclick="useSkillSlot(2)" title="[R] ใช้สกิล"><span class="hkey">R</span><span class="hicon" id="hsi2">—</span><span class="hval" id="hsn2"></span><div class="skill-cooldown hidden" id="hsc2"></div></div>
       <div class="hslot" id="hs3" onclick="useSkillSlot(3)" title="[F] ใช้สกิล"><span class="hkey">F</span><span class="hicon" id="hsi3">—</span><span class="hval" id="hsn3"></span><div class="skill-cooldown hidden" id="hsc3"></div></div>
-    </div>
-    <!-- Hotbar picker popup -->
-    <div id="hotbar-picker" class="hidden" style="position:fixed;background:#111;border:1px solid var(--lux);padding:8px;z-index:400;min-width:180px;max-height:260px;overflow-y:auto">
-      <div id="picker-title" style="font-size:9px;color:var(--lux2);margin-bottom:6px;letter-spacing:1px"></div>
-      <div id="picker-list"></div>
     </div>
   </div>
 
@@ -1464,10 +1486,7 @@ function updateUI(){
 
   const il=document.getElementById('inv-list');
   if(il)il.innerHTML=Object.entries(p.inv).filter(([k,v])=>v>0).map(([k,v])=>`
-    <div class="shop-item draggable-item" draggable="true"
-         ondragstart="dragItem(event,'${k}')"
-         onclick="useItem('${k}')"
-         title="ลากไปวางบน item slot 1-4">
+    <div class="shop-item" onclick="useItem('${k}')">
       <span>${SHOP_ITEMS.find(s=>s.id===k)?.icon||'📦'}</span>
       <span>${SHOP_ITEMS.find(s=>s.id===k)?.name||k}</span>
       <span class="shop-price">×${v}</span>
@@ -1501,121 +1520,14 @@ function hotbarItemUse(slot, silent=false){
 }
 
 let pickerSlot=-1,pickerMode='item';
-function hotbarItemPick(slot,e){
-  e.preventDefault();
-  pickerSlot=slot;pickerMode='item';
-  showPicker(e.clientX,e.clientY);
-}
-function hotbarSkillPick(slot,e){
-  e.preventDefault();
-  pickerSlot=slot;pickerMode='skill';
-  showPicker(e.clientX,e.clientY);
-}
-function showPicker(x,y){
+function hotbarItemPick(slot,e){e&&e.preventDefault();hkActiveMode='item';hkActiveSlot=slot;openScreen('hotkey');}
+function hotbarSkillPick(slot,e){e&&e.preventDefault();hkActiveMode='skill';hkActiveSlot=slot;openScreen('hotkey');}
+function assignHotbarItem(slot,id){G.p.hotbarItems[slot]=id;updateHotbar();renderHotkeyScreen();}
+function assignHotbarSkill(slot,id){G.p.hotbarSkills[slot]=id;updateHotbar();renderHotkeyScreen();}
+
+function showPicker(){} // stub
   const picker=document.getElementById('hotbar-picker');
-  const title=document.getElementById('picker-title');
-  const list=document.getElementById('picker-list');
-  const p=G.p;
-  picker.classList.remove('hidden');
-  // position picker above hotbar
-  const ph=220;
-  picker.style.left=Math.min(x,window.innerWidth-200)+'px';
-  picker.style.top=Math.max(y-ph-10,5)+'px';
-
-  if(pickerMode==='item'){
-    title.textContent='เลือกไอเทมสำหรับ slot '+(pickerSlot+1)+' (คลิกหรือลาก)';
-    const items=SHOP_ITEMS.filter(s=>s.id!=='JUNK'&&s.id!=='BLESSING'&&s.id!=='EXP_SCROLL'&&(p.inv[s.id]||0)>=0);
-    list.innerHTML=`<div class="picker-row" onclick="assignHotbarItem(${pickerSlot},null)" style="color:var(--text3)">— ลบออก —</div>`+
-      items.map(s=>`
-        <div class="picker-row draggable-item" draggable="true"
-             ondragstart="dragItem(event,'${s.id}')"
-             onclick="assignHotbarItem(${pickerSlot},'${s.id}')">
-          <span>${s.icon}</span>
-          <span style="flex:1">${s.name}</span>
-          <span style="color:var(--lux2)">×${p.inv[s.id]||0}</span>
-        </div>`).join('');
-  } else {
-    title.textContent='เลือกสกิลสำหรับ slot '+(pickerSlot+1)+' (คลิกหรือลาก)';
-    const learned=p.learnedSkills||[];
-    const bc=baseClass(p.class);
-    const sks=(SKILL_DB[bc]||[]).filter(sk=>learned.includes(sk.id));
-    list.innerHTML=`<div class="picker-row" onclick="assignHotbarSkill(${pickerSlot},null)" style="color:var(--text3)">— ลบออก —</div>`+
-      sks.map(sk=>`
-        <div class="picker-row draggable-item" draggable="true"
-             ondragstart="dragSkill(event,'${sk.id}')"
-             onclick="assignHotbarSkill(${pickerSlot},'${sk.id}')">
-          <span>${sk.icon}</span>
-          <span style="flex:1">${sk.name}</span>
-          <span style="color:#4488ff">Lv${getSkillLv(sk.id)}</span>
-        </div>`).join('');
-    if(!sks.length)list.innerHTML+='<div style="color:var(--text3);font-size:8px;padding:4px">ยังไม่มีสกิล</div>';
-  }
-}
-function assignHotbarItem(slot,id){
-  G.p.hotbarItems[slot]=id;
-  closePicker();updateHotbar();
-}
-function assignHotbarSkill(slot,id){
-  G.p.hotbarSkills[slot]=id;
-  closePicker();updateHotbar();
-}
-// ─── DRAG AND DROP ──────────────────────────────────────────
-let dragData={type:null,id:null};
-
-function dragSkill(event,skillId){
-  dragData={type:'skill',id:skillId};
-  event.dataTransfer.effectAllowed='copy';
-  event.dataTransfer.setData('text/plain','skill:'+skillId);
-}
-
-function dragItem(event,itemId){
-  dragData={type:'item',id:itemId};
-  event.dataTransfer.effectAllowed='copy';
-  event.dataTransfer.setData('text/plain','item:'+itemId);
-}
-
-function dropOnSkillSlot(event,slot){
-  event.preventDefault();
-  document.getElementById('hs'+slot)?.classList.remove('drag-over');
-  const raw=event.dataTransfer.getData('text/plain')||'';
-  let id=null;
-  if(raw.startsWith('skill:'))id=raw.slice(6);
-  else if(dragData.type==='skill')id=dragData.id;
-  if(!id)return;
-  const p=G.p;const bc=baseClass(p.class);
-  const sk=(SKILL_DB[bc]||[]).find(s=>s.id===id);
-  if(!sk){notify('ไม่พบสกิลนี้','#f44');return;}
-  if(!p.learnedSkills.includes(id)){notify('ยังไม่ได้เรียนสกิลนี้!','#f44');return;}
-  p.hotbarSkills[slot]=id;
-  updateHotbar();notify(`${sk.icon} ${sk.name} → slot ${['Q','E','R','F'][slot]}`,'var(--lux2)');
-  dragData={type:null,id:null};
-}
-
-function dropOnItemSlot(event,slot){
-  event.preventDefault();
-  document.getElementById('isl'+slot)?.classList.remove('drag-over');
-  const raw=event.dataTransfer.getData('text/plain')||'';
-  let id=null;
-  if(raw.startsWith('item:'))id=raw.slice(5);
-  else if(dragData.type==='item')id=dragData.id;
-  if(!id)return;
-  const s=SHOP_ITEMS.find(x=>x.id===id);
-  if(!s){notify('ไม่พบไอเทมนี้','#f44');return;}
-  G.p.hotbarItems[slot]=id;
-  updateHotbar();notify(`${s.icon} ${s.name} → slot ${slot+1}`,'var(--lux2)');
-  dragData={type:null,id:null};
-}
-
-function closePicker(){
-  document.getElementById('hotbar-picker').classList.add('hidden');
-}
-// Close picker on outside click
-document.addEventListener('click',function(e){
-  const picker=document.getElementById('hotbar-picker');
-  if(picker&&!picker.contains(e.target)&&!e.target.closest('.hslot')){
-    picker.classList.add('hidden');
-  }
-});
+function closePicker(){} // stub - replaced by hotkey screen
 
 function updateHotbar(){
   if(!G.p)return;
@@ -1677,12 +1589,13 @@ function hideTip(){document.getElementById('tooltip').style.display='none';}
 
 // ─── SCREENS ────────────────────────────────────────────────
 function openScreen(name){
-  const all=['pause','skill','shop','dungeon','item','equip','saveload'];
-  all.forEach(n=>document.getElementById(n+'-screen').classList.add('hidden'));
+  const all=['pause','skill','shop','dungeon','item','equip','saveload','hotkey'];
+  all.forEach(n=>{const el=document.getElementById(n+'-screen');if(el)el.classList.add('hidden');});
   hideTip();
   if(name&&name!=='none'&&name!=='game'){
-    if(!paused&&name!=='none'){paused=true;cancelAnimationFrame(raf);}
-    document.getElementById(name+'-screen').classList.remove('hidden');
+    if(!paused){paused=true;cancelAnimationFrame(raf);}
+    const el=document.getElementById(name+'-screen');
+    if(el)el.classList.remove('hidden');
     currentScreen=name;
   }else{currentScreen=null;}
   if(name==='skill')renderSkills();
@@ -1691,6 +1604,98 @@ function openScreen(name){
   if(name==='pause')updateUI();
   if(name==='equip')renderEquipScreen();
   if(name==='saveload')renderSaveLoad();
+  if(name==='hotkey')renderHotkeyScreen();
+}
+
+// ─── HOTKEY SCREEN ──────────────────────────────────────────
+let hkActiveSlot=null,hkActiveMode=null;
+
+function renderHotkeyScreen(){
+  if(!G.p)return;
+  const p=G.p,bc=baseClass(p.class);
+  const SKILL_KEYS=['Q','E','R','F'];
+  const ITEM_KEYS=['1','2','3','4'];
+
+  const ss=document.getElementById('hk-skill-slots');
+  if(ss)ss.innerHTML=p.hotbarSkills.map((id,i)=>{
+    const sk=id?(SKILL_DB[bc]||[]).find(s=>s.id===id):null;
+    const active=hkActiveMode==='skill'&&hkActiveSlot===i;
+    return`<div class="hotkey-slot${sk?' filled':''}" onclick="selectHkSlot('skill',${i})"
+      style="${active?'border-color:var(--lux);background:#1a1000;':''}" >
+      <span class="hk-key">${SKILL_KEYS[i]}</span>
+      <span class="hk-icon">${sk?sk.icon:'—'}</span>
+      <div class="hk-info">
+        <div class="hk-name">${sk?sk.name:'— ว่าง —'}</div>
+        <div class="hk-sub">${sk?'Lv'+getSkillLv(sk.id)+' · MP:'+sk.mp+' · CD:'+sk.cd+'s':'คลิกเพื่อเลือก'}</div>
+      </div>
+      ${sk?'<span style="font-size:9px;color:#f44;cursor:pointer;padding:2px 5px;border:1px solid #333" onclick="event.stopPropagation();assignHotbarSkill('+i+',null)">✕</span>':''}
+    </div>`;
+  }).join('');
+
+  const is=document.getElementById('hk-item-slots');
+  if(is)is.innerHTML=p.hotbarItems.map((id,i)=>{
+    const s=id?SHOP_ITEMS.find(x=>x.id===id):null;
+    const active=hkActiveMode==='item'&&hkActiveSlot===i;
+    return`<div class="hotkey-slot${s?' filled':''}" onclick="selectHkSlot('item',${i})"
+      style="${active?'border-color:var(--lux);background:#1a1000;':''}" >
+      <span class="hk-key">${ITEM_KEYS[i]}</span>
+      <span class="hk-icon">${s?s.icon:'—'}</span>
+      <div class="hk-info">
+        <div class="hk-name">${s?s.name:'— ว่าง —'}</div>
+        <div class="hk-sub">${s?'ใน bag: ×'+(p.inv[id]||0):'คลิกเพื่อเลือก'}</div>
+      </div>
+      <span class="hk-cnt">${s?'×'+(p.inv[id]||0):''}</span>
+      ${s?'<span style="font-size:9px;color:#f44;cursor:pointer;padding:2px 5px;border:1px solid #333" onclick="event.stopPropagation();assignHotbarItem('+i+',null)">✕</span>':''}
+    </div>`;
+  }).join('');
+
+  renderHkPickList();
+}
+
+function selectHkSlot(mode,slot){
+  hkActiveMode=mode;hkActiveSlot=slot;
+  renderHotkeyScreen();
+}
+
+function renderHkPickList(){
+  if(!G.p)return;
+  const p=G.p,bc=baseClass(p.class);
+  const title=document.getElementById('hk-pick-title');
+  const list=document.getElementById('hk-pick-list');
+  if(!title||!list)return;
+
+  if(hkActiveMode===null){
+    title.textContent='เลือก slot ด้านซ้ายเพื่อกำหนด';
+    list.innerHTML='<div style="color:var(--text3);font-size:9px;padding:8px">← เลือก slot ก่อน</div>';
+    return;
+  }
+
+  if(hkActiveMode==='skill'){
+    const SKILL_KEYS=['Q','E','R','F'];
+    title.textContent='เลือกสกิลสำหรับ ['+SKILL_KEYS[hkActiveSlot]+']';
+    const learned=p.learnedSkills||[];
+    const sks=(SKILL_DB[bc]||[]).filter(sk=>learned.includes(sk.id));
+    const cur=p.hotbarSkills[hkActiveSlot];
+    list.innerHTML='<div class="pick-item" onclick="assignHotbarSkill('+hkActiveSlot+',null)" style="color:var(--text3)">✕ ลบออก</div>'+
+      (sks.length?sks.map(sk=>'<div class="pick-item'+(sk.id===cur?' active-slot':'')+'" onclick="assignHotbarSkill('+hkActiveSlot+',\''+sk.id+'\')">'+
+        '<span style="font-size:15px">'+sk.icon+'</span>'+
+        '<div style="flex:1"><div style="font-weight:bold">'+sk.name+'</div>'+
+        '<div style="font-size:7px;color:var(--text3)">Lv'+getSkillLv(sk.id)+' · MP:'+sk.mp+' · CD:'+sk.cd+'s</div></div>'+
+        (sk.id===cur?'<span style="color:var(--lux2);font-size:8px">✓</span>':'')+
+        '</div>').join('')
+      :'<div style="color:var(--text3);font-size:9px;padding:8px">ยังไม่มีสกิล</div>');
+  } else {
+    title.textContent='เลือกไอเทมสำหรับ ['+(hkActiveSlot+1)+']';
+    const cur=p.hotbarItems[hkActiveSlot];
+    const items=SHOP_ITEMS.filter(s=>s.id!=='JUNK'&&s.id!=='JUNK_YARD');
+    list.innerHTML='<div class="pick-item" onclick="assignHotbarItem('+hkActiveSlot+',null)" style="color:var(--text3)">✕ ลบออก</div>'+
+      items.map(s=>'<div class="pick-item'+(s.id===cur?' active-slot':'')+'" onclick="assignHotbarItem('+hkActiveSlot+',\''+s.id+'\')">'+
+        '<span style="font-size:15px">'+s.icon+'</span>'+
+        '<div style="flex:1"><div style="font-weight:bold">'+s.name+'</div>'+
+        '<div style="font-size:7px;color:var(--text3)">'+s.desc+' · bag: ×'+(p.inv[s.id]||0)+'</div></div>'+
+        (s.id===cur?'<span style="color:var(--lux2);font-size:8px">✓</span>':'')+
+        '</div>').join('');
+  }
 }
 
 document.addEventListener('mousedown',function(e){
