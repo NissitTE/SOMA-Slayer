@@ -328,6 +328,7 @@ canvas{display:block;width:100%;height:100%}
       <button class="btn sm" id="tab-buyback-btn" onclick="switchShopTab('buyback')">BUY BACK</button>
       <button class="btn sm" id="tab-forge-btn" onclick="switchShopTab('forge')">⚒ FORGE</button>
       <button class="btn sm btn-reforge" id="tab-reforge-btn" onclick="switchShopTab('reforge')">♻ RE-FORGE</button>
+      <button class="btn sm" id="tab-jewel-btn" onclick="switchShopTab('jewel')" style="border-color:var(--god);color:var(--god)">💎 JEWEL FORGE</button>
     </div>
     <div id="shop-tab-buy">
       <h3>BUY ITEMS</h3>
@@ -381,10 +382,18 @@ canvas{display:block;width:100%;height:100%}
       </div>
       <div class="shop-list" id="reforge-list"></div>
     </div>
-  </div>
-</div>
-
-<div id="dungeon-screen" class="overlay hidden">
+    <div id="shop-tab-jewel" class="hidden">
+      <h3>💎 JEWEL FORGE <span style="color:var(--text3);font-size:8px">(สุ่มค่าพลังอุปกรณ์ใหม่)</span></h3>
+      <div style="font-size:8px;color:var(--text2);margin-bottom:8px;line-height:1.8">
+        ค่าใช้จ่าย: <span style="color:var(--god)">💎 1 Jewel</span> + <span style="color:var(--lux2)">100,000G</span><br>
+        💎 Jewel: <span id="jewel-count" style="color:var(--god)">0</span> ชิ้น<br>
+        <b style="color:#aaddff">Heavenly / Hell</b> โอกาสสำเร็จ <b>0.05%</b> · <b style="color:#f44">Break</b> <b>12%</b><br>
+        <b style="color:#aaa">SoSo</b> สุ่ม stat ใหม่ตามปกติ พร้อมโอกาสเปลี่ยน quality
+      </div>
+      <div style="font-size:8px;color:var(--text3);margin-bottom:6px">เลือกอุปกรณ์ที่ <b>สวมใส่อยู่</b> เพื่อ Forge:</div>
+      <div id="jewel-equip-list" style="display:flex;flex-direction:column;gap:3px;max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+      <div id="jewel-result" style="font-size:9px;min-height:28px;padding:4px 0"></div>
+    </div> class="overlay hidden">
   <div class="panel-box" style="max-width:700px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <h2 style="margin:0">🗺 DUNGEON SELECT</h2>
@@ -654,8 +663,8 @@ function freshPlayer(name,cls){
     str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),
     hp:0,maxHp:0,mp:0,maxMp:0,x:0,y:0,angle:0,
     equips:{Weapon:null,Shield:null,Head:null,Chest:null,Legs:null,Cloak:null,Pendant:null,Necklace:null,Ring:null},
-    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0,STAT_PT:0,SKILL_PT:0,
-         JUNK_YARD:0,SKILL_PT1:0,SKILL_PT10:0,SKILL_RST:0,STAT_PT1:0,STAT_PT10:0,STAT_RST:0},
+    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0,
+         JUNK_YARD:0,SKILL_PT1:0,SKILL_PT10:0,SKILL_RST:0,STAT_PT1:0,STAT_PT10:0,STAT_RST:0,JEWEL:0},
     spentStatPts:0, spentSkillPts:0,
     gears:[],
     learnedSkills:[],
@@ -918,22 +927,20 @@ const SKILL_DB={
 
 const SHOP_ITEMS=[
   {id:'HP_POT',    name:'HP Potion',        icon:'🧪', desc:'Restore 40% HP',                 price:200},
-  {id:'MP_POT',    name:'MP Potion',        icon:'💧', desc:'Restore 40% MP',                 price:200},
-  {id:'CLEANSE',   name:'Cleanse',          icon:'✨', desc:'Remove all status effects',        price:80},
-  {id:'HP_POT_L',  name:'HP Elixir',        icon:'🍷', desc:'Restore 80% HP',                 price:1000},
-  {id:'MP_POT_L',  name:'MP Elixir',        icon:'🌀', desc:'Restore 80% MP',                 price:1000},
-  {id:'EXP_SCROLL',name:'EXP Scroll',       icon:'📜', desc:'Gain 5000 EXP',                  price:100000},
-  {id:'STAT_PT',   name:'Stat Orb',         icon:'🔮', desc:'+1 Stat Point ทันที',             price:10000},
-  {id:'SKILL_PT',  name:'Skill Orb',        icon:'💎', desc:'+1 Skill Point ทันที',            price:50000},
-  {id:'JUNK',      name:'Junk ×10',         icon:'🔩', desc:'Used in forge',                   price:20, qty:10},
-  {id:'JUNK_YARD', name:'Junk Yard ×1000',  icon:'🏭', desc:'Junk 1,000 ชิ้น',                price:18000, qty:1000},
-  {id:'BLESSING',  name:'เสริมบุญ',         icon:'🙏', desc:'+1.5~3% drop rate 15min',         price:1000000},
-  {id:'SKILL_PT1', name:'Skill Point+',     icon:'🔷', desc:'+1 Skill Point สำหรับอัพสกิล',   price:2500000},
-  {id:'SKILL_PT10',name:'Skill Point++',    icon:'🔵', desc:'+10 Skill Point สำหรับอัพสกิล',  price:20000000},
-  {id:'SKILL_RST', name:'Skill Point Reset',icon:'🔄', desc:'คืน Skill Point ทั้งหมดที่เคยอัพ', price:80000000},
-  {id:'STAT_PT1',  name:'Status Point+',    icon:'🟡', desc:'+1 Status Point สำหรับอัพสเตตัส', price:1000000},
-  {id:'STAT_PT10', name:'Status Point++',   icon:'🟠', desc:'+10 Status Point สำหรับอัพสเตตัส',price:8000000},
-  {id:'STAT_RST',  name:'Status Point Reset',icon:'♻', desc:'คืน Status Point ทั้งหมดที่เคยอัพ', price:100000000},
+  {id:'MP_POT',    name:'MP Potion',         icon:'💧', desc:'Restore 40% MP',                 price:200},
+  {id:'CLEANSE',   name:'Cleanse',           icon:'✨', desc:'Remove all status effects',       price:80},
+  {id:'HP_POT_L',  name:'HP Elixir',         icon:'🍷', desc:'Restore 80% HP',                 price:1000},
+  {id:'MP_POT_L',  name:'MP Elixir',         icon:'🌀', desc:'Restore 80% MP',                 price:1000},
+  {id:'EXP_SCROLL',name:'EXP Scroll',        icon:'📜', desc:'Gain 5000 EXP',                  price:100000},
+  {id:'JUNK',      name:'Junk ×10',          icon:'🔩', desc:'Used in forge',                  price:20, qty:10},
+  {id:'JUNK_YARD', name:'Junk Yard ×1000',   icon:'🏭', desc:'Junk 1,000 ชิ้น',               price:18000, qty:1000},
+  {id:'BLESSING',  name:'เสริมบุญ',          icon:'🙏', desc:'+1.5~3% drop rate 15min',        price:1000000},
+  {id:'SKILL_PT1', name:'Skill Point+',      icon:'🔷', desc:'+1 Skill Point สำหรับอัพสกิล',  price:2500000},
+  {id:'SKILL_PT10',name:'Skill Point++',     icon:'🔵', desc:'+10 Skill Point สำหรับอัพสกิล', price:20000000},
+  {id:'SKILL_RST', name:'Skill Point Reset', icon:'🔄', desc:'คืน Skill Point ทั้งหมดที่เคยอัพ',price:80000000},
+  {id:'STAT_PT1',  name:'Status Point+',     icon:'🟡', desc:'+1 Status Point สำหรับอัพสเตตัส',price:1000000},
+  {id:'STAT_PT10', name:'Status Point++',    icon:'🟠', desc:'+10 Status Point สำหรับอัพสเตตัส',price:8000000},
+  {id:'STAT_RST',  name:'Status Point Reset',icon:'♻', desc:'คืน Status Point ทั้งหมดที่เคยอัพ',price:100000000},
 ];
 
 // ─── SKILLS ─────────────────────────────────────────────────
@@ -1114,6 +1121,20 @@ function mobDied(m){
     p.inv.JUNK=(p.inv.JUNK||0)+1;
   }
 
+  // 💎 Jewel drop: 0.01% = 0.0001 chance
+  if(Math.random()<0.0001*(m.dropMult||1)){
+    p.inv.JEWEL=(p.inv.JEWEL||0)+1;
+    notify('💎 JEWEL DROPPED! (0.01%!)','var(--god)');
+    logMsg('✦ JEWEL DROP!','var(--god)');
+    // Epic banner for jewel
+    const container=document.getElementById('epic-drop-banner');
+    const div=document.createElement('div');
+    div.className='epic-banner god';
+    div.textContent='✦ JEWEL DROP ✦ 💎 Ultra Rare 0.01%!';
+    container.appendChild(div);
+    setTimeout(()=>div.remove(),5000);
+  }
+
   if(m.isBoss){
     logMsg(`Boss cleared! Floor ${p.floor}`,'var(--god)');
     p.clearedFloors.add(p.floor);
@@ -1151,8 +1172,6 @@ function useItem(id, silent=false){
   else if(id==='MP_POT_L'){p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.8);logMsg('MP Elixir +80% MP','#44f');}
   else if(id==='CLEANSE'){p.statusEffects={};logMsg('Cleansed!','#0ff');}
   else if(id==='EXP_SCROLL'){giveExp(5000);logMsg('EXP Scroll +5000 EXP','var(--lux2)');}
-  else if(id==='STAT_PT'){p.pts=Math.min(MAX_STAT,p.pts+1);logMsg('Stat Orb +1 Stat PT','var(--lux2)');notify('+1 Stat Point!','var(--lux2)');}
-  else if(id==='SKILL_PT'){p.skillPts=(p.skillPts||0)+1;logMsg('Skill Orb +1 Skill PT','#ce93d8');notify('+1 Skill Point!','#ce93d8');}
   else if(id==='JUNK_YARD'){p.inv.JUNK=(p.inv.JUNK||0)+1000;logMsg('Junk Yard +1000 Junk','#888');notify('+1,000 🔩 Junk!','#888');}
   else if(id==='SKILL_PT1'){p.skillPts=(p.skillPts||0)+1;logMsg('Skill Point+ +1 Skill PT','#4488ff');notify('+1 Skill Point!','#4488ff');}
   else if(id==='SKILL_PT10'){p.skillPts=(p.skillPts||0)+10;logMsg('Skill Point++ +10 Skill PT','#4488ff');notify('+10 Skill Points!','#4488ff');}
@@ -1502,11 +1521,8 @@ function updateUI(){
 
   const sg=document.getElementById('shop-gold');if(sg)sg.textContent=p.gold.toLocaleString();
   const jc=document.getElementById('junk-count');if(jc)jc.textContent=p.inv.JUNK||0;
+  const jw=document.getElementById('jewel-count');if(jw)jw.textContent=p.inv.JEWEL||0;
   const spts=document.getElementById('skill-pts');if(spts)spts.textContent=p.skillPts;
-
-  document.getElementById('h1').textContent=p.inv.HP_POT||0;
-  document.getElementById('h2').textContent=p.inv.MP_POT||0;
-  document.getElementById('h3').textContent=p.inv.CLEANSE||0;
 
   updateHotbar();
 }
@@ -1599,7 +1615,7 @@ function openScreen(name){
     currentScreen=name;
   }else{currentScreen=null;}
   if(name==='skill')renderSkills();
-  if(name==='shop'){renderShopBuy();renderSellTab();renderBuybackTab();renderReforgeTab();switchShopTab('buy');}
+  if(name==='shop'){renderShopBuy();renderSellTab();renderBuybackTab();renderReforgeTab();renderJewelForge();switchShopTab('buy');}
   if(name==='dungeon')renderDungeons();
   if(name==='pause')updateUI();
   if(name==='equip')renderEquipScreen();
@@ -1795,10 +1811,7 @@ function renderSkills(){
   sl.innerHTML=sks.map(sk=>{
     const slv=getSkillLv(sk.id),isLearned=learned.includes(sk.id);
     const dmgD=sk.dmgMult?`${(getSkillDmg(sk)*100).toFixed(0)}%`:'';
-    return`<div class="skill-card ${isLearned?'learned':''}" onclick="learnSkill('${sk.id}')"
-      draggable="${isLearned?'true':'false'}"
-      ondragstart="dragSkill(event,'${sk.id}')"
-      title="${isLearned?'ลากไปวางบน skill slot Q/E/R/F ได้':''}">
+    return`<div class="skill-card ${isLearned?'learned':''}" onclick="learnSkill('${sk.id}')">
       <div class="sk-name">${sk.icon} ${sk.name} ${sk.hiddenOnly?'<span style="color:var(--god)">[H]</span>':''}</div>
       <div class="sk-desc">${sk.desc}</div>
       ${sk.dmgMult?`<div style="color:var(--lux);font-size:8px">DMG: ${dmgD}</div>`:''}
@@ -1812,7 +1825,7 @@ function renderSkills(){
 let currentShopTab='buy';
 function switchShopTab(tab){
   currentShopTab=tab;
-  ['buy','sell','buyback','forge','reforge'].forEach(t=>{
+  ['buy','sell','buyback','forge','reforge','jewel'].forEach(t=>{
     const el=document.getElementById(`shop-tab-${t}`);
     if(el)el.classList.toggle('hidden',t!==tab);
     const btn=document.getElementById(`tab-${t}-btn`);
@@ -1821,6 +1834,7 @@ function switchShopTab(tab){
   if(tab==='sell')renderSellTab();
   if(tab==='buyback')renderBuybackTab();
   if(tab==='reforge')renderReforgeTab();
+  if(tab==='jewel')renderJewelForge();
 }
 
 function renderShopBuy(){
@@ -1940,6 +1954,97 @@ function reforgeItem(idx){
   notify(`Re-Forged → +${total} 🔩 Junk`,'#ab47bc');
   renderReforgeTab();updateUI();
   const jc=document.getElementById('junk-count');if(jc)jc.textContent=p.inv.JUNK||0;
+}
+
+// ─── JEWEL FORGE ────────────────────────────────────────────
+function renderJewelForge(){
+  const p=G.p;if(!p)return;
+  const jc=document.getElementById('jewel-count');
+  if(jc)jc.textContent=p.inv.JEWEL||0;
+  const list=document.getElementById('jewel-equip-list');if(!list)return;
+  // แสดงเฉพาะอุปกรณ์ที่สวมใส่อยู่
+  const equipped=Object.entries(p.equips).filter(([slot,item])=>item!==null);
+  if(!equipped.length){
+    list.innerHTML='<div style="color:var(--text3);font-size:9px;padding:8px">ยังไม่มีอุปกรณ์สวมใส่</div>';
+    return;
+  }
+  list.innerHTML=equipped.map(([slot,item])=>`
+    <div class="shop-item" onclick="forgeJewelItem('${slot}')"
+         style="border-color:${RCOL[item.rarity]}">
+      <span style="color:${RCOL[item.rarity]};font-size:14px">${SLOT_ICONS[slot]}</span>
+      <div style="flex:1">
+        <div class="rank-${RANK[item.rarity]}" style="font-weight:bold">[${RANK[item.rarity]}] ${item.slot}</div>
+        <div style="font-size:7px;color:var(--text3)">${item.quality==='heavenly'?'✦Heavenly':item.quality==='hell'?'☠Hell':'◈SoSo'} · ATK:${item.atk} DEF:${item.def}</div>
+      </div>
+      <span class="shop-price">💎1 + 100,000G</span>
+    </div>`).join('');
+}
+
+function forgeJewelItem(slot){
+  const p=G.p;
+  const item=p.equips[slot];if(!item){notify('ไม่พบอุปกรณ์','#f44');return;}
+  if((p.inv.JEWEL||0)<1){notify('ต้องการ 💎 Jewel 1 ชิ้น!','#f44');return;}
+  if(p.gold<100000){notify('ต้องการ 100,000G!','#f44');return;}
+
+  const JEWEL_COST=100000;
+  const oldQ=item.quality;
+  const oldAtk=item.atk;const oldDef=item.def;
+
+  p.inv.JEWEL--;p.gold-=JEWEL_COST;
+
+  const r=Math.random();
+  const resultEl=document.getElementById('jewel-result');
+
+  // 12% Break
+  if(r<0.12){
+    p.equips[slot]=null;
+    const msg=`💥 BREAK! [${item.rarity}] ${slot} สลายแล้ว`;
+    if(resultEl)resultEl.innerHTML=`<span style="color:#f44;font-weight:bold">${msg}</span>`;
+    notify(msg,'#f44');
+    logMsg(msg,'#f44');
+    renderJewelForge();updateUI();return;
+  }
+
+  // Roll new quality
+  const qRoll=Math.random();
+  let newQ='soso';
+  if(qRoll<0.0005){
+    // 0.05% Heavenly หรือ Hell
+    newQ=Math.random()<0.5?'heavenly':'hell';
+  } else if(qRoll<0.10){
+    newQ='heavenly';
+  } else if(qRoll<0.20){
+    newQ='hell';
+  } else {
+    newQ='soso';
+  }
+
+  // Roll new stats
+  const rm={Junk:1,Normal:1.5,Fine:2.5,Rare:5,Legendary:12,GOD:20,SOMA:25};
+  const base=Math.floor(Math.sqrt(item.floor||p.floor)*20*(rm[item.rarity]||1));
+  const atkMult=newQ==='hell'?1.5+Math.random()*0.5:newQ==='heavenly'?1.2+Math.random()*0.4:0.9+Math.random()*0.3;
+  const newAtk=Math.floor(base*atkMult);
+  const newDef=Math.floor(base*atkMult*0.5);
+  const newBufStr=newQ!=='hell'?Math.floor(base*0.03):0;
+  const newBufAgi=newQ!=='hell'?Math.floor(base*0.02):0;
+  const newBufInt=newQ!=='hell'?Math.floor(base*0.02):0;
+  const newBufVit=newQ!=='hell'?Math.floor(base*0.03):0;
+  const newHpMod=newQ==='heavenly'?Math.floor(base*0.05):newQ==='hell'?-Math.floor(base*0.08):0;
+
+  item.quality=newQ;
+  item.atk=newAtk;item.def=newDef;
+  item.effects={buffs:{str:newBufStr,agi:newBufAgi,int:newBufInt,vit:newBufVit},hpMod:newHpMod,mpMod:0,statusEffects:[]};
+
+  const qLabel=newQ==='heavenly'?'✦Heavenly':newQ==='hell'?'☠Hell':'◈SoSo';
+  const atkDiff=newAtk-oldAtk;
+  const qColor=newQ==='heavenly'?'#aaddff':newQ==='hell'?'#ff5555':'#aaa';
+  const successMsg=`✨ Jewel Forge สำเร็จ! ${item.slot} → <span style="color:${qColor}">${qLabel}</span> ATK:${newAtk} <span style="color:${atkDiff>=0?'#2f2':'#f44'}">(${atkDiff>=0?'+':''}${atkDiff})</span>`;
+  if(resultEl)resultEl.innerHTML=`<span style="color:var(--lux2)">${successMsg}</span>`;
+  notify(`Jewel Forge! ${item.slot} ${qLabel}`,qColor);
+  logMsg(`Jewel: ${item.slot} ${qLabel} ATK:${newAtk}`,'var(--god)');
+
+  const cs=calcStats(p);p.hp=Math.min(p.hp,cs.maxHp);p.mp=Math.min(p.mp,cs.maxMp);
+  renderJewelForge();renderEquipScreen();updateUI();
 }
 
 function buyItemPrompt(id){
@@ -2105,7 +2210,9 @@ function loadFromSlot(slot){
     if(!p.inv.BLESSING)p.inv.BLESSING=0;
     if(!p.moveSpeedPct)p.moveSpeedPct=100;
     // Init new items
-    ['JUNK_YARD','SKILL_PT1','SKILL_PT10','SKILL_RST','STAT_PT1','STAT_PT10','STAT_RST'].forEach(k=>{if(!p.inv[k])p.inv[k]=0;});
+    ['JUNK_YARD','SKILL_PT1','SKILL_PT10','SKILL_RST','STAT_PT1','STAT_PT10','STAT_RST','JEWEL'].forEach(k=>{if(!p.inv[k])p.inv[k]=0;});
+    // Remove old duplicate orb items
+    delete p.inv.STAT_PT; delete p.inv.SKILL_PT;
     if(!p.spentStatPts)p.spentStatPts=0;
     if(!p.spentSkillPts)p.spentSkillPts=0;
     G.p=p;
