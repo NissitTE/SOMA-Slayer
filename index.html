@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SOMA SLAYER v11.3</title>
+<title>SOMA SLAYER v12.0</title>
 <style>
 :root{
   --bg:#050505;--bg2:#0a0a0a;--bg3:#111;--panel:#0d0d0d;
@@ -175,7 +175,7 @@ canvas{display:block;width:100%;height:100%}
 <div id="start-screen" class="overlay">
   <div class="panel-box" style="max-width:500px">
     <h1>⚔ SOMA SLAYER</h1>
-    <div class="sub-title">V 11.3 · FULL EDITION</div>
+    <div class="sub-title">V 12.0 · FULL EDITION</div>
     <input type="text" id="in-name" placeholder="Hero Name..." style="margin-bottom:10px">
     <div class="class-grid">
       <div class="class-card selected" data-class="Knight" onclick="selectClass(this)">
@@ -220,6 +220,7 @@ canvas{display:block;width:100%;height:100%}
         <button class="btn sm" onclick="openScreen('skill')">SKILLS</button>
         <button class="btn sm" onclick="openScreen('shop')">SHOP</button>
         <button class="btn sm" onclick="openScreen('dungeon')">MAP</button>
+        <button class="btn sm" onclick="openHotkeyScreen()">⌨ HOTKEY</button>
         <button class="btn sm" onclick="openScreen('saveload')">💾</button>
         <button class="btn sm" onclick="resumeGame()">▶ RESUME</button>
       </div>
@@ -303,6 +304,7 @@ canvas{display:block;width:100%;height:100%}
       <h2 style="margin:0">🏪 SHOP</h2>
       <div style="display:flex;gap:8px;align-items:center">
         <span class="soma-txt" style="font-size:9px">💰 <b id="shop-gold">0</b>G</span>
+        <span style="font-size:9px;color:#aaddff">💎 <b id="shop-diamond">0</b></span>
         <button class="btn sm" onclick="resumeGame()">← FIGHT</button>
       </div>
     </div>
@@ -312,6 +314,7 @@ canvas{display:block;width:100%;height:100%}
       <button class="btn sm" id="tab-buyback-btn" onclick="switchShopTab('buyback')">BUY BACK</button>
       <button class="btn sm" id="tab-forge-btn" onclick="switchShopTab('forge')">⚒ FORGE</button>
       <button class="btn sm btn-reforge" id="tab-reforge-btn" onclick="switchShopTab('reforge')">♻ RE-FORGE</button>
+      <button class="btn sm" id="tab-jewel-btn" onclick="switchShopTab('jewel')" style="border-color:#aaddff;color:#aaddff">💎 JEWEL</button>
     </div>
     <div id="shop-tab-buy">
       <h3>BUY ITEMS</h3>
@@ -369,6 +372,22 @@ canvas{display:block;width:100%;height:100%}
       </div>
       <div class="shop-list" id="reforge-list"></div>
     </div>
+    <div id="shop-tab-jewel" class="hidden">
+      <h3>💎 FORGE-JEWEL <span style="color:#aaddff;font-size:8px">เปลี่ยน Option อาวุธ/อุปกรณ์ด้วย Diamond</span></h3>
+      <div style="font-size:8px;color:var(--text2);margin-bottom:6px;line-height:1.6">
+        ใช้ 💎 Diamond เพื่อ Forge Option ของอาวุธ/อุปกรณ์สวมใส่:<br>
+        <span style="color:#aaddff">✦ Heavenly 10%</span> · <span style="color:#aaa">◈ คงเดิม (SoSo/Hell) 40%</span> · <span style="color:#ff5555">💥 แตก 20%</span> · <span style="color:var(--lux2)">Hell/SoSo 30%</span><br>
+        <span style="color:#888">Diamond ของคุณ: </span><span style="color:#aaddff;font-weight:bold" id="jewel-diamond-count">0</span> 💎
+      </div>
+      <div style="margin-bottom:6px">
+        <select id="jewel-target-slot" style="width:100%;padding:4px;font-size:9px;margin-bottom:4px">
+          <option value="">-- เลือก Slot ที่ต้องการ Forge --</option>
+        </select>
+        <div id="jewel-slot-preview" style="font-size:9px;color:var(--text2);min-height:30px;padding:4px;border:1px solid var(--border2);margin-bottom:5px"></div>
+        <button class="btn wide" onclick="forgeJewel()" style="border-color:#aaddff;color:#aaddff">💎 FORGE JEWEL (ใช้ 1 Diamond)</button>
+      </div>
+      <div id="jewel-result" style="font-size:9px;min-height:28px;padding:4px"></div>
+    </div>
   </div>
 </div>
 
@@ -385,7 +404,20 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
-<div id="item-screen" class="overlay hidden">
+<div id="hotkey-screen" class="overlay hidden">
+  <div class="panel-box" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h2 style="margin:0">⌨ HOTKEY CONFIG</h2>
+      <button class="btn sm" onclick="closeHotkeyScreen()">← BACK</button>
+    </div>
+    <div style="font-size:8px;color:var(--text3);margin-bottom:8px">ตั้งค่าปุ่ม Q/E/R/F สำหรับ Skill · ปุ่ม 1/2/3 สำหรับ Item (HP/MP/CLEANSE เท่านั้น)</div>
+    <h3 style="margin-bottom:5px">SKILL HOTKEYS (Q / E / R / F)</h3>
+    <div id="hotkey-skill-slots" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px"></div>
+    <h3 style="margin-bottom:5px">ITEM HOTKEYS (1 / 2 / 3)</h3>
+    <div style="font-size:8px;color:var(--text3);margin-bottom:5px">ไอเทมที่ตั้งได้: Potion, Elixir, Cleanse เท่านั้น</div>
+    <div id="hotkey-item-slots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px"></div>
+  </div>
+</div>
   <div class="panel-box" style="max-width:400px">
     <h2 id="item-detail-name" style="margin-bottom:3px">ITEM</h2>
     <div id="item-detail-quality" style="font-size:8px;margin-bottom:6px"></div>
@@ -407,6 +439,7 @@ canvas{display:block;width:100%;height:100%}
     <button class="btn sm" onclick="openScreen('shop')">SHOP</button>
     <button class="btn sm" onclick="openScreen('dungeon')">MAP</button>
     <button class="btn sm" onclick="openScreen('saveload')">💾</button>
+    <button class="btn sm" onclick="openHotkeyScreen()">⌨ HOTKEY</button>
     <button class="btn sm" onclick="togglePause()">⏸</button>
   </div>
 </div>
@@ -444,9 +477,9 @@ canvas{display:block;width:100%;height:100%}
     <canvas id="gameCanvas"></canvas>
     <div id="status-icons"></div>
     <div id="hotbar">
-      <div class="hslot" onclick="useItem('HP_POT')" title="[1]"><span class="hkey">1</span><span class="hicon">🧪</span><span class="hval" id="h1">0</span></div>
-      <div class="hslot" onclick="useItem('MP_POT')" title="[2]"><span class="hkey">2</span><span class="hicon">💧</span><span class="hval" id="h2">0</span></div>
-      <div class="hslot" onclick="useItem('CLEANSE')" title="[3]"><span class="hkey">3</span><span class="hicon">✨</span><span class="hval" id="h3">0</span></div>
+      <div class="hslot" onclick="useItem(hotkeyItemMap[0]||'HP_POT')" title="[1]"><span class="hkey">1</span><span class="hicon" id="hi0icon">🧪</span><span class="hval" id="h1">0</span></div>
+      <div class="hslot" onclick="useItem(hotkeyItemMap[1]||'MP_POT')" title="[2]"><span class="hkey">2</span><span class="hicon" id="hi1icon">💧</span><span class="hval" id="h2">0</span></div>
+      <div class="hslot" onclick="useItem(hotkeyItemMap[2]||'CLEANSE')" title="[3]"><span class="hkey">3</span><span class="hicon" id="hi2icon">✨</span><span class="hval" id="h3">0</span></div>
       <div class="hslot" onclick="useSkillSlot(0)" id="hs0"><span class="hkey">Q</span><span class="hicon" id="hsi0">—</span><span class="hval" id="hsn0"></span><div class="skill-cooldown hidden" id="hsc0"></div></div>
       <div class="hslot" onclick="useSkillSlot(1)" id="hs1"><span class="hkey">E</span><span class="hicon" id="hsi1">—</span><span class="hval" id="hsn1"></span><div class="skill-cooldown hidden" id="hsc1"></div></div>
       <div class="hslot" onclick="useSkillSlot(2)" id="hs2"><span class="hkey">R</span><span class="hicon" id="hsi2">—</span><span class="hval" id="hsn2"></span><div class="skill-cooldown hidden" id="hsc2"></div></div>
@@ -615,7 +648,7 @@ function freshPlayer(name,cls){
     str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),
     hp:0,maxHp:0,mp:0,maxMp:0,x:0,y:0,angle:0,
     equips:{Weapon:null,Shield:null,Head:null,Chest:null,Legs:null,Cloak:null,Pendant:null,Necklace:null,Ring:null},
-    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0},
+    inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0,DIAMOND:0,SKILL_POT:0,SKILL_ELIXIR:0,STATUS_POT:0,STATUS_ELIXIR:0,SKILL_RESET:0,STATUS_RESET:0},
     gears:[],
     learnedSkills:[],
     skillLevels:{},
@@ -851,6 +884,9 @@ const SKILL_DB={
     {id:'kt_taunt',name:'Provoke',icon:'😤',desc:'Cleanse+shield 3s.',mp:15,cd:12,type:'cleanse',buffKey:'shield',buffDur:3000,lv:25},
     {id:'kt_ultimate',name:'Excalibur Strike',icon:'✨',desc:'[HIDDEN] Full screen AOE holy.',mp:80,cd:30,range:99999,aoe:true,dmgMult:8.0,stat:'str',type:'atk',hiddenOnly:true,lv:1},
     {id:'kt_aoe2',name:'Holy Nova',icon:'💫',desc:'[HIDDEN] Wide AOE+stun 3s.',mp:50,cd:20,range:300,aoe:true,dmgMult:4.0,stat:'str',type:'stun',stunDur:3000,hiddenOnly:true,lv:1},
+    {id:'kt_p_armor',name:'Iron Skin',icon:'🪨',desc:'[PASSIVE] เสริมเกราะ: ลด DMG รับตามเลเวลสกิล. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:60,type:'passive',passiveType:'armor',buffKey:'passive_armor',buffDur:8000,lv:1,isPassive:true},
+    {id:'kt_p_speed',name:'Knight Rush',icon:'⚡',desc:'[PASSIVE] เสริมความเร็ว: เพิ่ม Move Speed ชั่วคราว. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:45,type:'passive',passiveType:'speed',buffKey:'passive_speed',buffDur:6000,lv:1,isPassive:true},
+    {id:'kt_p_power',name:'Warlord Aura',icon:'🔥',desc:'[PASSIVE] เสริมตีแรง: เพิ่ม ATK ชั่วคราว. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:50,type:'passive',passiveType:'power',buffKey:'passive_power',buffDur:7000,lv:1,isPassive:true},
   ],
   Archer:[
     {id:'ar_shot',name:'Power Shot',icon:'🏹',desc:'Precise shot.',mp:10,cd:1.5,range:200,aoe:false,dmgMult:2.2,stat:'agi',type:'atk',lv:1},
@@ -862,6 +898,9 @@ const SKILL_DB={
     {id:'ar_cleanse',name:'Antidote',icon:'🧴',desc:'Cleanse all debuffs.',mp:12,cd:8,type:'cleanse',lv:25},
     {id:'ar_ultimate',name:'.50 Cal Barrage',icon:'🔫',desc:'[HIDDEN] Full-auto AOE.',mp:80,cd:30,range:99999,aoe:true,dmgMult:6.0,stat:'agi',type:'atk',hiddenOnly:true,lv:1},
     {id:'ar_aoe2',name:'Storm of Arrows',icon:'🌩',desc:'[HIDDEN] Carpet bomb.',mp:60,cd:25,range:99999,aoe:true,dmgMult:5.0,stat:'agi',type:'atk',hiddenOnly:true,lv:1},
+    {id:'ar_p_armor',name:'Leather Guard',icon:'🪨',desc:'[PASSIVE] เสริมเกราะ: ลด DMG รับตามเลเวลสกิล. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:55,type:'passive',passiveType:'armor',buffKey:'passive_armor',buffDur:7000,lv:1,isPassive:true},
+    {id:'ar_p_speed',name:'Wind Step',icon:'⚡',desc:'[PASSIVE] เสริมความเร็ว: เพิ่ม Move Speed ชั่วคราว. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:35,type:'passive',passiveType:'speed',buffKey:'passive_speed',buffDur:5000,lv:1,isPassive:true},
+    {id:'ar_p_power',name:'Eagle Eye',icon:'🔥',desc:'[PASSIVE] เสริมตีแรง: เพิ่ม ATK ชั่วคราว. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:40,type:'passive',passiveType:'power',buffKey:'passive_power',buffDur:6000,lv:1,isPassive:true},
   ],
   Priest:[
     {id:'pr_smite',name:'Smite',icon:'⚡',desc:'Holy bolt.',mp:10,cd:2,range:160,aoe:false,dmgMult:1.8,stat:'int',type:'atk',lv:1},
@@ -873,18 +912,28 @@ const SKILL_DB={
     {id:'pr_fullheal',name:'Miracle',icon:'🌟',desc:'Full HP+MP.',mp:60,cd:30,type:'fullheal',lv:25},
     {id:'pr_ultimate',name:'Merlin Singularity',icon:'🌌',desc:'[HIDDEN] Reality tear map AOE.',mp:100,cd:40,range:99999,aoe:true,dmgMult:10.0,stat:'int',type:'atk',hiddenOnly:true,lv:1},
     {id:'pr_aoe2',name:'Divine Storm',icon:'⛈',desc:'[HIDDEN] AOE×3.',mp:70,cd:28,range:99999,aoe:true,dmgMult:5.0,repeat:3,stat:'int',type:'atk',hiddenOnly:true,lv:1},
+    {id:'pr_p_armor',name:'Holy Shield',icon:'🪨',desc:'[PASSIVE] เสริมเกราะ: ลด DMG รับตามเลเวลสกิล. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:50,type:'passive',passiveType:'armor',buffKey:'passive_armor',buffDur:9000,lv:1,isPassive:true},
+    {id:'pr_p_speed',name:'Angelic Rush',icon:'⚡',desc:'[PASSIVE] เสริมความเร็ว: เพิ่ม Move Speed ชั่วคราว. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:40,type:'passive',passiveType:'speed',buffKey:'passive_speed',buffDur:6000,lv:1,isPassive:true},
+    {id:'pr_p_power',name:'Divine Wrath',icon:'🔥',desc:'[PASSIVE] เสริมตีแรง: เพิ่ม ATK ชั่วคราว. CD ลดลงเมื่อใกล้ Lv99',mp:0,cd:45,type:'passive',passiveType:'power',buffKey:'passive_power',buffDur:8000,lv:1,isPassive:true},
   ],
 };
 
 const SHOP_ITEMS=[
-  {id:'HP_POT',name:'HP Potion',icon:'🧪',desc:'Restore 40% HP',price:50},
-  {id:'MP_POT',name:'MP Potion',icon:'💧',desc:'Restore 40% MP',price:50},
+  {id:'HP_POT',name:'HP Potion',icon:'🧪',desc:'Restore 40% HP',price:200},
+  {id:'MP_POT',name:'MP Potion',icon:'💧',desc:'Restore 40% MP',price:200},
   {id:'CLEANSE',name:'Cleanse',icon:'✨',desc:'Remove all effects',price:80},
-  {id:'HP_POT_L',name:'HP Elixir',icon:'🍷',desc:'Restore 80% HP',price:200},
-  {id:'MP_POT_L',name:'MP Elixir',icon:'🌀',desc:'Restore 80% MP',price:200},
+  {id:'HP_POT_L',name:'HP Elixir',icon:'🍷',desc:'Restore 80% HP',price:800},
+  {id:'MP_POT_L',name:'MP Elixir',icon:'🌀',desc:'Restore 80% MP',price:800},
   {id:'EXP_SCROLL',name:'EXP Scroll',icon:'📜',desc:'Gain 5000 EXP',price:100000},
   {id:'JUNK',name:'Junk ×10',icon:'🔩',desc:'Used in forge',price:20,qty:10},
+  {id:'JUNK1000',name:'Junk ×1,000',icon:'🔩',desc:'Junk Yard bulk buy',price:1800,qty:1000},
   {id:'BLESSING',name:'เสริมบุญ',icon:'🙏',desc:'+1.5~3% drop 15min',price:1000000},
+  {id:'SKILL_POT',name:'Skill Potion',icon:'💚',desc:'+1 Skill Point',price:100000},
+  {id:'SKILL_ELIXIR',name:'Skill Elixir',icon:'💎',desc:'+10 Skill Points',price:1000000},
+  {id:'STATUS_POT',name:'Status Potion',icon:'💜',desc:'+1 Status Point',price:120000},
+  {id:'STATUS_ELIXIR',name:'Status Elixir',icon:'🔮',desc:'+10 Status Points',price:1200000},
+  {id:'SKILL_RESET',name:'Skill Reset',icon:'🔄',desc:'Reset all Skill Points',price:15000000},
+  {id:'STATUS_RESET',name:'Status Reset',icon:'♻',desc:'Reset all Status Points',price:15000000},
 ];
 
 // ─── SKILLS ─────────────────────────────────────────────────
@@ -924,16 +973,42 @@ function useSkillSlot(slot,fromAuto=false){
   const bc=baseClass(p.class);const sk=(SKILL_DB[bc]||[]).find(s=>s.id===id);if(!sk)return;
   const now=Date.now();
   if(skillCDs[id]&&now<skillCDs[id]){if(!fromAuto)notify('Cooldown','#888');return;}
-  if(p.mp<sk.mp){if(!fromAuto)notify('No MP!','#44f');return;}
-  // FIX 8: cap skill uses per MP fill
-  if(fromAuto&&skillUseCount>=MAX_SKILL_USES_PER_FILL)return;
-  p.mp-=sk.mp;skillCDs[id]=now+(sk.cd*1000);
-  if(fromAuto)skillUseCount++;
+  // Passive skills don't use MP, CD handled in applySkill
+  if(!sk.isPassive){
+    if(p.mp<sk.mp){if(!fromAuto)notify('No MP!','#44f');return;}
+    // FIX 8: cap skill uses per MP fill
+    if(fromAuto&&skillUseCount>=MAX_SKILL_USES_PER_FILL)return;
+    p.mp-=sk.mp;
+    if(fromAuto)skillUseCount++;
+  }
+  const lv=getSkillLv(id)||1;
+  const actualCd=sk.isPassive?Math.max(5,Math.floor(sk.cd*(1-((lv-1)/MAX_SKILL_LV)*0.8))):sk.cd;
+  skillCDs[id]=now+(actualCd*1000);
   applySkill(sk);updateHotbar();
 }
 
 function applySkill(sk){
   const p=G.p,cs=calcStats(p);
+  if(sk.type==='passive'){
+    const lv=getSkillLv(sk.id)||1;
+    const dur=sk.buffDur*(1+lv*0.05);
+    if(sk.passiveType==='armor'){
+      // armor buff: reduce damage by lv*1% up to 80%
+      p.statusEffects.passive_armor={until:Date.now()+dur,pct:Math.min(0.80,lv*0.01)};
+      notify(`🪨 ${sk.name}: -${Math.min(80,lv)}% DMG for ${Math.floor(dur/1000)}s`,'#aaa');
+      logMsg(`${sk.name} active (${Math.floor(dur/1000)}s)`,'#aaa');
+    } else if(sk.passiveType==='speed'){
+      p.statusEffects.passive_speed={until:Date.now()+dur,pct:Math.min(0.80,lv*0.012)};
+      p.moveSpeedPct=Math.min(200,p.moveSpeedPct+(lv*2));
+      notify(`⚡ ${sk.name}: +${Math.min(80,Math.floor(lv*1.2))}% Speed for ${Math.floor(dur/1000)}s`,'#ffe082');
+      logMsg(`${sk.name} active (${Math.floor(dur/1000)}s)`,'#ffe082');
+    } else if(sk.passiveType==='power'){
+      p.statusEffects.passive_power={until:Date.now()+dur,pct:Math.min(0.80,lv*0.012)};
+      notify(`🔥 ${sk.name}: +${Math.min(80,Math.floor(lv*1.2))}% ATK for ${Math.floor(dur/1000)}s`,'#ff7043');
+      logMsg(`${sk.name} active (${Math.floor(dur/1000)}s)`,'#ff7043');
+    }
+    return;
+  }
   if(sk.type==='heal'){
     const h=(cs.maxHp*sk.healPct||0.3)+cs.int*3;
     p.hp=Math.min(cs.maxHp,p.hp+h);logMsg(`${sk.name}: +${Math.floor(h)} HP`,'#2f2');
@@ -949,9 +1024,10 @@ function applySkill(sk){
   else if(sk.type==='hot'){p.statusEffects.hot={until:Date.now()+sk.hotDur,pct:sk.hotPct,last:Date.now()};logMsg(`${sk.name}: Regen`,'#2f2');}
   else if(sk.type==='atk'||sk.type==='stun'||sk.type==='pierce'){
     const sv=sk.stat==='str'?cs.str:sk.stat==='agi'?cs.agi:cs.int;
-    // FIX 4: สกิลสำคัญขึ้นเมื่อ Lv 50+ — สเกลขึ้นตามเลเวล
-    const lvBonus=p.lv>=50?1+Math.floor(p.lv/50)*0.25:1; // +25% ทุก 50 เลเวล หลังจาก Lv 50
-    const base=Math.floor(sv*getSkillDmg(sk)*lvBonus);
+    const lvBonus=p.lv>=50?1+Math.floor(p.lv/50)*0.25:1;
+    // passive power buff bonus
+    const pwrBuff=p.statusEffects.passive_power&&Date.now()<p.statusEffects.passive_power.until?1+(p.statusEffects.passive_power.pct||0):1;
+    const base=Math.floor(sv*getSkillDmg(sk)*lvBonus*pwrBuff);
     let hits=0;
     const rep=sk.repeat||1;
     for(let r=0;r<rep;r++){
@@ -989,7 +1065,8 @@ function playerAttack(){
     const rng=p.equips.Weapon?100+p.equips.Weapon.atk*0.1:80;
     if(d<rng&&diff<0.55){
       let dmg=cs.atk+(p.equips.Weapon?p.equips.Weapon.atk:0);
-      dmg=Math.floor(dmg*(crit?2:1));
+      const pwrBuff=p.statusEffects.passive_power&&Date.now()<p.statusEffects.passive_power.until?1+(p.statusEffects.passive_power.pct||0):1;
+      dmg=Math.floor(dmg*(crit?2:1)*pwrBuff);
       m.hp-=dmg;addDmgNum(m.x,m.y,dmg,crit?'var(--god)':'#ddd');
     }
   });
@@ -1003,11 +1080,13 @@ function mobAttackPlayer(m){
   const shielded=p.statusEffects.shield&&now<p.statusEffects.shield.until;
   const barrier=p.statusEffects.barrier&&now<p.statusEffects.barrier.until;
   const evading=p.statusEffects.evade&&now<p.statusEffects.evade.until;
+  const passiveArmor=p.statusEffects.passive_armor&&now<p.statusEffects.passive_armor.until?p.statusEffects.passive_armor.pct:0;
   const agiDodge=Math.random()*100<cs.dodgeR;
   if((evading&&Math.random()<0.5)||agiDodge){logMsg('Dodge!','#0ff');return;}
   let dmg=Math.max(1,m.atk-def);
   if(shielded)dmg=Math.floor(dmg*0.5);
   if(barrier)dmg=Math.floor(dmg*0.5);
+  if(passiveArmor>0)dmg=Math.floor(dmg*(1-passiveArmor));
   p.hp=Math.max(0,p.hp-dmg);
   addDmgNum(p.x,p.y,dmg,'#f44');
   if(p.hp<=0)playerDead();
@@ -1075,7 +1154,20 @@ function mobDied(m){
   if(m.isBoss){
     logMsg(`Boss cleared! Floor ${p.floor}`,'var(--god)');
     p.clearedFloors.add(p.floor);
+    // Boss Diamond drop 0.1%
+    if(Math.random()<0.001){
+      p.inv.DIAMOND=(p.inv.DIAMOND||0)+1;
+      notify('💎 DIAMOND DROPPED! (Boss)','#aaddff');
+      logMsg('💎 Diamond drop from Boss!','#aaddff');
+    }
     if(!noBossMode)advanceFloor();
+  } else {
+    // Normal mob Diamond drop 0.01%
+    if(Math.random()<0.0001){
+      p.inv.DIAMOND=(p.inv.DIAMOND||0)+1;
+      notify('💎 DIAMOND DROPPED!','#aaddff');
+      logMsg('💎 Diamond drop!','#aaddff');
+    }
   }
 }
 
@@ -1114,7 +1206,32 @@ function useItem(id){
     blessingUntil=Date.now()+15*60*1000;
     notify(`✦ Blessing! +${(blessingBonus*100).toFixed(1)}% drop 15min`,'#ffd700');
   }
+  else if(id==='SKILL_POT'){p.skillPts=(p.skillPts||0)+1;notify('+1 Skill Point!','#00e676');logMsg('Skill Potion: +1 SP','#00e676');}
+  else if(id==='SKILL_ELIXIR'){p.skillPts=(p.skillPts||0)+10;notify('+10 Skill Points!','#00e676');logMsg('Skill Elixir: +10 SP','#00e676');}
+  else if(id==='STATUS_POT'){p.pts=(p.pts||0)+1;notify('+1 Status Point!','#ce93d8');logMsg('Status Potion: +1 Pts','#ce93d8');}
+  else if(id==='STATUS_ELIXIR'){p.pts=(p.pts||0)+10;notify('+10 Status Points!','#ce93d8');logMsg('Status Elixir: +10 Pts','#ce93d8');}
+  else if(id==='SKILL_RESET'){
+    const totalSP=Object.values(p.skillLevels||{}).reduce((s,v)=>s+v,0)+p.learnedSkills.length;
+    p.skillPts=(p.skillPts||0)+totalSP;
+    p.learnedSkills=[];p.skillLevels={};p.hotbarSkills=[null,null,null,null];
+    notify('Skill Points Reset! All SP refunded.','#fa0');logMsg('Skill Reset done','#fa0');
+  }
+  else if(id==='STATUS_RESET'){
+    const totalPts=(p.str-10-(baseStatBonus(p.class,'str')))+(p.agi-10-(baseStatBonus(p.class,'agi')))+(p.int-10-(baseStatBonus(p.class,'int')))+(p.vit-10-(baseStatBonus(p.class,'vit')));
+    const bc={Knight:{vit:5,str:3},Archer:{agi:5,str:2},Priest:{int:5,vit:2},Excalibur:{str:10,vit:8,agi:5,int:5},'.50 Calibre':{agi:12,str:6,int:4,vit:4},'Merlin Bloodline':{int:12,vit:6,str:4,agi:4}}[p.class]||{};
+    p.str=10+(bc.str||0);p.agi=10+(bc.agi||0);p.int=10+(bc.int||0);p.vit=10+(bc.vit||0);
+    // refund all pts spent: total levels * 2 pts/lv + initial 5
+    const spent=Math.max(0,totalPts);
+    p.pts=(p.pts||0)+spent;
+    const cs2=calcStats(p);p.hp=Math.min(cs2.maxHp,p.hp);p.mp=Math.min(cs2.maxMp,p.mp);
+    notify('Status Points Reset! All stats refunded.','#fa0');logMsg('Status Reset done','#fa0');
+  }
   p.inv[id]--;updateUI();
+}
+
+function baseStatBonus(cls,stat){
+  const cb={Knight:{vit:5,str:3},Archer:{agi:5,str:2},Priest:{int:5,vit:2},Excalibur:{str:10,vit:8,agi:5,int:5},'.50 Calibre':{agi:12,str:6,int:4,vit:4},'Merlin Bloodline':{int:12,vit:6,str:4,agi:4}};
+  return (cb[cls]||{})[stat]||0;
 }
 
 // ─── QTY MODAL ──────────────────────────────────────────────
@@ -1161,7 +1278,10 @@ function loop(){
   ctx.globalAlpha=1;
 
   // Player movement — NO obstacle collision, free movement
-  const moveSpd=cs.moveSpd;
+  let passiveSpdBonus=1;
+  if(G.p.statusEffects.passive_speed&&Date.now()<G.p.statusEffects.passive_speed.until)
+    passiveSpdBonus=1+(G.p.statusEffects.passive_speed.pct||0);
+  const moveSpd=cs.moveSpd*passiveSpdBonus;
   let dx=0,dy=0;
   if(keys['w']||keys['arrowup'])dy-=moveSpd;
   if(keys['s']||keys['arrowdown'])dy+=moveSpd;
@@ -1215,6 +1335,17 @@ function loop(){
       else if(p.inv.MP_POT>0){useItem('MP_POT');skillUseCount=0;}
     }
   }else if(mouse.down){playerAttack();}
+
+  // Passive speed buff cleanup
+  if(p.statusEffects.passive_speed&&now>=p.statusEffects.passive_speed.until){
+    delete p.statusEffects.passive_speed;
+  }
+  if(p.statusEffects.passive_armor&&now>=p.statusEffects.passive_armor.until){
+    delete p.statusEffects.passive_armor;
+  }
+  if(p.statusEffects.passive_power&&now>=p.statusEffects.passive_power.until){
+    delete p.statusEffects.passive_power;
+  }
 
   // HoT
   const hot=p.statusEffects.hot;
@@ -1323,7 +1454,7 @@ function updateStatusIcons(){
   Object.entries(p.statusEffects).forEach(([k,v])=>{
     if(now<v.until){
       const rem=Math.ceil((v.until-now)/1000);
-      const ic={shield:'🛡',evade:'💨',barrier:'🔮',hot:'🌿'}[k]||'✦';
+      const ic={shield:'🛡',evade:'💨',barrier:'🔮',hot:'🌿',passive_armor:'🪨',passive_speed:'⚡',passive_power:'🔥'}[k]||'✦';
       effs.push(`<div class="sicon">${ic} ${k.toUpperCase()} ${rem}s</div>`);
     }
   });
@@ -1412,12 +1543,20 @@ function updateUI(){
   }
 
   const sg=document.getElementById('shop-gold');if(sg)sg.textContent=p.gold.toLocaleString();
+  const sd=document.getElementById('shop-diamond');if(sd)sd.textContent=p.inv.DIAMOND||0;
+  const jd=document.getElementById('jewel-diamond-count');if(jd)jd.textContent=p.inv.DIAMOND||0;
   const jc=document.getElementById('junk-count');if(jc)jc.textContent=p.inv.JUNK||0;
   const spts=document.getElementById('skill-pts');if(spts)spts.textContent=p.skillPts;
 
-  document.getElementById('h1').textContent=p.inv.HP_POT||0;
-  document.getElementById('h2').textContent=p.inv.MP_POT||0;
-  document.getElementById('h3').textContent=p.inv.CLEANSE||0;
+  document.getElementById('h1').textContent=G.p.inv[hotkeyItemMap[0]||'HP_POT']||0;
+  document.getElementById('h2').textContent=G.p.inv[hotkeyItemMap[1]||'MP_POT']||0;
+  document.getElementById('h3').textContent=G.p.inv[hotkeyItemMap[2]||'CLEANSE']||0;
+  // Update item hotbar icons
+  const iconMap={HP_POT:'🧪',MP_POT:'💧',HP_POT_L:'🍷',MP_POT_L:'🌀',CLEANSE:'✨'};
+  ['hi0icon','hi1icon','hi2icon'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=iconMap[hotkeyItemMap[i]]||'📦';
+  });
 
   updateHotbar();
 }
@@ -1463,6 +1602,139 @@ function showBagTip(e,idx){
   tt.style.left=x+'px';tt.style.top=y+'px';tt.style.display='block';
 }
 function hideTip(){document.getElementById('tooltip').style.display='none';}
+
+// ─── FORGE JEWEL ────────────────────────────────────────────
+function renderJewelTab(){
+  const p=G.p;
+  const dc=document.getElementById('jewel-diamond-count');
+  if(dc)dc.textContent=p.inv.DIAMOND||0;
+  const sel=document.getElementById('jewel-target-slot');if(!sel)return;
+  const equipped=Object.entries(p.equips).filter(([,v])=>v);
+  sel.innerHTML='<option value="">-- เลือก Slot ที่ต้องการ Forge --</option>'+
+    equipped.map(([slot,item])=>`<option value="${slot}">[${RANK[item.rarity]}] ${slot} · ${qualLabel(item.quality).replace(/<[^>]+>/g,'')}</option>`).join('');
+  sel.onchange=()=>{
+    const slot=sel.value;
+    const prev=document.getElementById('jewel-slot-preview');
+    if(!slot||!p.equips[slot]){prev.innerHTML='<span style="color:var(--text3)">ไม่มีไอเทม</span>';return;}
+    const item=p.equips[slot];
+    prev.innerHTML=`<span style="color:${RCOL[item.rarity]}">[${RANK[item.rarity]}] ${item.slot}</span> · ${qualLabel(item.quality)} · ATK:${item.atk} DEF:${item.def}`;
+  };
+  document.getElementById('jewel-result').innerHTML='';
+}
+
+function forgeJewel(){
+  const p=G.p;
+  if((p.inv.DIAMOND||0)<=0){notify('ไม่มี Diamond!','#f44');return;}
+  const slot=document.getElementById('jewel-target-slot')?.value;
+  if(!slot||!p.equips[slot]){notify('เลือก Slot ก่อน!','#f44');return;}
+  const item=p.equips[slot];
+  p.inv.DIAMOND--;
+  const r=Math.random();
+  let newQ,msg,color;
+  if(r<0.20){
+    // Break 20%
+    const old={...item};p.equips[slot]=null;
+    msg=`💥 BREAK! [${old.rarity}] ${old.slot} แตกหาย!`;color='#f44';
+    notify(msg,color);
+    document.getElementById('jewel-result').innerHTML=`<div style="color:#f44;font-weight:bold">${msg}</div>`;
+  } else if(r<0.30){
+    // Heavenly 10%
+    newQ='heavenly';
+    item.quality='heavenly';
+    // Recalculate stats for heavenly
+    item.atk=Math.floor(item.atk*1.2);item.def=Math.floor(item.def*1.1);
+    msg=`✦ SUCCESS! → Heavenly! ATK:${item.atk} DEF:${item.def}`;color='#aaddff';
+    notify('✦ JEWEL FORGE → HEAVENLY!','#aaddff');
+    document.getElementById('jewel-result').innerHTML=`<div style="color:#aaddff;font-weight:bold">${msg}</div>`;
+  } else if(r<0.70){
+    // คงเดิม 40%
+    msg=`◈ คงเดิม... Option ไม่เปลี่ยน (${item.quality})`;color='#aaa';
+    document.getElementById('jewel-result').innerHTML=`<div style="color:#aaa">${msg}</div>`;
+    notify('◈ Jewel Forge: คงเดิม','#888');
+  } else {
+    // Hell or SoSo 30%
+    const cur=item.quality;
+    if(cur==='soso'){
+      newQ=Math.random()<0.5?'hell':'heavenly';
+    } else if(cur==='hell'){
+      newQ=Math.random()<0.5?'soso':'heavenly';
+    } else {
+      newQ=Math.random()<0.5?'hell':'soso';
+    }
+    item.quality=newQ;
+    if(newQ==='hell'){item.atk=Math.floor(item.atk*1.3);item.def=Math.floor(item.def*0.7);}
+    else if(newQ==='soso'){item.atk=Math.floor(item.atk*0.95);item.def=Math.floor(item.def*0.95);}
+    const qcolor=newQ==='hell'?'#ff5555':'#aaa';
+    msg=`→ ${newQ.toUpperCase()}! ATK:${item.atk} DEF:${item.def}`;
+    document.getElementById('jewel-result').innerHTML=`<div style="color:${qcolor};font-weight:bold">${msg}</div>`;
+    notify(`Jewel Forge → ${newQ.toUpperCase()}!`,qcolor);
+  }
+  renderJewelTab();updateUI();
+}
+
+// ─── HOTKEY SCREEN ───────────────────────────────────────────
+const HOTKEY_ITEM_IDS=['HP_POT','MP_POT','HP_POT_L','MP_POT_L','CLEANSE'];
+const HOTKEY_ITEM_KEYS=['1','2','3'];
+let hotkeyItemMap=['HP_POT','MP_POT','CLEANSE']; // default
+
+function openHotkeyScreen(){
+  if(!G.p){notify('Start game first!','#f44');return;}
+  paused=true;cancelAnimationFrame(raf);
+  document.querySelectorAll('.overlay').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('hotkey-screen').classList.remove('hidden');
+  renderHotkeyScreen();
+}
+
+function closeHotkeyScreen(){
+  document.getElementById('hotkey-screen').classList.add('hidden');
+  paused=false;loop();
+}
+
+function renderHotkeyScreen(){
+  const p=G.p;if(!p)return;
+  const bc=baseClass(p.class);
+  const skills=(SKILL_DB[bc]||[]).filter(sk=>(!sk.hiddenOnly||p.isHidden)&&p.learnedSkills.includes(sk.id));
+  const keyNames=['Q','E','R','F'];
+  const sslots=document.getElementById('hotkey-skill-slots');
+  if(sslots){
+    sslots.innerHTML=keyNames.map((key,i)=>{
+      const curId=p.hotbarSkills[i];
+      return`<div style="border:1px solid var(--border2);background:#0a0a0a;padding:5px">
+        <div style="font-size:8px;color:var(--lux);margin-bottom:3px">[${key}] Slot ${i+1}</div>
+        <select style="width:100%;font-size:8px;padding:2px" onchange="setHotkeySkill(${i},this.value)">
+          <option value="">— ไม่ตั้ง —</option>
+          ${skills.map(sk=>`<option value="${sk.id}" ${curId===sk.id?'selected':''}>${sk.icon} ${sk.name}</option>`).join('')}
+        </select>
+      </div>`;
+    }).join('');
+  }
+  const islots=document.getElementById('hotkey-item-slots');
+  if(islots){
+    const itemOptions=HOTKEY_ITEM_IDS.map(id=>{
+      const s=SHOP_ITEMS.find(x=>x.id===id);
+      return`<option value="${id}">${s?s.icon+' '+s.name:id}</option>`;
+    }).join('');
+    islots.innerHTML=HOTKEY_ITEM_KEYS.map((key,i)=>`
+      <div style="border:1px solid var(--border2);background:#0a0a0a;padding:5px">
+        <div style="font-size:8px;color:var(--lux);margin-bottom:3px">[${key}]</div>
+        <select style="width:100%;font-size:8px;padding:2px" onchange="setHotkeyItem(${i},this.value)">
+          ${HOTKEY_ITEM_IDS.map(id=>{const s=SHOP_ITEMS.find(x=>x.id===id);return`<option value="${id}" ${hotkeyItemMap[i]===id?'selected':''}>${s?s.icon+' '+s.name:id}</option>`;}).join('')}
+        </select>
+      </div>`).join('');
+  }
+}
+
+function setHotkeySkill(slot,id){
+  if(!G.p)return;
+  G.p.hotbarSkills[slot]=id||null;
+  updateHotbar();
+  notify(`[${['Q','E','R','F'][slot]}] → ${id||'Empty'}`,'var(--lux2)');
+}
+
+function setHotkeyItem(slot,id){
+  hotkeyItemMap[slot]=id;
+  notify(`[${HOTKEY_ITEM_KEYS[slot]}] → ${id}`,'var(--lux2)');
+}
 
 // ─── SCREENS ────────────────────────────────────────────────
 function openScreen(name){
@@ -1579,12 +1851,15 @@ function renderSkills(){
   sl.innerHTML=sks.map(sk=>{
     const slv=getSkillLv(sk.id),isLearned=learned.includes(sk.id);
     const dmgD=sk.dmgMult?`${(getSkillDmg(sk)*100).toFixed(0)}%`:'';
-    return`<div class="skill-card ${isLearned?'learned':''}" onclick="learnSkill('${sk.id}')">
-      <div class="sk-name">${sk.icon} ${sk.name} ${sk.hiddenOnly?'<span style="color:var(--god)">[H]</span>':''}</div>
+    const isPassive=sk.isPassive;
+    const actualCd=isPassive&&slv>0?Math.max(5,Math.floor(sk.cd*(1-((slv-1)/MAX_SKILL_LV)*0.8))):sk.cd;
+    const passiveBadge=isPassive?`<span style="color:#ffe082;font-size:7px;background:#2a2000;padding:1px 4px;border-radius:2px">PASSIVE</span> `:'';
+    return`<div class="skill-card ${isLearned?'learned':''}" onclick="learnSkill('${sk.id}')" style="${isPassive?'border-color:#554400':''}">
+      <div class="sk-name">${passiveBadge}${sk.icon} ${sk.name} ${sk.hiddenOnly?'<span style="color:var(--god)">[H]</span>':''}</div>
       <div class="sk-desc">${sk.desc}</div>
       ${sk.dmgMult?`<div style="color:var(--lux);font-size:8px">DMG: ${dmgD}</div>`:''}
-      <div class="sk-cost">MP:${sk.mp} CD:${sk.cd}s | Req LV${sk.lv}</div>
-      ${isLearned?`<div style="color:var(--lux2);font-size:8px">Lv${slv}/${MAX_SKILL_LV}${slv<MAX_SKILL_LV?' · click to up':' · MAX'}</div>`:''}
+      <div class="sk-cost">${isPassive?`CD: ${actualCd}s (base ${sk.cd}s) | Req LV${sk.lv}`:`MP:${sk.mp} CD:${sk.cd}s | Req LV${sk.lv}`}</div>
+      ${isLearned?`<div style="color:var(--lux2);font-size:8px">Lv${slv}/${MAX_SKILL_LV}${slv<MAX_SKILL_LV?' · click to up':' · MAX'}${isPassive?` · CD now ${Math.max(5,Math.floor(sk.cd*(1-((slv-1)/MAX_SKILL_LV)*0.8)))}s`:''}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -1593,7 +1868,7 @@ function renderSkills(){
 let currentShopTab='buy';
 function switchShopTab(tab){
   currentShopTab=tab;
-  ['buy','sell','buyback','forge','reforge'].forEach(t=>{
+  ['buy','sell','buyback','forge','reforge','jewel'].forEach(t=>{
     const el=document.getElementById(`shop-tab-${t}`);
     if(el)el.classList.toggle('hidden',t!==tab);
     const btn=document.getElementById(`tab-${t}-btn`);
@@ -1602,6 +1877,7 @@ function switchShopTab(tab){
   if(tab==='sell')renderSellTab();
   if(tab==='buyback')renderBuybackTab();
   if(tab==='reforge')renderReforgeTab();
+  if(tab==='jewel')renderJewelTab();
 }
 
 function renderShopBuy(){
@@ -1787,13 +2063,24 @@ function reforgeAll(){
 
 function buyItemPrompt(id){
   const s=SHOP_ITEMS.find(x=>x.id===id);if(!s)return;
-  const maxBuy=Math.min(100,Math.floor(G.p.gold/s.price));
+  // Single-use items that don't stack as qty
+  const singleUse=['SKILL_RESET','STATUS_RESET'];
+  const maxBuy=singleUse.includes(id)?Math.min(1,Math.floor(G.p.gold/s.price)):Math.min(100,Math.floor(G.p.gold/s.price));
   if(maxBuy<=0){notify('Not enough gold!','#f44');return;}
+  if(singleUse.includes(id)){
+    const total=s.price;
+    if(G.p.gold<total){notify('Not enough gold!','#f44');return;}
+    G.p.gold-=total;
+    G.p.inv[id]=(G.p.inv[id]||0)+1;
+    notify(`Bought: ${s.name}`,'var(--lux2)');
+    renderShopBuy();updateUI();
+    return;
+  }
   showQtyModal(`Buy: ${s.name}`,`${s.price.toLocaleString()}G each`,maxBuy,qty=>{
     const total=s.price*qty;
     if(G.p.gold<total){notify('Not enough gold!','#f44');return;}
     G.p.gold-=total;
-    if(id==='JUNK')G.p.inv.JUNK=(G.p.inv.JUNK||0)+(s.qty||1)*qty;
+    if(id==='JUNK'||id==='JUNK1000'){G.p.inv.JUNK=(G.p.inv.JUNK||0)+(s.qty||1)*qty;}
     else G.p.inv[id]=(G.p.inv[id]||0)+(s.qty||1)*qty;
     notify(`Bought ×${qty}: ${s.name}`,'var(--lux2)');
     renderShopBuy();updateUI();
@@ -1946,6 +2233,13 @@ function loadFromSlot(slot){
     p.clearedFloors=new Set(p.clearedFloors||[]);
     p.skillLevels=p.skillLevels||{};
     if(!p.inv.BLESSING)p.inv.BLESSING=0;
+    if(!p.inv.DIAMOND)p.inv.DIAMOND=0;
+    if(!p.inv.SKILL_POT)p.inv.SKILL_POT=0;
+    if(!p.inv.SKILL_ELIXIR)p.inv.SKILL_ELIXIR=0;
+    if(!p.inv.STATUS_POT)p.inv.STATUS_POT=0;
+    if(!p.inv.STATUS_ELIXIR)p.inv.STATUS_ELIXIR=0;
+    if(!p.inv.SKILL_RESET)p.inv.SKILL_RESET=0;
+    if(!p.inv.STATUS_RESET)p.inv.STATUS_RESET=0;
     if(!p.moveSpeedPct)p.moveSpeedPct=100;
     G.p=p;
     document.getElementById('start-screen').classList.add('hidden');
@@ -2030,9 +2324,9 @@ function initGame(isNew){
 function onKey(e){
   keys[e.key.toLowerCase()]=true;
   if(e.key==='Escape'){paused?resumeGame():togglePause();}
-  if(e.key==='1')useItem('HP_POT');
-  if(e.key==='2')useItem('MP_POT');
-  if(e.key==='3')useItem('CLEANSE');
+  if(e.key==='1')useItem(hotkeyItemMap[0]||'HP_POT');
+  if(e.key==='2')useItem(hotkeyItemMap[1]||'MP_POT');
+  if(e.key==='3')useItem(hotkeyItemMap[2]||'CLEANSE');
   if(e.key.toLowerCase()==='q')useSkillSlot(0);
   if(e.key.toLowerCase()==='e')useSkillSlot(1);
   if(e.key.toLowerCase()==='r')useSkillSlot(2);
