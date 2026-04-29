@@ -429,6 +429,21 @@ canvas{display:block;width:100%;height:100%}
   </div>
 </div>
 
+<div id="stat-screen" class="overlay hidden">
+  <div class="panel-box" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2 style="margin:0">📊 STAT UPGRADE</h2>
+      <button class="btn sm" onclick="closeStatScreen()">← BACK</button>
+    </div>
+    <div style="font-size:8px;color:var(--text3);margin-bottom:8px">ค่าสถิติรวมจากตัวละคร + อุปกรณ์ | pts ใช้ได้: <b id="stat-pts-overlay" style="color:var(--lux2)">0</b></div>
+    <div id="stat-screen-body"></div>
+    <div class="section-label" style="margin-top:10px">EQUIPPED BONUSES</div>
+    <div id="stat-equip-bonus" style="font-size:8px;color:var(--text2);line-height:1.9"></div>
+    <div class="section-label" style="margin-top:8px">DERIVED STATS</div>
+    <div id="stat-derived" style="font-size:8px;color:var(--text2);line-height:1.9"></div>
+  </div>
+</div>
+
 <div id="topbar">
   <span class="floor-info" id="floor-info">FLOOR 1</span>
   <span id="enemy-count" style="font-size:8px;color:var(--text2)"></span>
@@ -437,6 +452,7 @@ canvas{display:block;width:100%;height:100%}
     <button class="btn sm" id="auto-btn" onclick="toggleAuto()">AUTO OFF</button>
     <button class="btn sm" id="noboss-btn" onclick="toggleNoBoss()" style="display:none">NO BOSS</button>
     <button class="btn sm" onclick="openEquipFromMenu()">⚔EQUIP</button>
+    <button class="btn sm" onclick="openStatScreen()">📊STAT</button>
     <button class="btn sm" onclick="openScreen('skill')">SKILL</button>
     <button class="btn sm" onclick="openScreen('shop')">SHOP</button>
     <button class="btn sm" onclick="openScreen('dungeon')">MAP</button>
@@ -467,8 +483,11 @@ canvas{display:block;width:100%;height:100%}
       &nbsp;|&nbsp;💰<span id="p-gold" class="soma-txt">0</span>G
       &nbsp;|&nbsp;🔷<span id="p-pts">0</span>pts
     </div>
-    <div class="section-label">STATS <span style="color:var(--text3);font-size:7px">(+1/+10/+100/+300)</span></div>
+    <div class="section-label">STATS <span style="color:var(--text3);font-size:7px">(click to upgrade)</span></div>
     <div id="stat-ui"></div>
+    <div style="margin-top:3px">
+      <button class="btn sm wide" onclick="openStatScreen()" style="font-size:8px;letter-spacing:0">📊 STAT UPGRADE (pts: <span id="stat-pts-mini">0</span>)</button>
+    </div>
     <div class="section-label">COMBAT</div>
     <div id="combat-stats" style="font-size:8px;color:var(--text2);line-height:1.7"></div>
     <div class="section-label">AGI SPEED</div>
@@ -666,24 +685,31 @@ function freshPlayer(name,cls){
 
 function calcStats(p){
   let str=p.str,agi=p.agi,int_=p.int,vit=p.vit,hpB=0,mpB=0;
+  let bonusDodge=0,bonusMoveSpd=0,bonusAtkSpd=0,antiPoison=0,antiStun=0;
   Object.values(p.equips).forEach(eq=>{
     if(!eq)return;
-    str+=Math.floor((eq.effects?.buffs?.str||0)*0.4);
-    agi+=Math.floor((eq.effects?.buffs?.agi||0)*0.4);
-    int_+=Math.floor((eq.effects?.buffs?.int||0)*0.4);
-    vit+=Math.floor((eq.effects?.buffs?.vit||0)*0.4);
+    str+=Math.floor((eq.effects?.buffs?.str||0));
+    agi+=Math.floor((eq.effects?.buffs?.agi||0));
+    int_+=Math.floor((eq.effects?.buffs?.int||0));
+    vit+=Math.floor((eq.effects?.buffs?.vit||0));
     hpB+=eq.effects?.hpMod||0;mpB+=eq.effects?.mpMod||0;
+    (eq.effects?.special||[]).forEach(s=>{
+      if(s.type==='dodge')bonusDodge+=s.chance*100;
+      if(s.type==='fastMove')bonusMoveSpd+=s.chance*50;
+      if(s.type==='fastAtk')bonusAtkSpd+=s.chance*100;
+      if(s.type==='antiPoison')antiPoison=Math.max(antiPoison,s.chance);
+      if(s.type==='antiStun')antiStun=Math.max(antiStun,s.chance);
+    });
   });
-  // FIX 5: ลดค่า stat per lv (จาก *10 → *4, จาก *5 → *2)
   const maxHp=Math.max(1,60+vit*12+p.lv*4+hpB);
   const maxMp=Math.max(10,30+int_*6+p.lv*2+mpB);
   const atk=(str*1.5+agi*0.5)+p.lv*1;
   const def=Math.floor(vit*0.6+agi*0.3);
   const spd=2+agi*0.04;
   const critR=Math.min(50,agi*0.35);
-  const dodgeR=Math.min(30,agi*0.2);
-  const moveSpd=Math.max(1.5,2.8*(Math.min(200,p.moveSpeedPct||100)/100));
-  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,moveSpd};
+  const dodgeR=Math.min(60,agi*0.2+bonusDodge);
+  const moveSpd=Math.max(1.5,2.8*(Math.min(200,p.moveSpeedPct||100)/100)+bonusMoveSpd*0.02);
+  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,moveSpd,bonusAtkSpd,antiPoison,antiStun};
 }
 
 // ─── MONSTER SPAWN ──────────────────────────────────────────
@@ -752,6 +778,21 @@ function spawnEnemies(floor){
 }
 
 // ─── ITEM GEN ───────────────────────────────────────────────
+// อาวุธตามอาชีพ
+const WEAPON_NAMES={
+  Knight:   ['ดาบ','มีด','ค้อน','หอก'],
+  Excalibur:['ดาบ','มีด','ค้อน','หอก'],
+  Archer:   ['ธนู','ปืนพก','หน้าไม้','ไรเฟิล'],
+  '.50 Calibre':['ธนู','ปืนพก','หน้าไม้','ไรเฟิล'],
+  Priest:   ['คฑา','ไม้เท้า'],
+  'Merlin Bloodline':['คฑา','ไม้เท้า'],
+};
+const ACCESSORY_SLOTS=new Set(['Cloak','Pendant','Necklace','Ring']);
+const ARMOR_SLOTS=new Set(['Shield','Head','Chest','Legs']);
+
+function ri(min,max){return Math.floor(min+Math.random()*(max-min+1));}
+function rsign(posPct=0.7){return Math.random()<posPct?1:-1;}
+
 function rollQuality(){
   const r=Math.random();
   return r<0.001?'heavenly':r<0.01?'hell':'soso';
@@ -760,34 +801,113 @@ function qualLabel(q){
   return q==='heavenly'?'<span class="q-heavenly">✦Heavenly</span>':q==='hell'?'<span class="q-hell">☠Hell</span>':'<span class="q-soso">◈SoSo</span>';
 }
 
-function genItem(floor,forceRarity=null){
+function genItem(floor,forceRarity=null,playerClass=null){
   const rarity=forceRarity||rollEquipRarity(floor);
   const slot=SLOT_TYPES[Math.floor(Math.random()*SLOT_TYPES.length)];
   const quality=rollQuality();
   const rm={Junk:1,Normal:1.5,Fine:2.5,Rare:5,Legendary:12,GOD:20,SOMA:25};
-  const base = Math.floor(Math.sqrt(floor) * 20 * (rm[rarity] || 1));
-  const atkMult=quality==='hell'?1.5+Math.random()*0.5:quality==='heavenly'?1.2+Math.random()*0.4:0.9+Math.random()*0.3;
-  const buffs={
-    str:quality!=='hell'?Math.floor(base*0.03):0,
-    agi:quality!=='hell'?Math.floor(base*0.02):0,
-    int:quality!=='hell'?Math.floor(base*0.02):0,
-    vit:quality!=='hell'?Math.floor(base*0.03):0,
-  };
-  const hpMod=quality==='heavenly'?Math.floor(base*0.05):quality==='hell'?-Math.floor(base*0.08):0;
+  const base=Math.floor(Math.sqrt(floor)*20*(rm[rarity]||1));
+  const qMod=quality==='hell'?1.5+Math.random()*0.5:quality==='heavenly'?1.2+Math.random()*0.4:0.9+Math.random()*0.3;
+
+  // ─── WEAPON ─────────────────────────────────────────────
+  let atk=0,def=0,buffs={str:0,agi:0,int:0,vit:0};
+  let specialEffects=[]; // poison / stun chance
+  let weaponSubName='';
+
+  if(slot==='Weapon'){
+    // อาวุธเน้นตี, ป้องกันแทบ 0
+    atk=Math.floor(base*qMod*(0.85+Math.random()*0.3));
+    def=Math.floor(base*0.02*Math.random()); // 0~2%
+    // สุ่มชื่ออาวุธตาม class (ใช้ playerClass ถ้ามี)
+    const cls=playerClass||'Knight';
+    const names=WEAPON_NAMES[cls]||WEAPON_NAMES.Knight;
+    weaponSubName=' '+names[Math.floor(Math.random()*names.length)];
+    // Stat bonus ตามประเภทอาชีพ
+    const isMelee=(cls==='Knight'||cls==='Excalibur');
+    const isRange=(cls==='Archer'||cls==='.50 Calibre');
+    const isMagic=(cls==='Priest'||cls==='Merlin Bloodline');
+    if(isMelee){
+      buffs.str=ri(2,6)*Math.ceil(base/30)*rsign(0.85);
+      buffs.vit=ri(1,4)*Math.ceil(base/30)*rsign(0.80);
+      buffs.agi=ri(0,2)*Math.ceil(base/30)*rsign(0.35);
+      buffs.int=ri(0,1)*Math.ceil(base/30)*rsign(0.25);
+    } else if(isRange){
+      buffs.agi=ri(2,6)*Math.ceil(base/30)*rsign(0.85);
+      buffs.str=ri(1,3)*Math.ceil(base/30)*rsign(0.65);
+      buffs.int=ri(0,2)*Math.ceil(base/30)*rsign(0.30);
+      buffs.vit=ri(0,2)*Math.ceil(base/30)*rsign(0.35);
+    } else { // magic
+      buffs.int=ri(2,6)*Math.ceil(base/30)*rsign(0.85);
+      buffs.vit=ri(1,3)*Math.ceil(base/30)*rsign(0.70);
+      buffs.agi=ri(0,2)*Math.ceil(base/30)*rsign(0.30);
+      buffs.str=ri(0,1)*Math.ceil(base/30)*rsign(0.25);
+    }
+    // Hell / Heavenly → เพิ่ม poison/stun chance
+    if(quality==='hell'){
+      specialEffects.push({type:'poison',chance:Math.min(0.35,0.05+floor*0.0002)});
+      specialEffects.push({type:'stun',chance:Math.min(0.20,0.03+floor*0.0001)});
+    } else if(quality==='heavenly'){
+      specialEffects.push({type:'poison',chance:Math.min(0.25,0.04+floor*0.00015)});
+      specialEffects.push({type:'stun',chance:Math.min(0.30,0.05+floor*0.00015)});
+    }
+
+  // ─── ARMOR (Shield/Head/Chest/Legs) ─────────────────────
+  } else if(ARMOR_SLOTS.has(slot)){
+    // เกราะเน้นป้องกัน, โจมตีน้อยหรือติดลบ
+    def=Math.floor(base*qMod*(0.80+Math.random()*0.25));
+    atk=Math.floor(base*(Math.random()<0.3?-1:1)*Math.random()*0.08); // -8~+8%
+    // Stat: VIT เยอะ, STR พอมี, AGI/INT น้อยหรือติดลบ
+    buffs.vit=ri(2,6)*Math.ceil(base/30)*rsign(0.80);
+    buffs.str=ri(1,3)*Math.ceil(base/30)*rsign(0.65);
+    buffs.agi=ri(0,3)*Math.ceil(base/30)*rsign(0.40);
+    buffs.int=ri(0,2)*Math.ceil(base/30)*rsign(0.35);
+    if(quality==='hell'){
+      specialEffects.push({type:'stun',chance:Math.min(0.15,0.02+floor*0.0001)});
+    } else if(quality==='heavenly'){
+      specialEffects.push({type:'antiPoison',chance:0.5+Math.random()*0.5});
+    }
+
+  // ─── ACCESSORY (Cloak/Pendant/Necklace/Ring) ─────────────
+  } else {
+    // บัพมาก stat สุ่มได้ดีหรือแย่ผสม, atk/def น้อย
+    atk=Math.floor(base*(rsign(0.5)?1:-1)*Math.random()*0.12);
+    def=Math.floor(base*(rsign(0.5)?1:-1)*Math.random()*0.12);
+    // stat สุ่มทุก axis อาจดีหรือแย่
+    buffs.str=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
+    buffs.agi=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
+    buffs.int=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
+    buffs.vit=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
+    // Special buffs มากกว่าชนิดอื่น
+    const accBuffPool=['antiPoison','fastAtk','fastMove','dodge','antiStun'];
+    const numBuff=1+Math.floor(Math.random()*3); // 1~3 special buffs
+    for(let i=0;i<numBuff;i++){
+      const t=accBuffPool[Math.floor(Math.random()*accBuffPool.length)];
+      if(!specialEffects.find(e=>e.type===t)){
+        const val=quality==='heavenly'?0.2+Math.random()*0.4:quality==='hell'?0.05+Math.random()*0.2:0.05+Math.random()*0.15;
+        specialEffects.push({type:t,chance:Math.min(0.8,val)});
+      }
+    }
+    if(quality==='hell'){
+      specialEffects.push({type:'poison',chance:Math.min(0.25,0.05+floor*0.0001)});
+    }
+  }
+
+  const hpMod=quality==='heavenly'?Math.floor(base*0.05):quality==='hell'?-Math.floor(base*0.04):0;
   const reqStr=(['Legendary','GOD','SOMA'].includes(rarity))?Math.max(10,Math.floor(floor*0.8)):(['Rare','Fine'].includes(rarity))?Math.max(5,Math.floor(floor*0.3)):0;
   const reqAgi=slot==='Weapon'&&rarity!=='Junk'?Math.max(5,Math.floor(floor*0.15)):0;
   const reqInt=(slot==='Necklace'||slot==='Pendant')?Math.max(5,Math.floor(floor*0.15)):0;
   const sellMult={Junk:1,Normal:1,Fine:1,Rare:1,Legendary:0.5,GOD:0.35,SOMA:0.25};
-  const value = Math.floor(base * (sellMult[rarity] || 1));
+  const value=Math.floor(base*(sellMult[rarity]||1));
+
   return{
     id:Math.random().toString(36).slice(2),
     stackKey:`${rarity}_${slot}_${quality}`,
-    name:`${RANK[rarity]} ${slot}`,
-    fullName:`${rarity} ${slot}`,
+    name:`${RANK[rarity]}${weaponSubName||' '+slot}`,
+    fullName:`${rarity}${weaponSubName||' '+slot}`,
     rarity,slot,quality,floor,itemLv:floor,
-    atk:Math.floor(base*atkMult),
-    def:Math.floor(base*atkMult*0.5),
-    effects:{buffs,hpMod,mpMod:0,statusEffects:[]},
+    atk:Math.max(slot==='Weapon'?1:atk,atk),
+    def:Math.max(0,def),
+    effects:{buffs,hpMod,mpMod:0,statusEffects:[],special:specialEffects},
     reqStr,reqAgi,reqInt,value,count:1,
   };
 }
@@ -1057,9 +1177,14 @@ let atkCd=0;
 function playerAttack(){
   const now=Date.now();if(now<atkCd)return;
   const p=G.p,cs=calcStats(p);
-  const spd=Math.max(50,400-Math.min(350,cs.spd*20));
+  const baseSpd=Math.max(50,400-Math.min(350,cs.spd*20));
+  const atkSpdMult=Math.max(0.4,1-(cs.bonusAtkSpd||0)*0.005);
+  const spd=Math.floor(baseSpd*atkSpdMult);
   atkCd=now+spd;
   const crit=Math.random()*100<cs.critR;
+  const wpSpec=p.equips.Weapon?.effects?.special||[];
+  const poisonChance=(wpSpec.find(s=>s.type==='poison')?.chance)||0;
+  const stunChance=(wpSpec.find(s=>s.type==='stun')?.chance)||0;
   G.mobs.forEach(m=>{
     const d=Math.hypot(p.x-m.x,p.y-m.y);
     const ang=Math.atan2(m.y-p.y,m.x-p.x);
@@ -1067,9 +1192,19 @@ function playerAttack(){
     const rng=p.equips.Weapon?100+p.equips.Weapon.atk*0.1:80;
     if(d<rng&&diff<0.55){
       let dmg=cs.atk+(p.equips.Weapon?p.equips.Weapon.atk:0);
-      const pwrBuff=p.statusEffects.passive_power&&Date.now()<p.statusEffects.passive_power.until?1+(p.statusEffects.passive_power.pct||0):1;
+      const pwrBuff=p.statusEffects.passive_power&&now<p.statusEffects.passive_power.until?1+(p.statusEffects.passive_power.pct||0):1;
       dmg=Math.floor(dmg*(crit?2:1)*pwrBuff);
       m.hp-=dmg;addDmgNum(m.x,m.y,dmg,crit?'var(--god)':'#ddd');
+      // Weapon special: poison on hit
+      if(poisonChance>0&&Math.random()<poisonChance){
+        m.dot={dmg:Math.max(1,cs.atk*0.15),until:Date.now()+5000,last:Date.now()};
+        addDmgNum(m.x,m.y-15,'☠','#00e676');
+      }
+      // Weapon special: stun on hit
+      if(stunChance>0&&Math.random()<stunChance){
+        m.stunUntil=Date.now()+1500;
+        addDmgNum(m.x,m.y-20,'💫','#ffe082');
+      }
     }
   });
 }
@@ -1085,6 +1220,8 @@ function mobAttackPlayer(m){
   const passiveArmor=p.statusEffects.passive_armor&&now<p.statusEffects.passive_armor.until?p.statusEffects.passive_armor.pct:0;
   const agiDodge=Math.random()*100<cs.dodgeR;
   if((evading&&Math.random()<0.5)||agiDodge){logMsg('Dodge!','#0ff');return;}
+  // antiStun: ถ้ามีและ mob พยายาม stun จะ resist ได้
+  if(m.dot&&cs.antiPoison>0&&Math.random()<cs.antiPoison){m.dot=null;logMsg('☠ Poison resisted!','#8dffb0');return;}
   let dmg=Math.max(1,m.atk-def);
   if(shielded)dmg=Math.floor(dmg*0.5);
   if(barrier)dmg=Math.floor(dmg*0.5);
@@ -1141,7 +1278,7 @@ function mobDied(m){
   // อุปกรณ์สวมใส่ 10–25%
   const equipChance=(m.isBoss?0.30:m.isElite?0.15:0.04+Math.random()*0.05)*(m.dropMult||1)+bless;
   if(Math.random()<equipChance){
-    const item=genItem(p.floor);
+    const item=genItem(p.floor,null,p.class);
     if(addToBag(item)){
       const c=RCOL[item.rarity];
       notify(`Drop: ${item.fullName} [${item.quality}]`,c);
@@ -1196,6 +1333,8 @@ function advanceFloor(){
 // ─── CONSUMABLES ────────────────────────────────────────────
 function useItem(id){
   const p=G.p;if(!(p.inv[id]>0)){notify('None left!','#f44');return;}
+  // Diamond ใช้ได้เฉพาะผ่าน Jewel Forge เท่านั้น
+  if(id==='DIAMOND'){notify('💎 Diamond ใช้ได้ผ่าน Shop → JEWEL เท่านั้น','#aaddff');return;}
   const cs=calcStats(p);
   if(id==='HP_POT'){p.hp=Math.min(cs.maxHp,p.hp+cs.maxHp*0.4);logMsg('HP Potion','#2f2');}
   else if(id==='MP_POT'){p.mp=Math.min(cs.maxMp,p.mp+cs.maxMp*0.4);logMsg('MP Potion','#44f');}
@@ -1482,19 +1621,23 @@ function updateUI(){
   document.getElementById('p-lv').textContent=p.lv;
   document.getElementById('p-gold').textContent=p.gold.toLocaleString();
   document.getElementById('p-pts').textContent=p.pts;
+  if(si){
+    let eStr=0,eAgi=0,eInt=0,eVit=0;
+    Object.values(p.equips).forEach(eq=>{
+      if(!eq)return;
+      eStr+=eq.effects?.buffs?.str||0;eAgi+=eq.effects?.buffs?.agi||0;
+      eInt+=eq.effects?.buffs?.int||0;eVit+=eq.effects?.buffs?.vit||0;
+    });
+    si.innerHTML=[['STR','str',eStr,cs.str],['AGI','agi',eAgi,cs.agi],['INT','int',eInt,cs.int],['VIT','vit',eVit,cs.vit]].map(([n,k,eq,tot])=>`
+      <div class="stat-row">
+        <span class="stat-name">${n}</span>
+        <span class="stat-val">${p[k]}</span>
+        <span style="font-size:7px;color:${eq>=0?'#8dffb0':'#ff7070'};min-width:28px;text-align:right">${eq>=0?'+':''}${eq}</span>
+        <span style="font-size:7px;color:#4fc3f7;min-width:24px;text-align:right">=${tot}</span>
+      </div>`).join('');
+  }
 
-  const si=document.getElementById('stat-ui');
-  si.innerHTML=[['STR','str'],['AGI','agi'],['INT','int'],['VIT','vit']].map(([n,k])=>`
-    <div class="stat-row">
-      <span class="stat-name">${n}</span>
-      <span class="stat-val">${p[k]}</span>
-      <div class="stat-btn-group">
-        <button class="stat-btn" onclick="addStat('${k}',1)" ${p.pts<1?'disabled':''}>+1</button>
-        <button class="stat-btn" onclick="addStat('${k}',10)" ${p.pts<10?'disabled':''}>+10</button>
-        <button class="stat-btn" onclick="addStat('${k}',100)" ${p.pts<100?'disabled':''}>+100</button>
-        <button class="stat-btn" onclick="addStat('${k}',300)" ${p.pts<300?'disabled':''}>+300</button>
-      </div>
-    </div>`).join('');
+  const spm=document.getElementById('stat-pts-mini');if(spm)spm.textContent=p.pts;
 
   const asi=document.getElementById('agi-speed-info');
   if(asi){
@@ -1582,20 +1725,36 @@ function openItemFromBag(idx){
   openScreen('equip');
 }
 
+function specialFxLabel(spec){
+  if(!spec||!spec.length)return'';
+  const icons={poison:'☠',stun:'💫',antiPoison:'🛡',fastAtk:'⚡',fastMove:'🏃',dodge:'💨',antiStun:'🧿'};
+  const names={poison:'พิษ',stun:'สตัน',antiPoison:'กันพิษ',fastAtk:'ตีไว',fastMove:'เดินไว',dodge:'Dodge',antiStun:'กันสตัน'};
+  return spec.map(s=>`<span style="color:#ffe082">${icons[s.type]||'✦'}${names[s.type]||s.type} ${(s.chance*100).toFixed(1)}%</span>`).join(' ');
+}
+function statColor(v){return v>0?'#8dffb0':v<0?'#ff7070':'#888';}
+
 function showBagTip(e,idx){
   const g=G.p.gears[idx];if(!g)return;
   const equipped=G.p.equips[g.slot];
   const dAtk=equipped?g.atk-equipped.atk:null;
   const dDef=equipped?g.def-equipped.def:null;
   const err=canEquip(g);
+  const b=g.effects?.buffs||{};
+  const sp=g.effects?.special||[];
   const tt=document.getElementById('tooltip');
   tt.innerHTML=`
     <div style="color:${RCOL[g.rarity]};font-weight:bold">[${RANK[g.rarity]}] ${g.fullName}</div>
     <div style="font-size:8px;color:var(--text3)">${qualLabel(g.quality)} · Lv${g.itemLv} · ×${g.count}</div>
     <div>ATK: <b>${g.atk}</b>${dAtk!==null?` <span style="color:${dAtk>=0?'#2f2':'#f44'}">(${dAtk>=0?'+':''}${dAtk})</span>`:''}</div>
     <div>DEF: <b>${g.def}</b>${dDef!==null?` <span style="color:${dDef>=0?'#2f2':'#f44'}">(${dDef>=0?'+':''}${dDef})</span>`:''}</div>
-    <div>STR:+${g.effects.buffs.str} AGI:+${g.effects.buffs.agi} INT:+${g.effects.buffs.int} VIT:+${g.effects.buffs.vit}</div>
-    ${g.effects.hpMod?`<div>HP: <span style="color:${g.effects.hpMod>0?'#2f2':'#f44'}">${g.effects.hpMod>0?'+':''}${g.effects.hpMod}</span></div>`:''}
+    <div style="font-size:8px">
+      <span style="color:${statColor(b.str)}">STR:${b.str>=0?'+':''}${b.str}</span>
+      <span style="color:${statColor(b.agi)}"> AGI:${b.agi>=0?'+':''}${b.agi}</span>
+      <span style="color:${statColor(b.int)}"> INT:${b.int>=0?'+':''}${b.int}</span>
+      <span style="color:${statColor(b.vit)}"> VIT:${b.vit>=0?'+':''}${b.vit}</span>
+    </div>
+    ${g.effects?.hpMod?`<div>HP: <span style="color:${g.effects.hpMod>0?'#2f2':'#f44'}">${g.effects.hpMod>0?'+':''}${g.effects.hpMod}</span></div>`:''}
+    ${sp.length?`<div style="font-size:8px;margin-top:2px">${specialFxLabel(sp)}</div>`:''}
     ${g.reqStr?`<div style="color:var(--text3)">Req STR ${g.reqStr}</div>`:''}
     ${err?`<div style="color:#f44">${err}</div>`:''}
     <div style="color:var(--text3);margin-top:3px">Sell: ${Math.floor(g.value*0.5).toLocaleString()}G</div>`;
@@ -1735,9 +1894,85 @@ function setHotkeyItem(slot,id){
   notify(`[${HOTKEY_ITEM_KEYS[slot]}] → ${id}`,'var(--lux2)');
 }
 
+// ─── STAT SCREEN ─────────────────────────────────────────────
+function openStatScreen(){
+  if(!G.p){notify('Start game first!','#f44');return;}
+  openScreen('stat');
+}
+function closeStatScreen(){resumeGame();}
+
+function renderStatScreen(){
+  const p=G.p;if(!p)return;
+  const cs=calcStats(p);
+  // Raw stat bonuses from equips
+  let eStr=0,eAgi=0,eInt=0,eVit=0;
+  Object.values(p.equips).forEach(eq=>{
+    if(!eq)return;
+    eStr+=eq.effects?.buffs?.str||0;
+    eAgi+=eq.effects?.buffs?.agi||0;
+    eInt+=eq.effects?.buffs?.int||0;
+    eVit+=eq.effects?.buffs?.vit||0;
+  });
+  const so=document.getElementById('stat-pts-overlay');
+  if(so)so.textContent=p.pts;
+  const sm=document.getElementById('stat-pts-mini');
+  if(sm)sm.textContent=p.pts;
+
+  const body=document.getElementById('stat-screen-body');
+  if(body){
+    body.innerHTML=[
+      ['STR','str',eStr],['AGI','agi',eAgi],['INT','int',eInt],['VIT','vit',eVit]
+    ].map(([label,key,bonus])=>`
+      <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #111">
+        <span style="color:var(--text2);font-size:9px;width:28px">${label}</span>
+        <span style="color:var(--lux2);font-size:11px;font-weight:bold;min-width:36px">${p[key]}</span>
+        <span style="font-size:8px;color:${bonus>=0?'#8dffb0':'#ff7070'}">${bonus>=0?'+':''}${bonus} (eq)</span>
+        <span style="font-size:9px;color:#4fc3f7;margin-left:4px">= ${cs[key]}</span>
+        <div style="margin-left:auto;display:flex;gap:2px">
+          <button class="stat-btn" onclick="addStat('${key}',1);renderStatScreen()" ${p.pts<1?'disabled':''}>+1</button>
+          <button class="stat-btn" onclick="addStat('${key}',10);renderStatScreen()" ${p.pts<10?'disabled':''}>+10</button>
+          <button class="stat-btn" onclick="addStat('${key}',100);renderStatScreen()" ${p.pts<100?'disabled':''}>+100</button>
+          <button class="stat-btn" onclick="addStat('${key}',300);renderStatScreen()" ${p.pts<300?'disabled':''}>+300</button>
+        </div>
+      </div>`).join('');
+  }
+
+  const eb=document.getElementById('stat-equip-bonus');
+  if(eb){
+    const lines=[];
+    Object.entries(p.equips).forEach(([slot,eq])=>{
+      if(!eq)return;
+      const b=eq.effects?.buffs||{};
+      const sp=eq.effects?.special||[];
+      const statStr=[
+        b.str?`STR:${b.str>=0?'+':''}${b.str}`:'',
+        b.agi?`AGI:${b.agi>=0?'+':''}${b.agi}`:'',
+        b.int?`INT:${b.int>=0?'+':''}${b.int}`:'',
+        b.vit?`VIT:${b.vit>=0?'+':''}${b.vit}`:'',
+      ].filter(Boolean).join(' ');
+      const spStr=specialFxLabel(sp);
+      if(statStr||spStr)lines.push(`<div><span style="color:var(--lux3)">${SLOT_ICONS[slot]||''}${slot}</span>: ${statStr}${spStr?' · '+spStr:''}</div>`);
+    });
+    eb.innerHTML=lines.length?lines.join(''):'<span style="color:var(--text3)">ไม่มีอุปกรณ์</span>';
+  }
+
+  const dd=document.getElementById('stat-derived');
+  if(dd){
+    const atkSpd=Math.max(50,400-Math.min(350,cs.spd*20));
+    const atkSpdMult=Math.max(0.4,1-(cs.bonusAtkSpd||0)*0.005);
+    dd.innerHTML=`
+      <div>ATK: <b style="color:var(--lux2)">${cs.atk.toFixed(1)}</b> · DEF: <b>${cs.def}</b></div>
+      <div>HP: <b style="color:var(--hp)">${Math.floor(G.p.hp)}/${cs.maxHp}</b> · MP: <b style="color:#4488ff">${Math.floor(G.p.mp)}/${cs.maxMp}</b></div>
+      <div>CRIT: <b>${cs.critR.toFixed(1)}%</b> · Dodge: <b>${cs.dodgeR.toFixed(1)}%</b></div>
+      <div>ATK Speed: <b>${Math.floor(atkSpd*atkSpdMult)}ms</b> · Move: <b>${((Math.min(200,G.p.moveSpeedPct||100))).toFixed(1)}%</b></div>
+      ${cs.antiPoison>0?`<div>🛡 Anti-Poison: <b style="color:#8dffb0">${(cs.antiPoison*100).toFixed(0)}%</b></div>`:''}
+      ${cs.antiStun>0?`<div>🧿 Anti-Stun: <b style="color:#8dffb0">${(cs.antiStun*100).toFixed(0)}%</b></div>`:''}`;
+  }
+}
+
 // ─── SCREENS ────────────────────────────────────────────────
 function openScreen(name){
-  const all=['pause','skill','shop','dungeon','item','equip','saveload','hotkey'];
+  const all=['pause','skill','shop','dungeon','item','equip','saveload','hotkey','stat'];
   all.forEach(n=>document.getElementById(n+'-screen').classList.add('hidden'));
   hideTip();
   if(name&&name!=='none'&&name!=='game'){
@@ -1752,6 +1987,7 @@ function openScreen(name){
   if(name==='equip')renderEquipScreen();
   if(name==='saveload')renderSaveLoad();
   if(name==='hotkey')renderHotkeyScreen();
+  if(name==='stat')renderStatScreen();
 }
 
 document.addEventListener('mousedown',function(e){
@@ -2140,7 +2376,7 @@ function forgeJunk(amount){
       racc+=rates[k]||0;
       if(rollR<racc){rar=k;break;}
     }
-    const item=genItem(G.p.floor,rar);
+    const item=genItem(G.p.floor,rar,G.p.class);
     addToBag(item);
     results.push(`<span style="color:${RCOL[rar]}">[${RANK[rar]}] ${item.slot} ${qualLabel(item.quality)}</span>`);
     if(['Legendary','GOD','SOMA'].includes(rar))showEpicBanner(item);
@@ -2181,11 +2417,19 @@ function openItemDetail(idx,source){
   document.getElementById('item-detail-name').style.color=RCOL[item.rarity];
   document.getElementById('item-detail-quality').innerHTML=`${qualLabel(item.quality)} · Lv${item.itemLv||1} · ${item.rarity}`;
   const err=canEquip(item);
+  const b=item.effects?.buffs||{};
+  const sp=item.effects?.special||[];
   document.getElementById('item-detail-body').innerHTML=`
     <div>Slot: <b>${item.slot}</b> · Stack: ×${item.count||1}</div>
     <div>ATK: <b>${item.atk}</b> · DEF: <b>${item.def}</b></div>
-    <div>STR:+${item.effects.buffs.str} AGI:+${item.effects.buffs.agi} INT:+${item.effects.buffs.int} VIT:+${item.effects.buffs.vit}</div>
-    ${item.effects.hpMod?`<div>HP Mod: <b style="color:${item.effects.hpMod>0?'#2f2':'#f44'}">${item.effects.hpMod>0?'+':''}${item.effects.hpMod}</b></div>`:''}
+    <div style="font-size:9px">
+      <span style="color:${statColor(b.str)}">STR:${b.str>=0?'+':''}${b.str}</span>
+      <span style="color:${statColor(b.agi)}"> AGI:${b.agi>=0?'+':''}${b.agi}</span>
+      <span style="color:${statColor(b.int)}"> INT:${b.int>=0?'+':''}${b.int}</span>
+      <span style="color:${statColor(b.vit)}"> VIT:${b.vit>=0?'+':''}${b.vit}</span>
+    </div>
+    ${item.effects?.hpMod?`<div>HP Mod: <b style="color:${item.effects.hpMod>0?'#2f2':'#f44'}">${item.effects.hpMod>0?'+':''}${item.effects.hpMod}</b></div>`:''}
+    ${sp.length?`<div style="margin-top:4px">${specialFxLabel(sp)}</div>`:''}
     ${item.reqStr?`<div style="color:var(--text3)">Req STR ${item.reqStr}</div>`:''}
     ${err?`<div style="color:#f44">${err}</div>`:''}
     <div style="margin-top:6px">Sell: <span class="gold-txt">${Math.floor(item.value*0.5).toLocaleString()}G (50%)</span></div>`;
