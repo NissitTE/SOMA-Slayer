@@ -1621,6 +1621,8 @@ function updateUI(){
   document.getElementById('p-lv').textContent=p.lv;
   document.getElementById('p-gold').textContent=p.gold.toLocaleString();
   document.getElementById('p-pts').textContent=p.pts;
+
+  const si=document.getElementById('stat-ui');
   if(si){
     let eStr=0,eAgi=0,eInt=0,eVit=0;
     Object.values(p.equips).forEach(eq=>{
