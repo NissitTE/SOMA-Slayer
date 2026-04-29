@@ -418,6 +418,8 @@ canvas{display:block;width:100%;height:100%}
     <div id="hotkey-item-slots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px"></div>
   </div>
 </div>
+
+<div id="item-screen" class="overlay hidden">
   <div class="panel-box" style="max-width:400px">
     <h2 id="item-detail-name" style="margin-bottom:3px">ITEM</h2>
     <div id="item-detail-quality" style="font-size:8px;margin-bottom:6px"></div>
@@ -1738,7 +1740,7 @@ function setHotkeyItem(slot,id){
 
 // ─── SCREENS ────────────────────────────────────────────────
 function openScreen(name){
-  const all=['pause','skill','shop','dungeon','item','equip','saveload'];
+  const all=['pause','skill','shop','dungeon','item','equip','saveload','hotkey'];
   all.forEach(n=>document.getElementById(n+'-screen').classList.add('hidden'));
   hideTip();
   if(name&&name!=='none'&&name!=='game'){
