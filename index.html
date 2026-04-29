@@ -1681,15 +1681,12 @@ let hotkeyItemMap=['HP_POT','MP_POT','CLEANSE']; // default
 
 function openHotkeyScreen(){
   if(!G.p){notify('Start game first!','#f44');return;}
-  paused=true;cancelAnimationFrame(raf);
-  document.querySelectorAll('.overlay').forEach(el=>el.classList.add('hidden'));
-  document.getElementById('hotkey-screen').classList.remove('hidden');
+  openScreen('hotkey');
   renderHotkeyScreen();
 }
 
 function closeHotkeyScreen(){
-  document.getElementById('hotkey-screen').classList.add('hidden');
-  paused=false;loop();
+  resumeGame();
 }
 
 function renderHotkeyScreen(){
@@ -1754,6 +1751,7 @@ function openScreen(name){
   if(name==='pause')updateUI();
   if(name==='equip')renderEquipScreen();
   if(name==='saveload')renderSaveLoad();
+  if(name==='hotkey')renderHotkeyScreen();
 }
 
 document.addEventListener('mousedown',function(e){
