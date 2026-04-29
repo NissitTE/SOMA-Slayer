@@ -793,6 +793,30 @@ const ARMOR_SLOTS=new Set(['Shield','Head','Chest','Legs']);
 function ri(min,max){return Math.floor(min+Math.random()*(max-min+1));}
 function rsign(posPct=0.7){return Math.random()<posPct?1:-1;}
 
+// คำนวณ stat buff ตาม floor (เป็น % ของเลเวลก่อนหน้า) และ quality
+// quality: soso = -10%~+10%, hell = -25%~+15%, heavenly = -15%~+25%
+function rollStatPct(quality){
+  if(quality==='soso'){
+    return (Math.random()*0.20-0.10); // -10% to +10%
+  } else if(quality==='hell'){
+    return (Math.random()*0.40-0.25); // -25% to +15%
+  } else { // heavenly
+    return (Math.random()*0.40-0.15); // -15% to +25%
+  }
+}
+
+// ค่า stat base = (floor - 1) * scalePerFloor, แล้วคูณ pct
+function statBuff(floor, scale, quality){
+  const prevLvBase=Math.max(1,(floor-1))*scale;
+  const pct=rollStatPct(quality);
+  return Math.round(prevLvBase*pct);
+}
+
+// primary stat (stat หลักของ class): scale สูงกว่า
+// secondary stat: scale กลาง
+// dump stat: scale ต่ำ, มักติดลบ
+function rsign(posPct=0.7){return Math.random()<posPct?1:-1;}
+
 function rollQuality(){
   const r=Math.random();
   return r<0.001?'heavenly':r<0.01?'hell':'soso';
@@ -827,20 +851,20 @@ function genItem(floor,forceRarity=null,playerClass=null){
     const isRange=(cls==='Archer'||cls==='.50 Calibre');
     const isMagic=(cls==='Priest'||cls==='Merlin Bloodline');
     if(isMelee){
-      buffs.str=ri(2,6)*Math.ceil(base/30)*rsign(0.85);
-      buffs.vit=ri(1,4)*Math.ceil(base/30)*rsign(0.80);
-      buffs.agi=ri(0,2)*Math.ceil(base/30)*rsign(0.35);
-      buffs.int=ri(0,1)*Math.ceil(base/30)*rsign(0.25);
+      buffs.str=statBuff(floor,1.8,quality);   // primary
+      buffs.vit=statBuff(floor,1.2,quality);   // secondary
+      buffs.agi=statBuff(floor,0.5,quality);   // dump
+      buffs.int=statBuff(floor,0.3,quality);   // dump
     } else if(isRange){
-      buffs.agi=ri(2,6)*Math.ceil(base/30)*rsign(0.85);
-      buffs.str=ri(1,3)*Math.ceil(base/30)*rsign(0.65);
-      buffs.int=ri(0,2)*Math.ceil(base/30)*rsign(0.30);
-      buffs.vit=ri(0,2)*Math.ceil(base/30)*rsign(0.35);
+      buffs.agi=statBuff(floor,1.8,quality);
+      buffs.str=statBuff(floor,1.0,quality);
+      buffs.int=statBuff(floor,0.5,quality);
+      buffs.vit=statBuff(floor,0.5,quality);
     } else { // magic
-      buffs.int=ri(2,6)*Math.ceil(base/30)*rsign(0.85);
-      buffs.vit=ri(1,3)*Math.ceil(base/30)*rsign(0.70);
-      buffs.agi=ri(0,2)*Math.ceil(base/30)*rsign(0.30);
-      buffs.str=ri(0,1)*Math.ceil(base/30)*rsign(0.25);
+      buffs.int=statBuff(floor,1.8,quality);
+      buffs.vit=statBuff(floor,1.2,quality);
+      buffs.agi=statBuff(floor,0.4,quality);
+      buffs.str=statBuff(floor,0.3,quality);
     }
     // Hell / Heavenly → เพิ่ม poison/stun chance
     if(quality==='hell'){
@@ -857,10 +881,10 @@ function genItem(floor,forceRarity=null,playerClass=null){
     def=Math.floor(base*qMod*(0.80+Math.random()*0.25));
     atk=Math.floor(base*(Math.random()<0.3?-1:1)*Math.random()*0.08); // -8~+8%
     // Stat: VIT เยอะ, STR พอมี, AGI/INT น้อยหรือติดลบ
-    buffs.vit=ri(2,6)*Math.ceil(base/30)*rsign(0.80);
-    buffs.str=ri(1,3)*Math.ceil(base/30)*rsign(0.65);
-    buffs.agi=ri(0,3)*Math.ceil(base/30)*rsign(0.40);
-    buffs.int=ri(0,2)*Math.ceil(base/30)*rsign(0.35);
+    buffs.vit=statBuff(floor,1.8,quality);
+    buffs.str=statBuff(floor,0.9,quality);
+    buffs.agi=statBuff(floor,0.4,quality);
+    buffs.int=statBuff(floor,0.3,quality);
     if(quality==='hell'){
       specialEffects.push({type:'stun',chance:Math.min(0.15,0.02+floor*0.0001)});
     } else if(quality==='heavenly'){
@@ -872,11 +896,11 @@ function genItem(floor,forceRarity=null,playerClass=null){
     // บัพมาก stat สุ่มได้ดีหรือแย่ผสม, atk/def น้อย
     atk=Math.floor(base*(rsign(0.5)?1:-1)*Math.random()*0.12);
     def=Math.floor(base*(rsign(0.5)?1:-1)*Math.random()*0.12);
-    // stat สุ่มทุก axis อาจดีหรือแย่
-    buffs.str=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
-    buffs.agi=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
-    buffs.int=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
-    buffs.vit=ri(0,4)*Math.ceil(base/25)*rsign(0.55);
+    // stat สุ่มทุก axis อาจดีหรือแย่ แต่ scale เล็กกว่า weapon/armor
+    buffs.str=statBuff(floor,0.8,quality);
+    buffs.agi=statBuff(floor,0.8,quality);
+    buffs.int=statBuff(floor,0.8,quality);
+    buffs.vit=statBuff(floor,0.8,quality);
     // Special buffs มากกว่าชนิดอื่น
     const accBuffPool=['antiPoison','fastAtk','fastMove','dodge','antiStun'];
     const numBuff=1+Math.floor(Math.random()*3); // 1~3 special buffs
@@ -927,6 +951,10 @@ function canEquip(item){
   if(item.reqStr&&cs.str<item.reqStr)return`Req STR ${item.reqStr}`;
   if(item.reqAgi&&cs.agi<item.reqAgi)return`Req AGI ${item.reqAgi}`;
   if(item.reqInt&&cs.int<item.reqInt)return`Req INT ${item.reqInt}`;
+  // ห้ามใส่ถ้า stat รวมติดลบ
+  const b=item.effects?.buffs||{};
+  const totalStat=(b.str||0)+(b.agi||0)+(b.int||0)+(b.vit||0);
+  if(totalStat<0)return`สถิติรวมติดลบ (${totalStat}) ไม่สามารถสวมใส่ได้`;
   return null;
 }
 
@@ -2218,10 +2246,10 @@ function renderReforgeTab(){
     const qty=g.count||1;
     const total=junk*qty;
     const equipped=p.equips[g.slot];
-    // เช็คว่าดีกว่าของที่สวม
-    const isBetter=equipped&&(g.atk>equipped.atk||g.def>equipped.def);
-    const betterTag=isBetter?`<span style="color:#2f2;font-size:7px">▲ ดีกว่าที่ใส่</span>`:'';
-    return`<div class="shop-item" style="${isBetter?'border-color:#2f2':''}" onclick="reforgeItem(${i})">
+    const better=isBetterThanEquipped(g,equipped);
+    const scoreDiff=equipped?Math.floor(itemEffectiveScore(g)-itemEffectiveScore(equipped)):null;
+    const betterTag=better?`<span style="color:#2f2;font-size:7px">▲ ดีกว่า (+${scoreDiff})</span>`:'';
+    return`<div class="shop-item" style="${better?'border-color:#2f2':''}" onclick="reforgeItem(${i})">
       <span style="color:${RCOL[g.rarity]}">${SLOT_ICONS[g.slot]}</span>
       <span class="rank-${RANK[g.rarity]}">[${RANK[g.rarity]}] ${g.slot}${qty>1?' ×'+qty:''} ${betterTag}</span>
       <span class="shop-price" style="display:flex;align-items:center;gap:3px;color:#888">
@@ -2253,9 +2281,10 @@ function reforgeItem(idx){
   const junkEach=REFORGE_JUNK[g.rarity]||2;
   const qty=g.count||1;const total=junkEach*qty;
   const equipped=p.equips[g.slot];
-  const isBetter=equipped&&(g.atk>equipped.atk||g.def>equipped.def);
-  if(isBetter){
-    if(!confirm(`⚠ [${g.rarity}] ${g.slot} มีสเตตัสดีกว่าที่สวมอยู่!\nATK:${g.atk}>${equipped.atk} / DEF:${g.def}>${equipped.def}\nแน่ใจหรือไม่ที่จะ Re-Forge?`))return;
+  const better=isBetterThanEquipped(g,equipped);
+  if(better){
+    const scoreDiff=Math.floor(itemEffectiveScore(g)-itemEffectiveScore(equipped));
+    if(!confirm(`⚠ [${g.rarity}] ${g.slot} ดีกว่าที่สวมอยู่!\nScore +${scoreDiff} | ATK:${g.atk}>${equipped.atk} DEF:${g.def}>${equipped.def}\nแน่ใจหรือไม่ที่จะ Re-Forge?`))return;
   } else if(['GOD','SOMA'].includes(g.rarity)){
     if(!confirm(`Re-Forge [${g.rarity}] ${g.slot} → 🔩${total} Junk?`))return;
   }
@@ -2276,8 +2305,8 @@ function reforgeAll(){
   const toReforge=[];
   p.gears.forEach((g,i)=>{
     const equipped=p.equips[g.slot];
-    const isBetter=equipped&&(g.atk>equipped.atk||g.def>equipped.def);
-    if(isBetter){skippedNames.push(`[${RANK[g.rarity]}]${g.slot}`);}
+    const better=isBetterThanEquipped(g,equipped);
+    if(better){skippedNames.push(`[${RANK[g.rarity]}]${g.slot}`);}
     else toReforge.push(i);
   });
   if(toReforge.length===0){notify('ไม่มีของที่จะ Re-Forge (ทุกชิ้นดีกว่าที่ใส่อยู่)','#fa0');return;}
