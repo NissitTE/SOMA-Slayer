@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SOMA SLAYER v12.0</title>
+<title>SOMA SLAYER v12.1</title>
 <style>
 :root{
   --bg:#050505;--bg2:#0a0a0a;--bg3:#111;--panel:#0d0d0d;
@@ -175,7 +175,7 @@ canvas{display:block;width:100%;height:100%}
 <div id="start-screen" class="overlay">
   <div class="panel-box" style="max-width:500px">
     <h1>⚔ SOMA SLAYER</h1>
-    <div class="sub-title">V 12.0 · FULL EDITION</div>
+    <div class="sub-title">V 12.1 · FULL EDITION</div>
     <input type="text" id="in-name" placeholder="Hero Name..." style="margin-bottom:10px">
     <div class="class-grid">
       <div class="class-card selected" data-class="Knight" onclick="selectClass(this)">
@@ -250,8 +250,7 @@ canvas{display:block;width:100%;height:100%}
       <div style="display:flex;gap:4px;align-items:center">
         <select id="equip-sort" onchange="renderEquipScreen()" style="width:auto;padding:3px 6px;font-size:9px">
           <option value="rarity">Sort: Rarity ↓</option>
-          <option value="atk">Sort: ATK ↓</option>
-          <option value="def">Sort: DEF ↓</option>
+          <option value="score">Sort: Score ↓</option>
           <option value="lv">Sort: Item Lv ↓</option>
         </select>
         <select id="equip-filter-slot" onchange="renderEquipScreen()" style="width:auto;padding:3px 6px;font-size:9px">
@@ -526,14 +525,13 @@ canvas{display:block;width:100%;height:100%}
 
 <script>
 'use strict';
-/* ═══ SOMA SLAYER v11.2 ══════════════════════════════════════
-   FIX 1: Obstacles moved to border (decoration only, no collision)
-   FIX 2: New monster types & elite system
-   FIX 3: New drop rate system (3 tiers by floor)
-   FIX 4: New EXP formula (starts 10, ×1.3, cap 9,999,999)
-   FIX 5: New forge rates per amount
-   FIX 6: Re-Forge junk rates updated
-   FIX 7: Gold ×2 × mob level
+/* ═══ SOMA SLAYER v12.1 ══════════════════════════════════════
+   FIX 1: Re-Forge: class-based score (Knight=STR/VIT, Archer=STR/AGI, Priest=INT/VIT), ≥10% to flag as better
+   FIX 2: ATK/DEF removed from items — all combat from STR/INT/VIT stats
+   FIX 3: Priest/Merlin use INT for Magic ATK (not STR)
+   FIX 4: Luck stat added — crit chance, drop rate, found on accessories/head
+   FIX 5: Legendary drops/forge no longer announced in banner (GOD/SOMA only)
+   FIX 6: Gold drop reduced -30%
 ═══════════════════════════════════════════════════════════════ */
 
 const MAX_LV=9999, MAX_STAT=9999, MAX_GOLD=999999999, BAG_SIZE=199;
@@ -666,7 +664,7 @@ function freshPlayer(name,cls){
   return{
     name,class:cls,lv:1,exp:0,expNext:calcExpNext(1),
     gold:500,pts:5,skillPts:0,
-    str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),
+    str:10+(b.str||0),agi:10+(b.agi||0),int:10+(b.int||0),vit:10+(b.vit||0),luck:5,
     hp:0,maxHp:0,mp:0,maxMp:0,x:0,y:0,angle:0,
     equips:{Weapon:null,Shield:null,Head:null,Chest:null,Legs:null,Cloak:null,Pendant:null,Necklace:null,Ring:null},
     inv:{HP_POT:5,MP_POT:3,CLEANSE:2,JUNK:0,HP_POT_L:0,MP_POT_L:0,EXP_SCROLL:0,BLESSING:0,DIAMOND:0,SKILL_POT:0,SKILL_ELIXIR:0,STATUS_POT:0,STATUS_ELIXIR:0,SKILL_RESET:0,STATUS_RESET:0},
@@ -684,7 +682,7 @@ function freshPlayer(name,cls){
 }
 
 function calcStats(p){
-  let str=p.str,agi=p.agi,int_=p.int,vit=p.vit,hpB=0,mpB=0;
+  let str=p.str,agi=p.agi,int_=p.int,vit=p.vit,luck=p.luck||0,hpB=0,mpB=0;
   let bonusDodge=0,bonusMoveSpd=0,bonusAtkSpd=0,antiPoison=0,antiStun=0;
   Object.values(p.equips).forEach(eq=>{
     if(!eq)return;
@@ -692,6 +690,7 @@ function calcStats(p){
     agi+=Math.floor((eq.effects?.buffs?.agi||0));
     int_+=Math.floor((eq.effects?.buffs?.int||0));
     vit+=Math.floor((eq.effects?.buffs?.vit||0));
+    luck+=Math.floor((eq.luck||0));
     hpB+=eq.effects?.hpMod||0;mpB+=eq.effects?.mpMod||0;
     (eq.effects?.special||[]).forEach(s=>{
       if(s.type==='dodge')bonusDodge+=s.chance*100;
@@ -703,13 +702,18 @@ function calcStats(p){
   });
   const maxHp=Math.max(1,60+vit*12+p.lv*4+hpB);
   const maxMp=Math.max(10,30+int_*6+p.lv*2+mpB);
-  const atk=(str*1.5+agi*0.5)+p.lv*1;
+  // Priest/Merlin use INT for magic ATK; others use STR
+  const isMagicClass=(p.class==='Priest'||p.class==='Merlin Bloodline');
+  const atk=isMagicClass?(int_*1.8+p.lv*1):(str*1.5+agi*0.5+p.lv*1);
   const def=Math.floor(vit*0.6+agi*0.3);
   const spd=2+agi*0.04;
-  const critR=Math.min(50,agi*0.35);
+  // Luck adds crit chance: 1 luck = 0.1% crit extra (on top of AGI base)
+  const critR=Math.min(75,agi*0.35+luck*0.1);
   const dodgeR=Math.min(60,agi*0.2+bonusDodge);
   const moveSpd=Math.max(1.5,2.8*(Math.min(200,p.moveSpeedPct||100)/100)+bonusMoveSpd*0.02);
-  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,moveSpd,bonusAtkSpd,antiPoison,antiStun};
+  // Luck drop bonus: 1 luck = 0.002% drop increase
+  const luckDropBonus=luck*0.00002;
+  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,luck,moveSpd,bonusAtkSpd,antiPoison,antiStun,luckDropBonus};
 }
 
 // ─── MONSTER SPAWN ──────────────────────────────────────────
@@ -835,13 +839,12 @@ function genItem(floor,forceRarity=null,playerClass=null){
 
   // ─── WEAPON ─────────────────────────────────────────────
   let atk=0,def=0,buffs={str:0,agi:0,int:0,vit:0};
+  let luckBonus=0;
   let specialEffects=[]; // poison / stun chance
   let weaponSubName='';
 
   if(slot==='Weapon'){
-    // อาวุธเน้นตี, ป้องกันแทบ 0
-    atk=Math.floor(base*qMod*(0.85+Math.random()*0.3));
-    def=Math.floor(base*0.02*Math.random()); // 0~2%
+    // อาวุธ: stat หลักเท่านั้น ไม่มี ATK/DEF raw — ใช้ stat คำนวณ
     // สุ่มชื่ออาวุธตาม class (ใช้ playerClass ถ้ามี)
     const cls=playerClass||'Knight';
     const names=WEAPON_NAMES[cls]||WEAPON_NAMES.Knight;
@@ -860,11 +863,11 @@ function genItem(floor,forceRarity=null,playerClass=null){
       buffs.str=statBuff(floor,1.0,quality);
       buffs.int=statBuff(floor,0.5,quality);
       buffs.vit=statBuff(floor,0.5,quality);
-    } else { // magic
-      buffs.int=statBuff(floor,1.8,quality);
-      buffs.vit=statBuff(floor,1.2,quality);
-      buffs.agi=statBuff(floor,0.4,quality);
-      buffs.str=statBuff(floor,0.3,quality);
+    } else { // magic — เน้น INT เป็นหลัก ไม่มี STR เพราะไม่ส่งผลกับ Priest/Merlin
+      buffs.int=statBuff(floor,2.0,quality);   // primary (สูงสุด)
+      buffs.vit=statBuff(floor,1.2,quality);   // secondary
+      buffs.agi=statBuff(floor,0.4,quality);   // dump
+      buffs.str=statBuff(floor,0.1,quality);   // dump (แทบไม่มีผล)
     }
     // Hell / Heavenly → เพิ่ม poison/stun chance
     if(quality==='hell'){
@@ -877,14 +880,15 @@ function genItem(floor,forceRarity=null,playerClass=null){
 
   // ─── ARMOR (Shield/Head/Chest/Legs) ─────────────────────
   } else if(ARMOR_SLOTS.has(slot)){
-    // เกราะเน้นป้องกัน, โจมตีน้อยหรือติดลบ
-    def=Math.floor(base*qMod*(0.80+Math.random()*0.25));
-    atk=Math.floor(base*(Math.random()<0.3?-1:1)*Math.random()*0.08); // -8~+8%
-    // Stat: VIT เยอะ, STR พอมี, AGI/INT น้อยหรือติดลบ
+    // เกราะเน้น VIT, STR พอมี — ไม่มี ATK/DEF raw
     buffs.vit=statBuff(floor,1.8,quality);
     buffs.str=statBuff(floor,0.9,quality);
     buffs.agi=statBuff(floor,0.4,quality);
     buffs.int=statBuff(floor,0.3,quality);
+    // หมวก (Head) มีโอกาสได้ Luck
+    if(slot==='Head'){
+      luckBonus=Math.random()<0.4?ri(1,Math.max(1,Math.floor(floor*0.05))):0;
+    }
     if(quality==='hell'){
       specialEffects.push({type:'stun',chance:Math.min(0.15,0.02+floor*0.0001)});
     } else if(quality==='heavenly'){
@@ -893,14 +897,17 @@ function genItem(floor,forceRarity=null,playerClass=null){
 
   // ─── ACCESSORY (Cloak/Pendant/Necklace/Ring) ─────────────
   } else {
-    // บัพมาก stat สุ่มได้ดีหรือแย่ผสม, atk/def น้อย
-    atk=Math.floor(base*(rsign(0.5)?1:-1)*Math.random()*0.12);
-    def=Math.floor(base*(rsign(0.5)?1:-1)*Math.random()*0.12);
-    // stat สุ่มทุก axis อาจดีหรือแย่ แต่ scale เล็กกว่า weapon/armor
+    // บัฟ stat สุ่มได้ดีหรือแย่ผสม — ไม่มี ATK/DEF raw
     buffs.str=statBuff(floor,0.8,quality);
     buffs.agi=statBuff(floor,0.8,quality);
     buffs.int=statBuff(floor,0.8,quality);
     buffs.vit=statBuff(floor,0.8,quality);
+    // สร้อย หมวก รองเท้า (Pendant/Necklace) มีโอกาสได้ Luck สูง
+    if(slot==='Pendant'||slot==='Necklace'){
+      luckBonus=ri(1,Math.max(1,Math.floor(floor*0.08)));
+    } else if(slot==='Ring'||slot==='Cloak'){
+      luckBonus=Math.random()<0.35?ri(1,Math.max(1,Math.floor(floor*0.04))):0;
+    }
     // Special buffs มากกว่าชนิดอื่น
     const accBuffPool=['antiPoison','fastAtk','fastMove','dodge','antiStun'];
     const numBuff=1+Math.floor(Math.random()*3); // 1~3 special buffs
@@ -929,8 +936,8 @@ function genItem(floor,forceRarity=null,playerClass=null){
     name:`${RANK[rarity]}${weaponSubName||' '+slot}`,
     fullName:`${rarity}${weaponSubName||' '+slot}`,
     rarity,slot,quality,floor,itemLv:floor,
-    atk:Math.max(slot==='Weapon'?1:atk,atk),
-    def:Math.max(0,def),
+    atk:0,def:0, // ATK/DEF removed — all combat comes from STR/INT/VIT stats
+    luck:luckBonus||0,
     effects:{buffs,hpMod,mpMod:0,statusEffects:[],special:specialEffects},
     reqStr,reqAgi,reqInt,value,count:1,
   };
@@ -1217,9 +1224,9 @@ function playerAttack(){
     const d=Math.hypot(p.x-m.x,p.y-m.y);
     const ang=Math.atan2(m.y-p.y,m.x-p.x);
     let diff=Math.abs(p.angle-ang);if(diff>Math.PI)diff=Math.PI*2-diff;
-    const rng=p.equips.Weapon?100+p.equips.Weapon.atk*0.1:80;
+    const rng=p.equips.Weapon?100:80;
     if(d<rng&&diff<0.55){
-      let dmg=cs.atk+(p.equips.Weapon?p.equips.Weapon.atk:0);
+      let dmg=cs.atk;
       const pwrBuff=p.statusEffects.passive_power&&now<p.statusEffects.passive_power.until?1+(p.statusEffects.passive_power.pct||0):1;
       dmg=Math.floor(dmg*(crit?2:1)*pwrBuff);
       m.hp-=dmg;addDmgNum(m.x,m.y,dmg,crit?'var(--god)':'#ddd');
@@ -1241,7 +1248,7 @@ function mobAttackPlayer(m){
   const now=Date.now();if(now<m.cd||now<m.stunUntil)return;
   const p=G.p,cs=calcStats(p);
   m.cd=now+(m.isBoss?800:1200);
-  const def=cs.def+(p.equips.Shield?p.equips.Shield.def:0)+(p.equips.Chest?p.equips.Chest.def:0);
+  const def=cs.def; // DEF fully from VIT stat (no raw item DEF)
   const shielded=p.statusEffects.shield&&now<p.statusEffects.shield.until;
   const barrier=p.statusEffects.barrier&&now<p.statusEffects.barrier.until;
   const evading=p.statusEffects.evade&&now<p.statusEffects.evade.until;
@@ -1282,14 +1289,16 @@ function mobDied(m){
   // FIX 3: Exp ตามเลเวลมอนสเตอร์ตัวเอง
   const mobLv=m.lv||p.floor;
   const baseExp=m.isBoss?mobLv*40:mobLv*4;
-  // FIX 7: Gold ×2 × mobLv
-  const baseGold=m.isBoss?mobLv*40:mobLv*4;
+  // FIX 7: Gold reduced 30% from original (was mobLv*40/4)
+  const baseGold=m.isBoss?Math.floor(mobLv*28):Math.floor(mobLv*2.8);
 
   const exp=baseExp*(m.isElite?2:1)*mult;
   const gold=Math.floor(baseGold*(m.isElite?2:1)*mult);
 
   const now=Date.now();
+  const cs=calcStats(p);
   const bless=(now<blessingUntil)?blessingBonus:0;
+  const luckDrop=cs.luckDropBonus||0;
   p.gold=Math.min(MAX_GOLD,p.gold+gold);
   giveExp(exp);
 
@@ -1304,14 +1313,14 @@ function mobDied(m){
   }
 
   // อุปกรณ์สวมใส่ 10–25%
-  const equipChance=(m.isBoss?0.30:m.isElite?0.15:0.04+Math.random()*0.05)*(m.dropMult||1)+bless;
+  const equipChance=(m.isBoss?0.30:m.isElite?0.15:0.04+Math.random()*0.05)*(m.dropMult||1)+bless+luckDrop;
   if(Math.random()<equipChance){
     const item=genItem(p.floor,null,p.class);
     if(addToBag(item)){
       const c=RCOL[item.rarity];
       notify(`Drop: ${item.fullName} [${item.quality}]`,c);
       logMsg(`[${RANK[item.rarity]}] ${item.slot} ${item.quality}`,'#fa0');
-      if(['Legendary','GOD','SOMA'].includes(item.rarity))showEpicBanner(item);
+      if(['GOD','SOMA'].includes(item.rarity))showEpicBanner(item);
     }
   } else if(Math.random()<0.20+bless){
     // Junk drop separate
@@ -1386,9 +1395,9 @@ function useItem(id){
     notify('Skill Points Reset! All SP refunded.','#fa0');logMsg('Skill Reset done','#fa0');
   }
   else if(id==='STATUS_RESET'){
-    const totalPts=(p.str-10-(baseStatBonus(p.class,'str')))+(p.agi-10-(baseStatBonus(p.class,'agi')))+(p.int-10-(baseStatBonus(p.class,'int')))+(p.vit-10-(baseStatBonus(p.class,'vit')));
+    const totalPts=(p.str-10-(baseStatBonus(p.class,'str')))+(p.agi-10-(baseStatBonus(p.class,'agi')))+(p.int-10-(baseStatBonus(p.class,'int')))+(p.vit-10-(baseStatBonus(p.class,'vit')))+((p.luck||5)-5);
     const bc={Knight:{vit:5,str:3},Archer:{agi:5,str:2},Priest:{int:5,vit:2},Excalibur:{str:10,vit:8,agi:5,int:5},'.50 Calibre':{agi:12,str:6,int:4,vit:4},'Merlin Bloodline':{int:12,vit:6,str:4,agi:4}}[p.class]||{};
-    p.str=10+(bc.str||0);p.agi=10+(bc.agi||0);p.int=10+(bc.int||0);p.vit=10+(bc.vit||0);
+    p.str=10+(bc.str||0);p.agi=10+(bc.agi||0);p.int=10+(bc.int||0);p.vit=10+(bc.vit||0);p.luck=5;
     // refund all pts spent: total levels * 2 pts/lv + initial 5
     const spent=Math.max(0,totalPts);
     p.pts=(p.pts||0)+spent;
@@ -1664,7 +1673,13 @@ function updateUI(){
         <span class="stat-val">${p[k]}</span>
         <span style="font-size:7px;color:${eq>=0?'#8dffb0':'#ff7070'};min-width:28px;text-align:right">${eq>=0?'+':''}${eq}</span>
         <span style="font-size:7px;color:#4fc3f7;min-width:24px;text-align:right">=${tot}</span>
-      </div>`).join('');
+      </div>`).join('')+`
+      <div class="stat-row">
+        <span class="stat-name">LCK</span>
+        <span class="stat-val">${p.luck||0}</span>
+        <span style="font-size:7px;color:#8dffb0;min-width:28px;text-align:right">+${cs.luck-(p.luck||0)}</span>
+        <span style="font-size:7px;color:#4fc3f7;min-width:24px;text-align:right">=${cs.luck}</span>
+      </div>`;
   }
 
   const spm=document.getElementById('stat-pts-mini');if(spm)spm.textContent=p.pts;
@@ -1677,7 +1692,7 @@ function updateUI(){
   }
 
   document.getElementById('combat-stats').innerHTML=
-    `ATK:<b style="color:var(--lux2)">${cs.atk}</b> DEF:<b>${cs.def}</b><br>CRIT:<b>${cs.critR.toFixed(0)}%</b> AGI:<b>${cs.agi}</b>`;
+    `ATK:<b style="color:var(--lux2)">${cs.atk.toFixed(0)}</b>${(G.p.class==='Priest'||G.p.class==='Merlin Bloodline')?'<span style="font-size:7px">(INT)</span>':''} DEF:<b>${cs.def}</b><br>CRIT:<b>${cs.critR.toFixed(0)}%</b> AGI:<b>${cs.agi}</b><br>🍀LCK:<b style="color:#ffd700">${cs.luck}</b>`;
 
   document.getElementById('floor-info').textContent=`FLOOR ${p.floor}${isBossFloor(p.floor)?' ⚠BOSS':''}`;
 
@@ -1775,13 +1790,12 @@ function showBagTip(e,idx){
   tt.innerHTML=`
     <div style="color:${RCOL[g.rarity]};font-weight:bold">[${RANK[g.rarity]}] ${g.fullName}</div>
     <div style="font-size:8px;color:var(--text3)">${qualLabel(g.quality)} · Lv${g.itemLv} · ×${g.count}</div>
-    <div>ATK: <b>${g.atk}</b>${dAtk!==null?` <span style="color:${dAtk>=0?'#2f2':'#f44'}">(${dAtk>=0?'+':''}${dAtk})</span>`:''}</div>
-    <div>DEF: <b>${g.def}</b>${dDef!==null?` <span style="color:${dDef>=0?'#2f2':'#f44'}">(${dDef>=0?'+':''}${dDef})</span>`:''}</div>
     <div style="font-size:8px">
       <span style="color:${statColor(b.str)}">STR:${b.str>=0?'+':''}${b.str}</span>
       <span style="color:${statColor(b.agi)}"> AGI:${b.agi>=0?'+':''}${b.agi}</span>
       <span style="color:${statColor(b.int)}"> INT:${b.int>=0?'+':''}${b.int}</span>
       <span style="color:${statColor(b.vit)}"> VIT:${b.vit>=0?'+':''}${b.vit}</span>
+      ${g.luck?`<span style="color:#ffd700"> LCK:+${g.luck}</span>`:''}
     </div>
     ${g.effects?.hpMod?`<div>HP: <span style="color:${g.effects.hpMod>0?'#2f2':'#f44'}">${g.effects.hpMod>0?'+':''}${g.effects.hpMod}</span></div>`:''}
     ${sp.length?`<div style="font-size:8px;margin-top:2px">${specialFxLabel(sp)}</div>`:''}
@@ -1808,7 +1822,7 @@ function renderJewelTab(){
     const prev=document.getElementById('jewel-slot-preview');
     if(!slot||!p.equips[slot]){prev.innerHTML='<span style="color:var(--text3)">ไม่มีไอเทม</span>';return;}
     const item=p.equips[slot];
-    prev.innerHTML=`<span style="color:${RCOL[item.rarity]}">[${RANK[item.rarity]}] ${item.slot}</span> · ${qualLabel(item.quality)} · ATK:${item.atk} DEF:${item.def}`;
+    prev.innerHTML=`<span style="color:${RCOL[item.rarity]}">[${RANK[item.rarity]}] ${item.slot}</span> · ${qualLabel(item.quality)} · STR:${item.effects?.buffs?.str>=0?'+':''}${item.effects?.buffs?.str||0} INT:${item.effects?.buffs?.int>=0?'+':''}${item.effects?.buffs?.int||0} VIT:${item.effects?.buffs?.vit>=0?'+':''}${item.effects?.buffs?.vit||0}`;
   };
   document.getElementById('jewel-result').innerHTML='';
 }
@@ -1832,9 +1846,9 @@ function forgeJewel(){
     // Heavenly 10%
     newQ='heavenly';
     item.quality='heavenly';
-    // Recalculate stats for heavenly
-    item.atk=Math.floor(item.atk*1.2);item.def=Math.floor(item.def*1.1);
-    msg=`✦ SUCCESS! → Heavenly! ATK:${item.atk} DEF:${item.def}`;color='#aaddff';
+    // Boost main stat buffs for heavenly
+    Object.keys(item.effects.buffs).forEach(k=>{item.effects.buffs[k]=Math.round((item.effects.buffs[k]||0)*1.15);});
+    msg=`✦ SUCCESS! → Heavenly! Stats boosted ×1.15`;color='#aaddff';
     notify('✦ JEWEL FORGE → HEAVENLY!','#aaddff');
     document.getElementById('jewel-result').innerHTML=`<div style="color:#aaddff;font-weight:bold">${msg}</div>`;
   } else if(r<0.70){
@@ -1853,10 +1867,10 @@ function forgeJewel(){
       newQ=Math.random()<0.5?'hell':'soso';
     }
     item.quality=newQ;
-    if(newQ==='hell'){item.atk=Math.floor(item.atk*1.3);item.def=Math.floor(item.def*0.7);}
-    else if(newQ==='soso'){item.atk=Math.floor(item.atk*0.95);item.def=Math.floor(item.def*0.95);}
+    if(newQ==='hell'){Object.keys(item.effects.buffs).forEach(k=>{item.effects.buffs[k]=Math.round((item.effects.buffs[k]||0)*1.1);});}
+    else if(newQ==='soso'){Object.keys(item.effects.buffs).forEach(k=>{item.effects.buffs[k]=Math.round((item.effects.buffs[k]||0)*0.95);});}
     const qcolor=newQ==='hell'?'#ff5555':'#aaa';
-    msg=`→ ${newQ.toUpperCase()}! ATK:${item.atk} DEF:${item.def}`;
+    msg=`→ ${newQ.toUpperCase()}! Stats adjusted`;
     document.getElementById('jewel-result').innerHTML=`<div style="color:${qcolor};font-weight:bold">${msg}</div>`;
     notify(`Jewel Forge → ${newQ.toUpperCase()}!`,qcolor);
   }
@@ -1951,13 +1965,13 @@ function renderStatScreen(){
   const body=document.getElementById('stat-screen-body');
   if(body){
     body.innerHTML=[
-      ['STR','str',eStr],['AGI','agi',eAgi],['INT','int',eInt],['VIT','vit',eVit]
+      ['STR','str',eStr],['AGI','agi',eAgi],['INT','int',eInt],['VIT','vit',eVit],['LCK','luck',0]
     ].map(([label,key,bonus])=>`
       <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #111">
         <span style="color:var(--text2);font-size:9px;width:28px">${label}</span>
-        <span style="color:var(--lux2);font-size:11px;font-weight:bold;min-width:36px">${p[key]}</span>
+        <span style="color:var(--lux2);font-size:11px;font-weight:bold;min-width:36px">${p[key]||0}</span>
         <span style="font-size:8px;color:${bonus>=0?'#8dffb0':'#ff7070'}">${bonus>=0?'+':''}${bonus} (eq)</span>
-        <span style="font-size:9px;color:#4fc3f7;margin-left:4px">= ${cs[key]}</span>
+        <span style="font-size:9px;color:#4fc3f7;margin-left:4px">= ${cs[key]||0}</span>
         <div style="margin-left:auto;display:flex;gap:2px">
           <button class="stat-btn" onclick="addStat('${key}',1);renderStatScreen()" ${p.pts<1?'disabled':''}>+1</button>
           <button class="stat-btn" onclick="addStat('${key}',10);renderStatScreen()" ${p.pts<10?'disabled':''}>+10</button>
@@ -1979,6 +1993,7 @@ function renderStatScreen(){
         b.agi?`AGI:${b.agi>=0?'+':''}${b.agi}`:'',
         b.int?`INT:${b.int>=0?'+':''}${b.int}`:'',
         b.vit?`VIT:${b.vit>=0?'+':''}${b.vit}`:'',
+        eq.luck?`LCK:+${eq.luck}`:'',
       ].filter(Boolean).join(' ');
       const spStr=specialFxLabel(sp);
       if(statStr||spStr)lines.push(`<div><span style="color:var(--lux3)">${SLOT_ICONS[slot]||''}${slot}</span>: ${statStr}${spStr?' · '+spStr:''}</div>`);
@@ -1991,10 +2006,11 @@ function renderStatScreen(){
     const atkSpd=Math.max(50,400-Math.min(350,cs.spd*20));
     const atkSpdMult=Math.max(0.4,1-(cs.bonusAtkSpd||0)*0.005);
     dd.innerHTML=`
-      <div>ATK: <b style="color:var(--lux2)">${cs.atk.toFixed(1)}</b> · DEF: <b>${cs.def}</b></div>
+      <div>ATK: <b style="color:var(--lux2)">${cs.atk.toFixed(1)}</b> · DEF: <b>${cs.def}</b> <span style="font-size:7px;color:var(--text3)">${(G.p.class==='Priest'||G.p.class==='Merlin Bloodline')?'(from INT)':'(from STR)'}</span></div>
       <div>HP: <b style="color:var(--hp)">${Math.floor(G.p.hp)}/${cs.maxHp}</b> · MP: <b style="color:#4488ff">${Math.floor(G.p.mp)}/${cs.maxMp}</b></div>
       <div>CRIT: <b>${cs.critR.toFixed(1)}%</b> · Dodge: <b>${cs.dodgeR.toFixed(1)}%</b></div>
       <div>ATK Speed: <b>${Math.floor(atkSpd*atkSpdMult)}ms</b> · Move: <b>${((Math.min(200,G.p.moveSpeedPct||100))).toFixed(1)}%</b></div>
+      <div style="color:#ffd700">🍀 LCK: <b>${cs.luck}</b> · Crit+${(cs.luck*0.1).toFixed(1)}% · Drop+${(cs.luckDropBonus*100).toFixed(3)}%</div>
       ${cs.antiPoison>0?`<div>🛡 Anti-Poison: <b style="color:#8dffb0">${(cs.antiPoison*100).toFixed(0)}%</b></div>`:''}
       ${cs.antiStun>0?`<div>🧿 Anti-Stun: <b style="color:#8dffb0">${(cs.antiStun*100).toFixed(0)}%</b></div>`:''}`;
   }
@@ -2045,10 +2061,9 @@ function togglePause(){
 
 // ─── EQUIP SCREEN ───────────────────────────────────────────
 function itemSortScore(item,sortBy){
-  if(sortBy==='atk')return item.atk;
-  if(sortBy==='def')return item.def;
+  if(sortBy==='score')return itemEffectiveScore(item);
   if(sortBy==='lv')return item.itemLv||1;
-  return RARITY.indexOf(item.rarity)*100000+item.atk;
+  return RARITY.indexOf(item.rarity)*100000+itemEffectiveScore(item);
 }
 
 function renderEquipScreen(){
@@ -2079,7 +2094,9 @@ function renderEquipScreen(){
   const inv=document.getElementById('equip-inv-ui');
   if(inv)inv.innerHTML=filtered.map(({g,i})=>{
     const err=canEquip(g);const col=RCOL[g.rarity];
-    const eq=p.equips[g.slot];const dA=eq?g.atk-eq.atk:null;
+    const eq=p.equips[g.slot];
+    const cs=calcStats(p);
+    const scoreDiff=eq?Math.floor(itemEffectiveScore(g)-itemEffectiveScore(eq)):null;
     return`<div class="equip-inv-item" onclick="equipItem(${i})"
                  onmouseenter="showBagTip(event,${i})" onmouseleave="hideTip()"
                  style="border-color:${err?'#2a2a2a':col}">
@@ -2088,9 +2105,9 @@ function renderEquipScreen(){
         <div><span class="rank-${RANK[g.rarity]}" style="font-weight:bold">[${RANK[g.rarity]}]</span>
           <span style="color:${col}"> ${g.slot}</span>
           ${g.count>1?`<span style="color:var(--lux2);font-size:7px"> ×${g.count}</span>`:''}
-          ${dA!==null?`<span style="color:${dA>=0?'#2f2':'#f44'};font-size:8px"> (${dA>=0?'+':''}${dA} ATK)</span>`:''}
+          ${scoreDiff!==null?`<span style="color:${scoreDiff>=0?'#2f2':'#f44'};font-size:8px"> (${scoreDiff>=0?'+':''}${scoreDiff} score)</span>`:''}
         </div>
-        <div style="font-size:7px;color:var(--text3)">${qualLabel(g.quality)} · Lv${g.itemLv} · ATK:${g.atk} DEF:${g.def}</div>
+        <div style="font-size:7px;color:var(--text3)">${qualLabel(g.quality)} · Lv${g.itemLv}${g.luck?` · 🍀LCK+${g.luck}`:''}</div>
         ${err?`<div style="color:#f44;font-size:7px">${err}</div>`:''}
       </div>
     </div>`;
@@ -2102,8 +2119,7 @@ function showEquipTip(e,slot){
   const tt=document.getElementById('tooltip');
   tt.innerHTML=`<div style="color:${RCOL[item.rarity]};font-weight:bold">[${RANK[item.rarity]}] ${item.slot}</div>
     <div>${qualLabel(item.quality)} · Lv${item.itemLv}</div>
-    <div>ATK: <b>${item.atk}</b> DEF: <b>${item.def}</b></div>
-    <div>STR:+${item.effects.buffs.str} AGI:+${item.effects.buffs.agi} INT:+${item.effects.buffs.int} VIT:+${item.effects.buffs.vit}</div>
+    <div style="font-size:8px">STR:${item.effects.buffs.str>=0?'+':''}${item.effects.buffs.str} AGI:${item.effects.buffs.agi>=0?'+':''}${item.effects.buffs.agi} INT:${item.effects.buffs.int>=0?'+':''}${item.effects.buffs.int} VIT:${item.effects.buffs.vit>=0?'+':''}${item.effects.buffs.vit}${item.luck?` <span style="color:#ffd700">LCK:+${item.luck}</span>`:''}</div>
     ${item.effects.hpMod?`<div>HP: ${item.effects.hpMod>0?'+':''}${item.effects.hpMod}</div>`:''}
     <div style="color:var(--text3);margin-top:3px">Click to unequip</div>`;
   tt.style.left=Math.min(e.clientX+8,window.innerWidth-230)+'px';
@@ -2236,6 +2252,31 @@ function buybackItem(idx){
   renderBuybackTab();updateUI();
 }
 
+// ─── RE-FORGE SCORE: class-based stat weights ────────────────
+// Knight/Excalibur: STR+VIT | Archer/.50 Calibre: STR+AGI | Priest/Merlin: INT+VIT
+function itemEffectiveScore(item){
+  if(!item)return 0;
+  const b=item.effects?.buffs||{};
+  const p=G.p;
+  const cls=p?p.class:'Knight';
+  if(cls==='Knight'||cls==='Excalibur'){
+    return (b.str||0)*2+(b.vit||0)*2+(b.agi||0)*0.5+(b.int||0)*0.5+(item.effects?.hpMod||0)*0.1+(item.luck||0)*10;
+  } else if(cls==='Archer'||cls==='.50 Calibre'){
+    return (b.str||0)*1.5+(b.agi||0)*2+(b.vit||0)*0.5+(b.int||0)*0.5+(item.luck||0)*10;
+  } else { // Priest / Merlin Bloodline
+    return (b.int||0)*2+(b.vit||0)*2+(b.str||0)*0.3+(b.agi||0)*0.3+(item.effects?.mpMod||0)*0.1+(item.luck||0)*10;
+  }
+}
+
+// Returns true if candidate is ≥10% better than equipped (by class-relevant score)
+function isBetterThanEquipped(candidate,equipped){
+  if(!equipped)return false; // nothing equipped → not "better than equipped" (still show it)
+  const newScore=itemEffectiveScore(candidate);
+  const oldScore=itemEffectiveScore(equipped);
+  if(oldScore<=0)return newScore>0;
+  return newScore>=oldScore*1.10; // must be ≥10% better overall
+}
+
 const REFORGE_JUNK={Junk:1,Normal:2,Fine:2,Rare:5,Legendary:10,GOD:20,SOMA:20};
 function renderReforgeTab(){
   const p=G.p;
@@ -2284,7 +2325,7 @@ function reforgeItem(idx){
   const better=isBetterThanEquipped(g,equipped);
   if(better){
     const scoreDiff=Math.floor(itemEffectiveScore(g)-itemEffectiveScore(equipped));
-    if(!confirm(`⚠ [${g.rarity}] ${g.slot} ดีกว่าที่สวมอยู่!\nScore +${scoreDiff} | ATK:${g.atk}>${equipped.atk} DEF:${g.def}>${equipped.def}\nแน่ใจหรือไม่ที่จะ Re-Forge?`))return;
+    if(!confirm(`⚠ [${g.rarity}] ${g.slot} ดีกว่าที่สวมอยู่!\nScore +${scoreDiff}\nแน่ใจหรือไม่ที่จะ Re-Forge?`))return;
   } else if(['GOD','SOMA'].includes(g.rarity)){
     if(!confirm(`Re-Forge [${g.rarity}] ${g.slot} → 🔩${total} Junk?`))return;
   }
@@ -2410,7 +2451,7 @@ function forgeJunk(amount){
     const item=genItem(G.p.floor,rar,G.p.class);
     addToBag(item);
     results.push(`<span style="color:${RCOL[rar]}">[${RANK[rar]}] ${item.slot} ${qualLabel(item.quality)}</span>`);
-    if(['Legendary','GOD','SOMA'].includes(rar))showEpicBanner(item);
+    if(['GOD','SOMA'].includes(rar))showEpicBanner(item);
   }
 
   const fr=document.getElementById('forge-result');
@@ -2452,12 +2493,12 @@ function openItemDetail(idx,source){
   const sp=item.effects?.special||[];
   document.getElementById('item-detail-body').innerHTML=`
     <div>Slot: <b>${item.slot}</b> · Stack: ×${item.count||1}</div>
-    <div>ATK: <b>${item.atk}</b> · DEF: <b>${item.def}</b></div>
     <div style="font-size:9px">
       <span style="color:${statColor(b.str)}">STR:${b.str>=0?'+':''}${b.str}</span>
       <span style="color:${statColor(b.agi)}"> AGI:${b.agi>=0?'+':''}${b.agi}</span>
       <span style="color:${statColor(b.int)}"> INT:${b.int>=0?'+':''}${b.int}</span>
       <span style="color:${statColor(b.vit)}"> VIT:${b.vit>=0?'+':''}${b.vit}</span>
+      ${item.luck?`<span style="color:#ffd700"> LCK:+${item.luck}</span>`:''}
     </div>
     ${item.effects?.hpMod?`<div>HP Mod: <b style="color:${item.effects.hpMod>0?'#2f2':'#f44'}">${item.effects.hpMod>0?'+':''}${item.effects.hpMod}</b></div>`:''}
     ${sp.length?`<div style="margin-top:4px">${specialFxLabel(sp)}</div>`:''}
@@ -2516,6 +2557,7 @@ function loadFromSlot(slot){
     if(!p.inv.SKILL_RESET)p.inv.SKILL_RESET=0;
     if(!p.inv.STATUS_RESET)p.inv.STATUS_RESET=0;
     if(!p.moveSpeedPct)p.moveSpeedPct=100;
+    if(p.luck===undefined)p.luck=5;
     G.p=p;
     document.getElementById('start-screen').classList.add('hidden');
     initGame(false);
