@@ -829,65 +829,88 @@ function qualLabel(q){
   return q==='heavenly'?'<span class="q-heavenly">✦Heavenly</span>':q==='hell'?'<span class="q-hell">☠Hell</span>':'<span class="q-soso">◈SoSo</span>';
 }
 
-function genItem(floor,forceRarity=null,playerClass=null){
+// ─── STAT ROLL from monster level ──────────────────────────────
+// Base stat pool = mobLv * scalePerPoint, then apply quality % range
+// SoSo:     -10% to +10%
+// Hell:     -15% to +20%
+// Heavenly: -5%  to +25%
+function rollStatFromMob(mobLv, scalePerPoint, quality){
+  const base=Math.max(1, mobLv * scalePerPoint);
+  let lo, hi;
+  if(quality==='heavenly'){ lo=-0.05; hi=0.25; }
+  else if(quality==='hell'){ lo=-0.15; hi=0.20; }
+  else /* soso */           { lo=-0.10; hi=0.10; }
+  const pct = lo + Math.random()*(hi - lo);
+  return Math.round(base * pct);
+}
+
+function genItem(floor, forceRarity=null, playerClass=null, mobLvOverride=null){
   const rarity=forceRarity||rollEquipRarity(floor);
   const slot=SLOT_TYPES[Math.floor(Math.random()*SLOT_TYPES.length)];
   const quality=rollQuality();
+
+  // monster level used to derive stat magnitude
+  const mobLv = mobLvOverride || floor;
+
   const rm={Junk:1,Normal:1.5,Fine:2.5,Rare:5,Legendary:12,GOD:20,SOMA:25};
   const base=Math.floor(Math.sqrt(floor)*20*(rm[rarity]||1));
-  const qMod=quality==='hell'?1.5+Math.random()*0.5:quality==='heavenly'?1.2+Math.random()*0.4:0.9+Math.random()*0.3;
 
-  // ─── WEAPON ─────────────────────────────────────────────
+  // rarity multiplier on stat pool
+  const rarMul={Junk:0.4,Normal:0.7,Fine:1.0,Rare:1.6,Legendary:2.8,GOD:4.5,SOMA:6.0}[rarity]||1.0;
+
   let atk=0,def=0,buffs={str:0,agi:0,int:0,vit:0};
   let luckBonus=0;
-  let specialEffects=[]; // poison / stun chance
+  let specialEffects=[];
   let weaponSubName='';
 
+  // helper: roll one stat from mob, scaled by rarity
+  const rollS=(scalePP, q=quality)=> rollStatFromMob(mobLv * rarMul, scalePP, q);
+
   if(slot==='Weapon'){
-    // อาวุธ: stat หลักเท่านั้น ไม่มี ATK/DEF raw — ใช้ stat คำนวณ
-    // สุ่มชื่ออาวุธตาม class (ใช้ playerClass ถ้ามี)
     const cls=playerClass||'Knight';
     const names=WEAPON_NAMES[cls]||WEAPON_NAMES.Knight;
     weaponSubName=' '+names[Math.floor(Math.random()*names.length)];
-    // Stat bonus ตามประเภทอาชีพ
+
     const isMelee=(cls==='Knight'||cls==='Excalibur');
     const isRange=(cls==='Archer'||cls==='.50 Calibre');
-    const isMagic=(cls==='Priest'||cls==='Merlin Bloodline');
+    // Priest / Merlin: primary = AGI + INT (per spec), STR dump
+    // Melee: primary = STR + AGI  (per spec)
+    // Range: primary = STR + AGI  (per spec)
     if(isMelee){
-      buffs.str=statBuff(floor,1.8,quality);   // primary
-      buffs.vit=statBuff(floor,1.2,quality);   // secondary
-      buffs.agi=statBuff(floor,0.5,quality);   // dump
-      buffs.int=statBuff(floor,0.3,quality);   // dump
+      buffs.str = rollS(1.8);   // primary
+      buffs.agi = rollS(1.2);   // secondary
+      buffs.int = rollS(0.3);   // dump
+      buffs.vit = rollS(0.4);   // dump
     } else if(isRange){
-      buffs.agi=statBuff(floor,1.8,quality);
-      buffs.str=statBuff(floor,1.0,quality);
-      buffs.int=statBuff(floor,0.5,quality);
-      buffs.vit=statBuff(floor,0.5,quality);
-    } else { // magic — เน้น INT เป็นหลัก ไม่มี STR เพราะไม่ส่งผลกับ Priest/Merlin
-      buffs.int=statBuff(floor,2.0,quality);   // primary (สูงสุด)
-      buffs.vit=statBuff(floor,1.2,quality);   // secondary
-      buffs.agi=statBuff(floor,0.4,quality);   // dump
-      buffs.str=statBuff(floor,0.1,quality);   // dump (แทบไม่มีผล)
-    }
-    // Hell / Heavenly → เพิ่ม poison/stun chance
-    if(quality==='hell'){
-      specialEffects.push({type:'poison',chance:Math.min(0.35,0.05+floor*0.0002)});
-      specialEffects.push({type:'stun',chance:Math.min(0.20,0.03+floor*0.0001)});
-    } else if(quality==='heavenly'){
-      specialEffects.push({type:'poison',chance:Math.min(0.25,0.04+floor*0.00015)});
-      specialEffects.push({type:'stun',chance:Math.min(0.30,0.05+floor*0.00015)});
+      buffs.str = rollS(1.5);   // primary
+      buffs.agi = rollS(1.8);   // primary
+      buffs.int = rollS(0.3);   // dump
+      buffs.vit = rollS(0.3);   // dump
+    } else {
+      // Magic: AGI + INT primary (per spec: "Priest weapon = AGI and INT")
+      buffs.agi = rollS(1.4);   // primary
+      buffs.int = rollS(2.0);   // primary (MagicATK)
+      buffs.vit = rollS(0.5);   // secondary
+      buffs.str = rollS(0.1);   // dump (irrelevant for Priest)
     }
 
-  // ─── ARMOR (Shield/Head/Chest/Legs) ─────────────────────
+    if(quality==='hell'){
+      specialEffects.push({type:'poison',chance:Math.min(0.35,0.05+floor*0.0002)});
+      specialEffects.push({type:'stun',  chance:Math.min(0.20,0.03+floor*0.0001)});
+    } else if(quality==='heavenly'){
+      specialEffects.push({type:'poison',chance:Math.min(0.25,0.04+floor*0.00015)});
+      specialEffects.push({type:'stun',  chance:Math.min(0.30,0.05+floor*0.00015)});
+    }
+
   } else if(ARMOR_SLOTS.has(slot)){
-    // เกราะเน้น VIT, STR พอมี — ไม่มี ATK/DEF raw
-    buffs.vit=statBuff(floor,1.8,quality);
-    buffs.str=statBuff(floor,0.9,quality);
-    buffs.agi=statBuff(floor,0.4,quality);
-    buffs.int=statBuff(floor,0.3,quality);
-    // หมวก (Head) มีโอกาสได้ Luck
+    // Armor / Cloth / Hat / Cloak / Pants → AGI, VIT, Luck  (per spec)
+    buffs.agi = rollS(1.2);
+    buffs.vit = rollS(1.8);   // primary for armor
+    buffs.str = rollS(0.4);   // minor
+    buffs.int = rollS(0.2);   // minor
+    // Head: always rolls Luck
     if(slot==='Head'){
-      luckBonus=Math.random()<0.4?ri(1,Math.max(1,Math.floor(floor*0.05))):0;
+      luckBonus = Math.max(0, rollStatFromMob(mobLv * rarMul, 0.08, quality));
     }
     if(quality==='hell'){
       specialEffects.push({type:'stun',chance:Math.min(0.15,0.02+floor*0.0001)});
@@ -895,22 +918,20 @@ function genItem(floor,forceRarity=null,playerClass=null){
       specialEffects.push({type:'antiPoison',chance:0.5+Math.random()*0.5});
     }
 
-  // ─── ACCESSORY (Cloak/Pendant/Necklace/Ring) ─────────────
   } else {
-    // บัฟ stat สุ่มได้ดีหรือแย่ผสม — ไม่มี ATK/DEF raw
-    buffs.str=statBuff(floor,0.8,quality);
-    buffs.agi=statBuff(floor,0.8,quality);
-    buffs.int=statBuff(floor,0.8,quality);
-    buffs.vit=statBuff(floor,0.8,quality);
-    // สร้อย หมวก รองเท้า (Pendant/Necklace) มีโอกาสได้ Luck สูง
+    // Accessory (Cloak / Pendant / Necklace / Ring) → AGI, VIT, Luck (per spec)
+    buffs.agi = rollS(1.0);
+    buffs.vit = rollS(0.9);
+    buffs.str = rollS(0.5);
+    buffs.int = rollS(0.5);
+    // Pendant / Necklace: always Luck (high scale)
     if(slot==='Pendant'||slot==='Necklace'){
-      luckBonus=ri(1,Math.max(1,Math.floor(floor*0.08)));
+      luckBonus = Math.max(0, rollStatFromMob(mobLv * rarMul, 0.12, quality));
     } else if(slot==='Ring'||slot==='Cloak'){
-      luckBonus=Math.random()<0.35?ri(1,Math.max(1,Math.floor(floor*0.04))):0;
+      luckBonus = Math.max(0, rollStatFromMob(mobLv * rarMul, 0.06, quality));
     }
-    // Special buffs มากกว่าชนิดอื่น
     const accBuffPool=['antiPoison','fastAtk','fastMove','dodge','antiStun'];
-    const numBuff=1+Math.floor(Math.random()*3); // 1~3 special buffs
+    const numBuff=1+Math.floor(Math.random()*3);
     for(let i=0;i<numBuff;i++){
       const t=accBuffPool[Math.floor(Math.random()*accBuffPool.length)];
       if(!specialEffects.find(e=>e.type===t)){
