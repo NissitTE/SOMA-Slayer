@@ -797,22 +797,35 @@ const ARMOR_SLOTS=new Set(['Shield','Head','Chest','Legs']);
 function ri(min,max){return Math.floor(min+Math.random()*(max-min+1));}
 function rsign(posPct=0.7){return Math.random()<posPct?1:-1;}
 
-// คำนวณ stat buff ตาม floor (เป็น % ของเลเวลก่อนหน้า) และ quality
-// quality: soso = -10%~+10%, hell = -25%~+15%, heavenly = -15%~+25%
-function rollStatPct(quality){
-  if(quality==='soso'){
-    return (Math.random()*0.20-0.10); // -10% to +10%
-  } else if(quality==='hell'){
-    return (Math.random()*0.40-0.25); // -25% to +15%
-  } else { // heavenly
-    return (Math.random()*0.40-0.15); // -15% to +25%
-  }
+// ฟังก์ชันช่วยกำหนดขีดจำกัดสูงสุดที่ยอมให้ติดลบ (Anti-Brick)
+function getAntiBrickLimit(floor) {
+    if (floor <= 10) return 0;      // ชั้น 1-10: ห้ามติดลบเด็ดขาด
+    if (floor <= 20) return -0.01;  // ชั้น 11-20: ติดลบได้ไม่เกิน 1%
+    if (floor <= 40) return -0.02;  // ชั้น 21-40: ติดลบได้ไม่เกิน 2%
+    if (floor <= 50) return -0.03;  // ชั้น 41-50: ติดลบได้ไม่เกิน 3%
+    if (floor <= 5000) return -0.04; // ชั้น 51-5000: ติดลบได้ไม่เกิน 4%
+    if (floor <= 9000) return -0.05; // ชั้น 5001-9000: ติดลบได้ไม่เกิน 5%
+    return -0.08;                   // ชั้นสูงๆ: ยอมให้ติดลบได้มากสุด 8% (ตามค่า lo ต่ำสุดของ Hell)
 }
 
-// ค่า stat base = (floor - 1) * scalePerFloor, แล้วคูณ pct
+function rollStatPct(quality, floor) {
+    let lo, hi;
+    if (quality === 'heavenly') { lo = -0.05; hi = 0.35; }
+    else if (quality === 'hell') { lo = -0.08; hi = 0.25; }
+    else { lo = -0.03; hi = 0.15; }
+    let pct = lo + Math.random() * (hi - lo);
+    // Anti-Brick clamp
+    if(floor !== undefined){
+      const limit = getAntiBrickLimit(floor);
+      if (pct < limit) pct = limit;
+    }
+    return pct;
+}
+
+// stat base = (floor-1) * scale * rollStatPct
 function statBuff(floor, scale, quality){
   const prevLvBase=Math.max(1,(floor-1))*scale;
-  const pct=rollStatPct(quality);
+  const pct=rollStatPct(quality, floor);
   return Math.round(prevLvBase*pct);
 }
 
@@ -831,17 +844,26 @@ function qualLabel(q){
 
 // ─── STAT ROLL from monster level ──────────────────────────────
 // Base stat pool = mobLv * scalePerPoint, then apply quality % range
-// SoSo:     -10% to +10%
-// Hell:     -15% to +20%
-// Heavenly: -5%  to +25%
-function rollStatFromMob(mobLv, scalePerPoint, quality){
-  const base=Math.max(1, mobLv * scalePerPoint);
-  let lo, hi;
-  if(quality==='heavenly'){ lo=-0.05; hi=0.25; }
-  else if(quality==='hell'){ lo=-0.15; hi=0.20; }
-  else /* soso */           { lo=-0.10; hi=0.10; }
-  const pct = lo + Math.random()*(hi - lo);
-  return Math.round(base * pct);
+// SoSo:     -3% to +15%
+// Hell:     -8% to +25%
+// Heavenly: -5%  to +35%
+function rollStatFromMob(mobLv, scalePerPoint, quality, floor) {
+    const base = Math.max(1, mobLv * scalePerPoint);
+    let lo, hi;
+    
+    if(quality==='heavenly'){ lo=-0.05; hi=0.35; }
+    else if(quality==='hell'){ lo=-0.08; hi=0.25; }
+    else { lo=-0.03; hi=0.15; } // soso
+    
+    let pct = lo + Math.random() * (hi - lo);
+
+    // --- APPLY ANTI-BRICK ---
+    const limit = getAntiBrickLimit(floor);
+    if (pct < limit) {
+        pct = limit; 
+    }
+
+    return Math.round(base * pct);
 }
 
 function genItem(floor, forceRarity=null, playerClass=null, mobLvOverride=null){
@@ -974,15 +996,18 @@ function addToBag(item){
 
 // ─── EQUIP ──────────────────────────────────────────────────
 function canEquip(item){
-  const cs=calcStats(G.p);
-  if(item.itemLv&&G.p.lv<Math.floor(item.itemLv*0.1))return`Req LV ${Math.floor(item.itemLv*0.1)}`;
+  const p=G.p;
+  const cs=calcStats(p);
+  if(item.itemLv&&p.lv<Math.floor(item.itemLv*0.1))return`Req LV ${Math.floor(item.itemLv*0.1)}`;
   if(item.reqStr&&cs.str<item.reqStr)return`Req STR ${item.reqStr}`;
   if(item.reqAgi&&cs.agi<item.reqAgi)return`Req AGI ${item.reqAgi}`;
   if(item.reqInt&&cs.int<item.reqInt)return`Req INT ${item.reqInt}`;
-  // ห้ามใส่ถ้า stat รวมติดลบ
+  // Anti-Brick: ตรวจว่า stat รวมหลังสวมจะติดลบหรือไม่ (ใช้ G.p ไม่ใช่ player)
   const b=item.effects?.buffs||{};
-  const totalStat=(b.str||0)+(b.agi||0)+(b.int||0)+(b.vit||0);
-  if(totalStat<0)return`สถิติรวมติดลบ (${totalStat}) ไม่สามารถสวมใส่ได้`;
+  for(const s of ['str','agi','int','vit']){
+    const projected=(p[s]||0)+(b[s]||0);
+    if(projected<=0)return`สวมใส่ไม่ได้: ${s.toUpperCase()} จะเหลือ ${projected}`;
+  }
   return null;
 }
 
