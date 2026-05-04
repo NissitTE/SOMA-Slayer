@@ -87,14 +87,22 @@ canvas{display:block;width:100%;height:100%}
 .q-hell{color:#ff5555}.q-heavenly{color:#aaddff}.q-soso{color:#aaa}
 .rank-J{color:var(--junk)}.rank-N{color:var(--normal)}.rank-F{color:var(--fine)}
 .rank-R{color:var(--rare)}.rank-L{color:var(--legendary)}.rank-G{color:var(--god)}.rank-S{color:var(--soma)}
-.equip-main{display:grid;grid-template-columns:230px 1fr;gap:12px}
-.equip-slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.equip-main{display:grid;grid-template-columns:160px 1fr 1fr;gap:10px;align-items:start}
+.stat-preview-panel{background:#060606;border:1px solid var(--border2);padding:7px;font-size:8px;line-height:1.8}
+.stat-preview-panel .sp-title{font-size:7px;color:var(--lux3);letter-spacing:2px;margin-bottom:5px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:3px}
+.spr{display:flex;justify-content:space-between;align-items:center;padding:1px 0;border-bottom:1px solid #0d0d0d}
+.spr-label{color:var(--text3);font-size:8px;min-width:36px}
+.spr-now{color:var(--text2);font-size:8px;min-width:30px;text-align:right}
+.spr-arrow{color:var(--text3);font-size:7px;padding:0 2px}
+.spr-after{font-size:8px;font-weight:bold;min-width:30px;text-align:left}
+.spr-diff{font-size:7px;min-width:28px;text-align:right}
+.equip-slots-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
 .eslot{border:1px solid var(--border2);background:#0a0a0a;padding:3px;cursor:pointer;text-align:center;transition:border-color .15s;min-height:38px}
 .eslot:hover{border-color:var(--lux)}
 .eslot .sl{font-size:7px;color:var(--text3);letter-spacing:1px;display:block;margin-bottom:1px}
 .eslot .sn{font-size:8px;font-weight:bold}
 .eslot .sq{font-size:7px;margin-top:1px}
-.equip-inv-list{display:flex;flex-direction:column;gap:2px;max-height:240px;overflow-y:auto}
+.equip-inv-list{display:flex;flex-direction:column;gap:2px;max-height:400px;overflow-y:auto}
 .equip-inv-item{display:flex;align-items:center;gap:5px;border:1px solid var(--border2);background:#0a0a0a;padding:4px;cursor:pointer;transition:border-color .15s;font-size:8px}
 .equip-inv-item:hover{border-color:var(--lux)}
 .pause-layout{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -271,14 +279,29 @@ canvas{display:block;width:100%;height:100%}
       </div>
     </div>
     <div class="equip-main">
+
+      <!-- ซ้าย: Player Status -->
+      <div class="stat-preview-panel" id="equip-stat-preview">
+        <div class="sp-title">📊 Player Status</div>
+        <div id="equip-stat-preview-body" style="color:var(--text3);font-size:8px">Hover อาวุธ/อุปกรณ์<br>เพื่อดูการเปลี่ยนแปลง</div>
+      </div>
+
+      <!-- กลาง: Equipped -->
       <div>
         <h3>EQUIPPED <span style="color:var(--text3);font-size:7px">(click to unequip)</span></h3>
         <div class="equip-slots-grid" id="equip-slots-ui"></div>
+        <div style="margin-top:6px;border-top:1px solid var(--border);padding-top:5px">
+          <div style="font-size:7px;color:var(--lux3);letter-spacing:1px;margin-bottom:3px">✦ SET BONUS</div>
+          <div id="equip-set-bonus"></div>
+        </div>
       </div>
+
+      <!-- ขวา: Bag -->
       <div>
         <h3>BAG <span id="equip-bag-count" style="color:var(--text3)"></span> <span style="color:var(--text3);font-size:7px">(click to equip)</span></h3>
         <div class="equip-inv-list" id="equip-inv-ui"></div>
       </div>
+
     </div>
   </div>
 </div>
@@ -618,14 +641,14 @@ function getMobForFloor(floor){
 // Equip sub-rarity rates based on floor range
 function getEquipRarityRates(floor){
   if(floor<=500){
-    // Junk 30% / Normal 50% / Rare 12% / Leg 5% / GOD 2% / Soma 1%
-    return [0.30,0.50,0.00,0.12,0.05,0.02,0.01];
+    // Junk 33% / Normal 52% / Fine 7% / Rare 4% / Leg 2.4% / GOD 1.2% / SOMA 0.4%   (Leg-SOMA -20%)
+    return [0.33,0.52,0.07,0.04,0.024,0.012,0.004];
   } else if(floor<=5000){
-    // Junk 40% / Normal 30% / Rare 20% / Leg 5% / GOD 3% / Soma 2%
-    return [0.40,0.30,0.00,0.20,0.05,0.03,0.02];
+    // Junk 43% / Normal 32% / Fine 9% / Rare 8% / Leg 4% / GOD 2.4% / SOMA 1.6%
+    return [0.43,0.32,0.09,0.08,0.040,0.024,0.016];
   } else {
-    // Junk 5% / Normal 30% / Rare 35% / Leg 20% / GOD 5% / Soma 5%
-    return [0.05,0.30,0.00,0.35,0.20,0.05,0.05];
+    // Junk 7% / Normal 13% / Fine 10% / Rare 36% / Leg 16% / GOD 8% / SOMA 8%       (Leg-SOMA -20%)
+    return [0.07,0.13,0.10,0.36,0.160,0.080,0.080];
   }
 }
 
@@ -684,6 +707,7 @@ function freshPlayer(name,cls){
 function calcStats(p){
   let str=p.str,agi=p.agi,int_=p.int,vit=p.vit,luck=p.luck||0,hpB=0,mpB=0;
   let bonusDodge=0,bonusMoveSpd=0,bonusAtkSpd=0,antiPoison=0,antiStun=0;
+  let totalBonusAtkPct=0,totalBonusDefPct=0,totalBonusHpPct=0,totalBonusMpPct=0,totalBonusLuckPct=0;
   Object.values(p.equips).forEach(eq=>{
     if(!eq)return;
     str+=Math.floor((eq.effects?.buffs?.str||0));
@@ -692,6 +716,12 @@ function calcStats(p){
     vit+=Math.floor((eq.effects?.buffs?.vit||0));
     luck+=Math.floor((eq.luck||0));
     hpB+=eq.effects?.hpMod||0;mpB+=eq.effects?.mpMod||0;
+    // Accumulate bonus%
+    totalBonusAtkPct+=(eq.bonusAtkPct||0)/100;
+    totalBonusDefPct+=(eq.bonusDefPct||0)/100;
+    totalBonusHpPct+=(eq.bonusHpPct||0)/100;
+    totalBonusMpPct+=(eq.bonusMpPct||0)/100;
+    totalBonusLuckPct+=(eq.bonusLuckPct||0)/100;
     (eq.effects?.special||[]).forEach(s=>{
       if(s.type==='dodge')bonusDodge+=s.chance*100;
       if(s.type==='fastMove')bonusMoveSpd+=s.chance*50;
@@ -700,28 +730,37 @@ function calcStats(p){
       if(s.type==='antiStun')antiStun=Math.max(antiStun,s.chance);
     });
   });
-  const maxHp=Math.max(1,60+vit*12+p.lv*4+hpB);
-  const maxMp=Math.max(10,30+int_*6+p.lv*2+mpB);
+  // Set bonus: +% to all stats if full set equipped
+  const setBonus=getSetBonus(p); // e.g. 0.10 = 10%
+  const setMult=1+setBonus;
+
+  const maxHp=Math.max(1,Math.round((60+vit*12+p.lv*4+hpB)*(1+totalBonusHpPct)*setMult));
+  const maxMp=Math.max(10,Math.round((30+int_*6+p.lv*2+mpB)*(1+totalBonusMpPct)*setMult));
   // Priest/Merlin use INT for magic ATK; others use STR
   const isMagicClass=(p.class==='Priest'||p.class==='Merlin Bloodline');
-  const atk=isMagicClass?(int_*1.8+p.lv*1):(str*1.5+agi*0.5+p.lv*1);
-  const def=Math.floor(vit*0.6+agi*0.3);
+  const baseAtk=isMagicClass?(int_*1.8+p.lv*1):(str*1.5+agi*0.5+p.lv*1);
+  const atk=baseAtk*(1+totalBonusAtkPct)*setMult;
+  const baseDef=Math.floor(vit*0.6+agi*0.3);
+  const def=Math.round(baseDef*(1+totalBonusDefPct)*setMult);
   const spd=2+agi*0.04;
+  const luckFinal=Math.round(luck*(1+totalBonusLuckPct)*setMult);
   // Luck adds crit chance: 1 luck = 0.1% crit extra (on top of AGI base)
-  const critR=Math.min(75,agi*0.35+luck*0.1);
+  const critR=Math.min(75,agi*0.35+luckFinal*0.1);
   const dodgeR=Math.min(60,agi*0.2+bonusDodge);
   const moveSpd=Math.max(1.5,2.8*(Math.min(200,p.moveSpeedPct||100)/100)+bonusMoveSpd*0.02);
   // Luck drop bonus: 1 luck = 0.002% drop increase
-  const luckDropBonus=luck*0.00002;
-  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,luck,moveSpd,bonusAtkSpd,antiPoison,antiStun,luckDropBonus};
+  const luckDropBonus=luckFinal*0.00002;
+  return{maxHp,maxMp,atk,def,spd,critR,dodgeR,str,agi,int:int_,vit,luck:luckFinal,moveSpd,bonusAtkSpd,antiPoison,antiStun,luckDropBonus,setBonus};
 }
 
 // ─── MONSTER SPAWN ──────────────────────────────────────────
 function isBossFloor(f){return f%11===0&&f>0;}
-function enemyCount(f){return Math.min(f,80);}
+function enemyCount(f){return Math.min(f,100);}
 function floorScale(f){
   if(f<=100)return f;
   if(f<=1000)return 100+(f-100)*5;
+  if(f<=5000)return 100+(f-100)*7;
+  if(f<=8000)return 100+(f-100)*8;
   return 100+900*5+(f-1000)*10;
 }
 
@@ -744,10 +783,10 @@ function spawnEnemies(floor){
     const bossPool=MOB_TYPES.filter(m=>m.type==='boss');
     const boss=bossPool[Math.floor(Math.random()*bossPool.length)];
     const bs=isSecret?scale*2:scale;
-    const hp=boss.baseHp*bs*20;
+    const hp=boss.baseHp*bs*0.40;
     mobs.push({id:Math.random(),name:(isSecret?'★SECRET★ ':'')+boss.name+' LV'+floor,
       icon:boss.icon,x:W*0.65+Math.random()*60,y:H*0.4+Math.random()*60,
-      hp,maxHp:hp,atk:boss.atk*bs*2,speed:boss.speed*(isSecret?1.5:1),
+      hp,maxHp:hp,atk:boss.atk*bs*0.30,speed:boss.speed*(isSecret?1.5:1),
       range:boss.range,type:'boss',cd:0,isBoss:true,isSecret,lv:floor,dropMult:isSecret?5:3,stunUntil:0,
       wanderTarget:null,wanderCd:0});
   }
@@ -784,18 +823,123 @@ function spawnEnemies(floor){
 // ─── ITEM GEN ───────────────────────────────────────────────
 // อาวุธตามอาชีพ
 const WEAPON_NAMES={
-  Knight:   ['ดาบ','มีด','ค้อน','หอก'],
-  Excalibur:['ดาบ','มีด','ค้อน','หอก'],
-  Archer:   ['ธนู','ปืนพก','หน้าไม้','ไรเฟิล'],
-  '.50 Calibre':['ธนู','ปืนพก','หน้าไม้','ไรเฟิล'],
-  Priest:   ['คฑา','ไม้เท้า'],
-  'Merlin Bloodline':['คฑา','ไม้เท้า'],
+  Knight:   ['Sword','Knife','Hammer','Spear'],
+  Excalibur:['Long Sword','Tactical Knife','Sledge Hammer','Holy Spear'],
+  Archer:   ['Bow','Wooden Bow','Crossbow','Metal Crossbow'],
+  '.50 Calibre':['Handgun9mm','Shotgun12g','Magnum.357','Beowulf.50'],
+  Priest:   ['Rod','Staff'],
+  'Merlin Bloodline':['Scepter','Sanctified Wand'],
 };
 const ACCESSORY_SLOTS=new Set(['Cloak','Pendant','Necklace','Ring']);
 const ARMOR_SLOTS=new Set(['Shield','Head','Chest','Legs']);
 
 function ri(min,max){return Math.floor(min+Math.random()*(max-min+1));}
 function rsign(posPct=0.7){return Math.random()<posPct?1:-1;}
+
+// ─── SET SYSTEM ─────────────────────────────────────────────
+const SET_DEFS=[
+  {name:'Soldier Set',   icon:'🪖', bonusPct:2,  dropBoss:[0.10,0.25],dropMob:[0.10,0.15],color:'#90caf9'},
+  {name:'Blessed Set',   icon:'✨', bonusPct:3,  dropBoss:[0.10,0.25],dropMob:[0.10,0.20],color:'#ffe082'},
+  {name:'Lizard Scale',  icon:'🦎', bonusPct:5,  dropBoss:[0.05,0.15],dropMob:[0.05,0.10],color:'#a5d6a7'},
+  {name:'Night Walker',  icon:'🌑', bonusPct:8,  dropBoss:[0.05,0.15],dropMob:[0.05,0.10],color:'#ce93d8'},
+  {name:'High Council',  icon:'👑', bonusPct:10, dropBoss:[0.05,0.10],dropMob:[0.05,0.08],color:'#ffd700'},
+  {name:'Dragon Lord',   icon:'🐉', bonusPct:15, dropBoss:[0.05,0.07],dropMob:[0.05,0.05],color:'#ff7043'},
+  {name:'Archangel',     icon:'👼', bonusPct:20, dropBoss:[0.03,0.07],dropMob:[0.03,0.05],color:'#e1f5fe'},
+  {name:'Light Bringer', icon:'☀', bonusPct:25, dropBoss:[0.01,0.02],dropMob:[0.01,0.01],color:'#fff9c4'},
+];
+const SET_SLOTS=['Weapon','Shield','Head','Chest','Legs','Cloak'];
+
+function getSetPoolForFloor(floor){
+  if(floor===666){
+    return SET_DEFS.map(s=>({...s,dropBoss:[0.00666,0.00666],dropMob:[0.00666,0.00666],_easterEgg:true}));
+  }
+  if(floor<=500)  return SET_DEFS.filter(s=>['Soldier Set','Blessed Set','Lizard Scale','Night Walker'].includes(s.name));
+  if(floor<=5000) return SET_DEFS.filter(s=>['Lizard Scale','Night Walker','High Council'].includes(s.name));
+  if(floor<=8000) return SET_DEFS.filter(s=>['Lizard Scale','Night Walker','High Council','Dragon Lord','Archangel'].includes(s.name));
+  return SET_DEFS.filter(s=>['High Council','Dragon Lord','Archangel','Light Bringer'].includes(s.name));
+}
+function rollSetDrop(isBoss,floor=1){
+  const pool=getSetPoolForFloor(floor);
+  for(let i=pool.length-1;i>=0;i--){
+    const s=pool[i];
+    const [lo,hi]=isBoss?s.dropBoss:s.dropMob;
+    const chance=lo+Math.random()*(hi-lo);
+    if(Math.random()<chance){
+      if(s._easterEgg){logMsg(`🎃 EASTER EGG FLOOR 666! ${s.icon} ${s.name}`,'#ff6e40');notify(`🎃 FLOOR 666! ${s.icon} ${s.name}!`,'#ff6e40');}
+      return s;
+    }
+  }
+  return null;
+}
+
+function getSetBonus(p){
+  const setCount={};
+  Object.values(p.equips).forEach(eq=>{
+    if(eq&&eq.setName)setCount[eq.setName]=(setCount[eq.setName]||0)+1;
+  });
+  let totalBonus=0;
+  Object.entries(setCount).forEach(([name,count])=>{
+    if(count>=SET_SLOTS.length){
+      const def=SET_DEFS.find(s=>s.name===name);
+      if(def)totalBonus+=def.bonusPct/100;
+    }
+  });
+  return totalBonus;
+}
+
+function genSetItem(setDef,floor,playerClass){
+  const slot=SET_SLOTS[Math.floor(Math.random()*SET_SLOTS.length)];
+
+  // Rarity weighted by floor — Set items are always at least Rare
+  // แต่ GOD/Legendary ต้องอยู่ชั้นสูงพอ
+  function rollSetRarity(f){
+    // [Rare, Legendary, GOD]  weights ตามชั้น
+    let w;
+    if(f<=100)        w=[0.92, 0.07, 0.01];   // ชั้น 1-100   : Rare 92%, Leg 7%, GOD 1%
+    else if(f<=500)   w=[0.80, 0.17, 0.03];   // ชั้น 101-500 : Rare 80%, Leg 17%, GOD 3%
+    else if(f<=2000)  w=[0.60, 0.30, 0.10];   // ชั้น 501-2000
+    else if(f<=5000)  w=[0.45, 0.38, 0.17];   // ชั้น 2001-5000
+    else if(f<=8000)  w=[0.25, 0.45, 0.30];   // ชั้น 5001-8000
+    else              w=[0.10, 0.45, 0.45];   // ชั้น 8001+
+    const r=Math.random();
+    if(r<w[0])return'Rare';
+    if(r<w[0]+w[1])return'Legendary';
+    return'GOD';
+  }
+
+  const rarity=rollSetRarity(floor);
+  const quality=rollQuality();
+  const mobLv=floor;
+  const rarMul={Rare:1.6,Legendary:2.8,GOD:4.5}[rarity]||1.6;
+  const rollS=(scalePP,q=quality)=>rollStatFromMob(mobLv*rarMul,scalePP,q,floor);
+  let buffs={str:0,agi:0,int:0,vit:0};
+  let weaponSubName='';
+  if(slot==='Weapon'){
+    const cls=playerClass||'Knight';
+    const names=WEAPON_NAMES[cls]||WEAPON_NAMES.Knight;
+    weaponSubName=' '+names[Math.floor(Math.random()*names.length)];
+    buffs.str=rollS(1.8);buffs.agi=rollS(1.4);buffs.int=rollS(0.4);buffs.vit=rollS(0.4);
+  } else {
+    buffs.str=rollS(0.8);buffs.agi=rollS(1.2);buffs.int=rollS(0.5);buffs.vit=rollS(1.8);
+  }
+  const base=Math.floor(Math.sqrt(floor)*20*rarMul);
+  const rm={Rare:1,Legendary:0.5,GOD:0.35};
+  const value=Math.floor(base*(rm[rarity]||1));
+  return{
+    id:Math.random().toString(36).slice(2),
+    stackKey:`SET_${setDef.name}_${slot}_${Math.random()}`,
+    name:`${setDef.icon}${weaponSubName||' '+slot}`,
+    fullName:`[SET:${setDef.name}] ${slot}`,
+    rarity,slot,quality,floor,itemLv:floor,
+    atk:0,def:0,luck:0,
+    effects:{buffs,hpMod:0,mpMod:0,statusEffects:[],special:[]},
+    reqStr:Math.max(5,Math.floor(floor*0.3)),reqAgi:0,reqInt:0,value,count:1,
+    setName:setDef.name,setBonusPct:setDef.bonusPct,setColor:setDef.color,
+    bonusAtkPct:slot==='Weapon'?setDef.bonusPct:0,
+    bonusDefPct:slot!=='Weapon'?setDef.bonusPct:0,
+    bonusHpPct:0,bonusMpPct:0,bonusLuckPct:0,
+  };
+}
 
 // ฟังก์ชันช่วยกำหนดขีดจำกัดสูงสุดที่ยอมให้ติดลบ (Anti-Brick)
 function getAntiBrickLimit(floor) {
@@ -973,6 +1117,50 @@ function genItem(floor, forceRarity=null, playerClass=null, mobLvOverride=null){
   const sellMult={Junk:1,Normal:1,Fine:1,Rare:1,Legendary:0.5,GOD:0.35,SOMA:0.25};
   const value=Math.floor(base*(sellMult[rarity]||1));
 
+  // ─── BONUS % STATS (ข้อ 2 & 3) ──────────────────────────
+  // อาวุธ: +Atk% บัพ, +/-HP%, +/-MP%, +/-Luck%
+  // เกราะ/โล่: +Def% บัพ, +/-HP%, +/-MP%, +/-Luck%
+  const rarBonusRange={Junk:[0,2],Normal:[0,4],Fine:[1,6],Rare:[2,10],Legendary:[3,15],GOD:[5,20],SOMA:[7,25]};
+  const [blo,bhi]=rarBonusRange[rarity]||[0,4];
+
+  function rollBonusPct(posBias=0.7){
+    const mag=(blo+Math.random()*(bhi-blo));
+    const sign=Math.random()<posBias?1:-1;
+    // Anti-brick: cap negative to getAntiBrickLimit equivalent for bonus%
+    const limit=getAntiBrickLimit(floor)*100; // convert to %
+    const val=sign*mag;
+    return Math.round(Math.max(limit, val)*10)/10;
+  }
+
+  let bonusAtkPct=0,bonusDefPct=0,bonusHpPct=0,bonusMpPct=0,bonusLuckPct=0;
+  if(slot==='Weapon'){
+    bonusAtkPct=rollBonusPct(0.65);
+    // 50% chance to also get HP or MP or Luck bonus
+    if(Math.random()<0.5){bonusHpPct=rollBonusPct(0.6);}
+    if(Math.random()<0.4){bonusMpPct=rollBonusPct(0.6);}
+    if(Math.random()<0.35){bonusLuckPct=rollBonusPct(0.7);}
+  } else if(ARMOR_SLOTS.has(slot)){
+    bonusDefPct=rollBonusPct(0.65);
+    if(Math.random()<0.5){bonusHpPct=rollBonusPct(0.6);}
+    if(Math.random()<0.4){bonusMpPct=rollBonusPct(0.6);}
+    if(Math.random()<0.35){bonusLuckPct=rollBonusPct(0.7);}
+  }
+
+  // ─── WEAPON PROC (ข้อ 4): ติดพิษ / สตัน / ช้า ──────────
+  // โอกาสมีสถานะพิเศษ 15-25% เฉพาะอาวุธ
+  if(slot==='Weapon'&&rarity!=='Junk'){
+    const hasProcChance=0.15+Math.random()*0.10; // 15-25%
+    if(Math.random()<hasProcChance){
+      const procPool=['poison','stun','slow'];
+      const chosen=procPool[Math.floor(Math.random()*procPool.length)];
+      // Boss resist: boss ติดยากกว่า (ค่า chance ต่ำกว่า)
+      const baseChance=0.08+Math.random()*0.12; // 8-20% on hit vs normal mob
+      // Remove any existing proc of same type to avoid dup
+      specialEffects=specialEffects.filter(s=>s.type!==chosen);
+      specialEffects.push({type:chosen,chance:baseChance,bossChance:baseChance*0.3,duration:chosen==='stun'?2000:chosen==='slow'?4000:5000});
+    }
+  }
+
   return{
     id:Math.random().toString(36).slice(2),
     stackKey:`${rarity}_${slot}_${quality}`,
@@ -983,6 +1171,8 @@ function genItem(floor, forceRarity=null, playerClass=null, mobLvOverride=null){
     luck:luckBonus||0,
     effects:{buffs,hpMod,mpMod:0,statusEffects:[],special:specialEffects},
     reqStr,reqAgi,reqInt,value,count:1,
+    bonusAtkPct,bonusDefPct,bonusHpPct,bonusMpPct,bonusLuckPct,
+    setName:null,setBonusPct:0,setColor:null,
   };
 }
 
@@ -1128,8 +1318,8 @@ const SHOP_ITEMS=[
   {id:'HP_POT_L',name:'HP Elixir',icon:'🍷',desc:'Restore 80% HP',price:800},
   {id:'MP_POT_L',name:'MP Elixir',icon:'🌀',desc:'Restore 80% MP',price:800},
   {id:'EXP_SCROLL',name:'EXP Scroll',icon:'📜',desc:'Gain 5000 EXP',price:100000},
-  {id:'JUNK',name:'Junk ×10',icon:'🔩',desc:'Used in forge',price:20,qty:10},
-  {id:'JUNK1000',name:'Junk ×1,000',icon:'🔩',desc:'Junk Yard bulk buy',price:1800,qty:1000},
+  {id:'JUNK',name:'Junk ×10',icon:'🔩',desc:'Used in forge',price:2000,qty:10},
+  {id:'JUNK1000',name:'Junk ×1,000',icon:'🔩',desc:'Junk Yard bulk buy',price:18000,qty:1000},
   {id:'BLESSING',name:'เสริมบุญ',icon:'🙏',desc:'+1.5~3% drop 15min',price:1000000},
   {id:'SKILL_POT',name:'Skill Potion',icon:'💚',desc:'+1 Skill Point',price:100000},
   {id:'SKILL_ELIXIR',name:'Skill Elixir',icon:'💎',desc:'+10 Skill Points',price:1000000},
@@ -1286,6 +1476,25 @@ function playerAttack(){
         m.stunUntil=Date.now()+1500;
         addDmgNum(m.x,m.y-20,'💫','#ffe082');
       }
+      // Weapon special procs from bonusAtkPct system (poison/stun/slow with boss resist)
+      const wpSpecAll=p.equips.Weapon?.effects?.special||[];
+      wpSpecAll.forEach(sp=>{
+        if(['poison','stun','slow'].includes(sp.type)){
+          const chanceUsed=m.isBoss?(sp.bossChance||sp.chance*0.3):sp.chance;
+          if(Math.random()<chanceUsed){
+            if(sp.type==='poison'){
+              m.dot={dmg:Math.max(1,cs.atk*0.12),until:Date.now()+(sp.duration||5000),last:Date.now()};
+              addDmgNum(m.x,m.y-15,'☠','#00e676');
+            } else if(sp.type==='stun'){
+              m.stunUntil=Date.now()+(sp.duration||2000);
+              addDmgNum(m.x,m.y-20,'💫','#ffe082');
+            } else if(sp.type==='slow'){
+              m.slowUntil=Date.now()+(sp.duration||4000);
+              addDmgNum(m.x,m.y-20,'🐢','#80cbc4');
+            }
+          }
+        }
+      });
     }
   });
 }
@@ -1382,6 +1591,15 @@ function mobDied(m){
       notify('💎 DIAMOND DROPPED! (Boss)','#aaddff');
       logMsg('💎 Diamond drop from Boss!','#aaddff');
     }
+    // Set item drop (boss)
+    const setDef=rollSetDrop(true,p.floor);
+    if(setDef){
+      const setItem=genSetItem(setDef,p.floor,p.class);
+      if(addToBag(setItem)){
+        notify(`✦ SET DROP: ${setDef.icon} ${setDef.name} [${setItem.slot}]`,setDef.color||'var(--god)');
+        logMsg(`[SET] ${setDef.name} ${setItem.slot}`,'#ffe082');
+      }
+    }
     if(!noBossMode)advanceFloor();
   } else {
     // Normal mob Diamond drop 0.01%
@@ -1389,6 +1607,15 @@ function mobDied(m){
       p.inv.DIAMOND=(p.inv.DIAMOND||0)+1;
       notify('💎 DIAMOND DROPPED!','#aaddff');
       logMsg('💎 Diamond drop!','#aaddff');
+    }
+    // Set item drop (mob)
+    const setDefMob=rollSetDrop(false,p.floor);
+    if(setDefMob){
+      const setItemMob=genSetItem(setDefMob,p.floor,p.class);
+      if(addToBag(setItemMob)){
+        notify(`✦ SET DROP: ${setDefMob.icon} ${setDefMob.name} [${setItemMob.slot}]`,setDefMob.color||'var(--lux2)');
+        logMsg(`[SET] ${setDefMob.name} ${setItemMob.slot}`,'#ffe082');
+      }
     }
   }
 }
@@ -1604,18 +1831,20 @@ function loop(){
     if(m.dot&&now<m.dot.until){if(now-m.dot.last>1000){m.hp-=m.dot.dmg;m.dot.last=now;}}
     const d=Math.hypot(p.x-m.x,p.y-m.y);
     const stunned=now<m.stunUntil;
+    const slowed=m.slowUntil&&now<m.slowUntil;
+    const effectiveSpeed=slowed?m.speed*0.4:m.speed;
     if(!stunned){
       if(d>m.range+14){
         if(d<450){
           const mx=p.x-m.x,my2=p.y-m.y,md=Math.hypot(mx,my2);
-          m.x=Math.max(10,Math.min(W-10,m.x+mx/md*m.speed));
-          m.y=Math.max(10,Math.min(H-10,m.y+my2/md*m.speed));
+          m.x=Math.max(10,Math.min(W-10,m.x+mx/md*effectiveSpeed));
+          m.y=Math.max(10,Math.min(H-10,m.y+my2/md*effectiveSpeed));
         }else{
           if(!m.wanderTarget||now>m.wanderCd||Math.hypot(m.x-m.wanderTarget.x,m.y-m.wanderTarget.y)<20){
             m.wanderTarget={x:60+Math.random()*(W-120),y:60+Math.random()*(H-120)};m.wanderCd=now+2500;
           }
           const wx=m.wanderTarget.x-m.x,wy=m.wanderTarget.y-m.y,wd=Math.hypot(wx,wy);
-          if(wd>2){m.x=Math.max(10,Math.min(W-10,m.x+wx/wd*m.speed*0.6));m.y=Math.max(10,Math.min(H-10,m.y+wy/wd*m.speed*0.6));}
+          if(wd>2){m.x=Math.max(10,Math.min(W-10,m.x+wx/wd*effectiveSpeed*0.6));m.y=Math.max(10,Math.min(H-10,m.y+wy/wd*effectiveSpeed*0.6));}
         }
       }else{
         mobAttackPlayer(m);
@@ -1625,6 +1854,7 @@ function loop(){
     // Draw mob
     ctx.save();ctx.translate(m.x,m.y);
     if(stunned)ctx.globalAlpha=0.5;
+    if(slowed&&!stunned){ctx.globalAlpha=0.75;}
     ctx.font=`${m.isBoss?22:16}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.shadowColor='rgba(255,255,255,0.3)';ctx.shadowBlur=4;
     ctx.fillText(m.icon,0,0);ctx.shadowBlur=0;
@@ -1738,7 +1968,7 @@ function updateUI(){
   }
 
   document.getElementById('combat-stats').innerHTML=
-    `ATK:<b style="color:var(--lux2)">${cs.atk.toFixed(0)}</b>${(G.p.class==='Priest'||G.p.class==='Merlin Bloodline')?'<span style="font-size:7px">(INT)</span>':''} DEF:<b>${cs.def}</b><br>CRIT:<b>${cs.critR.toFixed(0)}%</b> AGI:<b>${cs.agi}</b><br>🍀LCK:<b style="color:#ffd700">${cs.luck}</b>`;
+    `ATK:<b style="color:var(--lux2)">${cs.atk.toFixed(0)}</b>${(G.p.class==='Priest'||G.p.class==='Merlin Bloodline')?'<span style="font-size:7px">(INT)</span>':''} DEF:<b>${cs.def}</b><br>CRIT:<b>${cs.critR.toFixed(0)}%</b> AGI:<b>${cs.agi}</b><br>🍀LCK:<b style="color:#ffd700">${cs.luck}</b>${cs.setBonus>0?`<br>✦SET:<b style="color:#ffe082">+${(cs.setBonus*100).toFixed(0)}% all</b>`:''}`;
 
   document.getElementById('floor-info').textContent=`FLOOR ${p.floor}${isBossFloor(p.floor)?' ⚠BOSS':''}`;
 
@@ -1818,41 +2048,68 @@ function openItemFromBag(idx){
 
 function specialFxLabel(spec){
   if(!spec||!spec.length)return'';
-  const icons={poison:'☠',stun:'💫',antiPoison:'🛡',fastAtk:'⚡',fastMove:'🏃',dodge:'💨',antiStun:'🧿'};
-  const names={poison:'พิษ',stun:'สตัน',antiPoison:'กันพิษ',fastAtk:'ตีไว',fastMove:'เดินไว',dodge:'Dodge',antiStun:'กันสตัน'};
-  return spec.map(s=>`<span style="color:#ffe082">${icons[s.type]||'✦'}${names[s.type]||s.type} ${(s.chance*100).toFixed(1)}%</span>`).join(' ');
+  const icons={poison:'☠',stun:'💫',slow:'🐢',antiPoison:'🛡',fastAtk:'⚡',fastMove:'🏃',dodge:'💨',antiStun:'🧿'};
+  const names={poison:'พิษ',stun:'สตัน',slow:'ช้า',antiPoison:'กันพิษ',fastAtk:'ตีไว',fastMove:'เดินไว',dodge:'Dodge',antiStun:'กันสตัน'};
+  return spec.map(s=>`<span style="color:#ffe082">${icons[s.type]||'✦'}${names[s.type]||s.type} ${(s.chance*100).toFixed(1)}%${s.bossChance?`(Boss:${(s.bossChance*100).toFixed(1)}%)`:''}</span>`).join(' ');
 }
 function statColor(v){return v>0?'#8dffb0':v<0?'#ff7070':'#888';}
 
 function showBagTip(e,idx){
   const g=G.p.gears[idx];if(!g)return;
   const equipped=G.p.equips[g.slot];
-  const dAtk=equipped?g.atk-equipped.atk:null;
-  const dDef=equipped?g.def-equipped.def:null;
   const err=canEquip(g);
   const b=g.effects?.buffs||{};
   const sp=g.effects?.special||[];
+
+  function bonusLine(label,val){
+    if(val===undefined||val===null||val===0)return'';
+    const col=val>0?'#8dffb0':'#ff7070';
+    const sign=val>0?'+':'';
+    return`<div style="color:${col};font-size:8px">${label}: ${sign}${val.toFixed(1)}%</div>`;
+  }
+  function bonusLineLuck(val){
+    if(!val)return'';
+    const col=val>0?'#ffd700':'#ff7070';
+    const sign=val>0?'+':'';
+    return`<div style="color:${col};font-size:8px">LUCK: ${sign}${val.toFixed(1)}%</div>`;
+  }
+
+  const statBlock=`<div style="font-size:8px">
+    <span style="color:${statColor(b.str||0)}">STR:${(b.str||0)>=0?'+':''}${b.str||0}</span>
+    <span style="color:${statColor(b.agi||0)}"> AGI:${(b.agi||0)>=0?'+':''}${b.agi||0}</span>
+    <span style="color:${statColor(b.int||0)}"> INT:${(b.int||0)>=0?'+':''}${b.int||0}</span>
+    <span style="color:${statColor(b.vit||0)}"> VIT:${(b.vit||0)>=0?'+':''}${b.vit||0}</span>
+    ${g.luck?`<span style="color:#ffd700"> LCK:+${g.luck}</span>`:''}
+  </div>`;
+
+  const bonusBlock=
+    bonusLine('ATK',g.bonusAtkPct)+
+    bonusLine('DEF',g.bonusDefPct)+
+    bonusLine('HP', g.bonusHpPct)+
+    bonusLine('MP', g.bonusMpPct)+
+    bonusLineLuck(g.bonusLuckPct);
+
+  const setLine=g.setName?`<div style="color:${g.setColor||'#ffe082'};font-size:8px;margin-top:2px">✦ SET: ${g.setName} (+${g.setBonusPct}% all when full set)</div>`:'';
   const tt=document.getElementById('tooltip');
   tt.innerHTML=`
     <div style="color:${RCOL[g.rarity]};font-weight:bold">[${RANK[g.rarity]}] ${g.fullName}</div>
     <div style="font-size:8px;color:var(--text3)">${qualLabel(g.quality)} · Lv${g.itemLv} · ×${g.count}</div>
-    <div style="font-size:8px">
-      <span style="color:${statColor(b.str)}">STR:${b.str>=0?'+':''}${b.str}</span>
-      <span style="color:${statColor(b.agi)}"> AGI:${b.agi>=0?'+':''}${b.agi}</span>
-      <span style="color:${statColor(b.int)}"> INT:${b.int>=0?'+':''}${b.int}</span>
-      <span style="color:${statColor(b.vit)}"> VIT:${b.vit>=0?'+':''}${b.vit}</span>
-      ${g.luck?`<span style="color:#ffd700"> LCK:+${g.luck}</span>`:''}
-    </div>
-    ${g.effects?.hpMod?`<div>HP: <span style="color:${g.effects.hpMod>0?'#2f2':'#f44'}">${g.effects.hpMod>0?'+':''}${g.effects.hpMod}</span></div>`:''}
+    ${statBlock}
+    ${g.effects?.hpMod?`<div>HP Mod: <span style="color:${g.effects.hpMod>0?'#2f2':'#f44'}">${g.effects.hpMod>0?'+':''}${g.effects.hpMod}</span></div>`:''}
+    ${bonusBlock}
     ${sp.length?`<div style="font-size:8px;margin-top:2px">${specialFxLabel(sp)}</div>`:''}
+    ${setLine}
     ${g.reqStr?`<div style="color:var(--text3)">Req STR ${g.reqStr}</div>`:''}
     ${err?`<div style="color:#f44">${err}</div>`:''}
     <div style="color:var(--text3);margin-top:3px">Sell: ${Math.floor(g.value*0.5).toLocaleString()}G</div>`;
   const x=Math.min(e.clientX+8,window.innerWidth-230);
-  const y=Math.max(e.clientY-120,5);
+  const y=Math.max(e.clientY-160,5);
   tt.style.left=x+'px';tt.style.top=y+'px';tt.style.display='block';
+  if(document.getElementById('equip-screen')&&!document.getElementById('equip-screen').classList.contains('hidden')){
+    showStatPreview(g);
+  }
 }
-function hideTip(){document.getElementById('tooltip').style.display='none';}
+function hideTip(){document.getElementById('tooltip').style.display='none';clearStatPreview();}
 
 // ─── FORGE JEWEL ────────────────────────────────────────────
 function renderJewelTab(){
@@ -2121,14 +2378,54 @@ function renderEquipScreen(){
   if(eu)eu.innerHTML=SLOT_TYPES.map(slot=>{
     const item=p.equips[slot];
     const col=item?RCOL[item.rarity]:'#333';
+    const setCol=item?.setColor||col;
+    const atkTag=item?.bonusAtkPct?`<div style="font-size:7px;color:${item.bonusAtkPct>0?'#8dffb0':'#ff7070'}">ATK${item.bonusAtkPct>0?'+':''}${item.bonusAtkPct.toFixed(1)}%</div>`:'';
+    const defTag=item?.bonusDefPct?`<div style="font-size:7px;color:${item.bonusDefPct>0?'#8dffb0':'#ff7070'}">DEF${item.bonusDefPct>0?'+':''}${item.bonusDefPct.toFixed(1)}%</div>`:'';
+    const setTag=item?.setName?`<div style="font-size:6px;color:${item.setColor||'#ffe082'}">✦${item.setName.split(' ')[0]}</div>`:'';
     return`<div class="eslot" onclick="unequipSlot('${slot}')"
-              onmouseenter="${item?'showEquipTip(event,\''+slot+'\')':''}" onmouseleave="hideTip()">
+              onmouseenter="${item?'showEquipTip(event,\''+slot+'\')':''}" onmouseleave="hideTip()"
+              style="${item?.setColor?'border-color:'+item.setColor+'66':''}">
       <span class="sl">${SLOT_ICONS[slot]} ${slot}</span>
-      <span class="sn" style="color:${col}">${item?`<span class="rank-${RANK[item.rarity]}">[${RANK[item.rarity]}]</span> ${item.slot}`:'—'}</span>
+      <span class="sn" style="color:${setCol}">${item?`<span class="rank-${RANK[item.rarity]}">[${RANK[item.rarity]}]</span> ${item.slot}`:'—'}</span>
       ${item?`<div class="sq">${qualLabel(item.quality)}</div>`:''}
+      ${atkTag}${defTag}${setTag}
     </div>`;
   }).join('');
 
+  // Set bonus summary
+  const setCount={};
+  Object.values(p.equips).forEach(eq=>{if(eq?.setName)setCount[eq.setName]=(setCount[eq.setName]||0)+1;});
+  let setHtml='';
+  Object.entries(setCount).forEach(([name,count])=>{
+    const def=SET_DEFS.find(s=>s.name===name);
+    if(!def)return;
+    const full=count>=SET_SLOTS.length;
+    setHtml+=`<div style="font-size:8px;color:${full?def.color:'var(--text3)'};padding:2px 0">${def.icon} ${name}: ${count}/${SET_SLOTS.length} ${full?'✦ FULL SET +'+def.bonusPct+'% all stats!':''}</div>`;
+  });
+  const setBonusEl=document.getElementById('equip-set-bonus');
+  if(setBonusEl)setBonusEl.innerHTML=setHtml||'<span style="color:var(--text3);font-size:8px">No set equipped</span>';
+
+  // Render current stats as baseline in stat preview panel
+  const spEl=document.getElementById('equip-stat-preview-body');
+  if(spEl&&p){
+    const cs=calcStats(p);
+    const isMagic=(p.class==='Priest'||p.class==='Merlin Bloodline');
+    const fp=v=>`${(Math.round(v*10)/10).toFixed(1)}%`;
+    function baseRow(label,val,color='var(--text2)'){
+      return`<div class="spr"><span class="spr-label">${label}</span><span style="color:${color};font-size:8px;margin-left:auto">${val}</span></div>`;
+    }
+    spEl.innerHTML=`<div style="font-size:7px;color:var(--text3);margin-bottom:4px">สถานะปัจจุบัน</div>`
+      +baseRow('STR',cs.str)+baseRow('AGI',cs.agi)+baseRow('INT',cs.int)
+      +baseRow('VIT',cs.vit)+baseRow('LCK',cs.luck,'#ffd700')
+      +`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`
+      +baseRow(isMagic?'M.ATK':'ATK',Math.round(cs.atk),'var(--lux2)')
+      +baseRow('DEF',cs.def)+baseRow('HP',cs.maxHp,'var(--hp)')+baseRow('MP',cs.maxMp,'#4488ff')
+      +`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`
+      +baseRow('CRIT',fp(cs.critR))+baseRow('DODGE',fp(cs.dodgeR))
+      +baseRow('SPEED',cs.moveSpd.toFixed(2))
+      +`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`
+      +`<div style="font-size:7px;color:var(--text3)">Hover ของใน Bag<br>เพื่อดูการเปลี่ยนแปลง</div>`;
+  }
   let filtered=p.gears.map((g,i)=>({g,i}));
   if(filterSlot!=='all')filtered=filtered.filter(({g})=>g.slot===filterSlot);
   if(filterRar!=='all')filtered=filtered.filter(({g})=>g.rarity===filterRar);
@@ -2141,19 +2438,22 @@ function renderEquipScreen(){
   if(inv)inv.innerHTML=filtered.map(({g,i})=>{
     const err=canEquip(g);const col=RCOL[g.rarity];
     const eq=p.equips[g.slot];
-    const cs=calcStats(p);
     const scoreDiff=eq?Math.floor(itemEffectiveScore(g)-itemEffectiveScore(eq)):null;
+    const setTag=g.setName?`<span style="color:${g.setColor||'#ffe082'};font-size:7px"> ✦${g.setName}</span>`:'';
+    const atkTag=g.bonusAtkPct?`<span style="color:${g.bonusAtkPct>0?'#8dffb0':'#ff7070'};font-size:7px"> ATK${g.bonusAtkPct>0?'+':''}${g.bonusAtkPct.toFixed(1)}%</span>`:'';
+    const defTag=g.bonusDefPct?`<span style="color:${g.bonusDefPct>0?'#8dffb0':'#ff7070'};font-size:7px"> DEF${g.bonusDefPct>0?'+':''}${g.bonusDefPct.toFixed(1)}%</span>`:'';
     return`<div class="equip-inv-item" onclick="equipItem(${i})"
                  onmouseenter="showBagTip(event,${i})" onmouseleave="hideTip()"
-                 style="border-color:${err?'#2a2a2a':col}">
+                 style="border-color:${err?'#2a2a2a':g.setColor||col}">
       <span style="font-size:13px">${SLOT_ICONS[g.slot]}</span>
       <div style="flex:1;min-width:0">
         <div><span class="rank-${RANK[g.rarity]}" style="font-weight:bold">[${RANK[g.rarity]}]</span>
-          <span style="color:${col}"> ${g.slot}</span>
+          <span style="color:${g.setColor||col}"> ${g.slot}</span>
           ${g.count>1?`<span style="color:var(--lux2);font-size:7px"> ×${g.count}</span>`:''}
           ${scoreDiff!==null?`<span style="color:${scoreDiff>=0?'#2f2':'#f44'};font-size:8px"> (${scoreDiff>=0?'+':''}${scoreDiff} score)</span>`:''}
+          ${setTag}
         </div>
-        <div style="font-size:7px;color:var(--text3)">${qualLabel(g.quality)} · Lv${g.itemLv}${g.luck?` · 🍀LCK+${g.luck}`:''}</div>
+        <div style="font-size:7px;color:var(--text3)">${qualLabel(g.quality)} · Lv${g.itemLv}${g.luck?` · 🍀LCK+${g.luck}`:''}${atkTag}${defTag}</div>
         ${err?`<div style="color:#f44;font-size:7px">${err}</div>`:''}
       </div>
     </div>`;
@@ -2162,17 +2462,165 @@ function renderEquipScreen(){
 
 function showEquipTip(e,slot){
   const item=G.p.equips[slot];if(!item)return;
+  const b=item.effects?.buffs||{};
+  const sp=item.effects?.special||[];
   const tt=document.getElementById('tooltip');
+
+  function bonusLine(label,val){
+    if(val===undefined||val===null||val===0)return'';
+    const col=val>0?'#8dffb0':'#ff7070';
+    return`<div style="color:${col};font-size:8px">${label}: ${val>0?'+':''}${val.toFixed(1)}%</div>`;
+  }
+
+  const setLine=item.setName?`<div style="color:#ffe082;font-size:8px">✦ SET: ${item.setName}${item.setBonusPct?` (+${item.setBonusPct}% all stats when full set)`:''}</div>`:'';
+  const bonusBlock=
+    bonusLine('ATK',item.bonusAtkPct)+
+    bonusLine('DEF',item.bonusDefPct)+
+    bonusLine('HP', item.bonusHpPct)+
+    bonusLine('MP', item.bonusMpPct)+
+    (item.bonusLuckPct?`<div style="color:${item.bonusLuckPct>0?'#ffd700':'#ff7070'};font-size:8px">LUCK: ${item.bonusLuckPct>0?'+':''}${item.bonusLuckPct.toFixed(1)}%</div>`:'');
+
   tt.innerHTML=`<div style="color:${RCOL[item.rarity]};font-weight:bold">[${RANK[item.rarity]}] ${item.slot}</div>
     <div>${qualLabel(item.quality)} · Lv${item.itemLv}</div>
-    <div style="font-size:8px">STR:${item.effects.buffs.str>=0?'+':''}${item.effects.buffs.str} AGI:${item.effects.buffs.agi>=0?'+':''}${item.effects.buffs.agi} INT:${item.effects.buffs.int>=0?'+':''}${item.effects.buffs.int} VIT:${item.effects.buffs.vit>=0?'+':''}${item.effects.buffs.vit}${item.luck?` <span style="color:#ffd700">LCK:+${item.luck}</span>`:''}</div>
-    ${item.effects.hpMod?`<div>HP: ${item.effects.hpMod>0?'+':''}${item.effects.hpMod}</div>`:''}
-    <div style="color:var(--text3);margin-top:3px">Click to unequip</div>`;
+    <div style="font-size:8px">
+      <span style="color:${statColor(b.str||0)}">STR:${(b.str||0)>=0?'+':''}${b.str||0}</span>
+      <span style="color:${statColor(b.agi||0)}"> AGI:${(b.agi||0)>=0?'+':''}${b.agi||0}</span>
+      <span style="color:${statColor(b.int||0)}"> INT:${(b.int||0)>=0?'+':''}${b.int||0}</span>
+      <span style="color:${statColor(b.vit||0)}"> VIT:${(b.vit||0)>=0?'+':''}${b.vit||0}</span>
+      ${item.luck?`<span style="color:#ffd700"> LCK:+${item.luck}</span>`:''}
+    </div>
+    ${item.effects?.hpMod?`<div style="color:${item.effects.hpMod>0?'#2f2':'#f44'};font-size:8px">HP Mod: ${item.effects.hpMod>0?'+':''}${item.effects.hpMod}</div>`:''}
+    ${bonusBlock}
+    ${sp.length?`<div style="font-size:8px;margin-top:2px">${specialFxLabel(sp)}</div>`:''}
+    ${setLine}
+    <div style="color:var(--text3);margin-top:3px;font-size:8px">Click to unequip</div>`;
   tt.style.left=Math.min(e.clientX+8,window.innerWidth-230)+'px';
-  tt.style.top=Math.max(e.clientY-100,5)+'px';tt.style.display='block';
+  tt.style.top=Math.max(e.clientY-140,5)+'px';tt.style.display='block';
+  // Stat preview: show what happens if this equipped item is REMOVED
+  const el=document.getElementById('equip-stat-preview-body');
+  if(el&&G.p){
+    const p=G.p;
+    const isMagic=(p.class==='Priest'||p.class==='Merlin Bloodline');
+    const csBefore=calcStats(p);
+    const savedItem=p.equips[slot];
+    p.equips[slot]=null;
+    const csAfter=calcStats(p);
+    p.equips[slot]=savedItem;
+    function row2(label,before,after,fmt,hib=true){
+      const bv=fmt?fmt(before):Math.round(before);
+      const av=fmt?fmt(after):Math.round(after);
+      const diff=after-before;
+      let dc='#888',sign='';
+      if(Math.abs(diff)>0.001){const good=(hib&&diff>0)||(!hib&&diff<0);dc=good?'#8dffb0':'#ff7070';sign=diff>0?'+':'';}
+      const rdiff=fmt?fmt(diff):Math.round(diff);
+      return`<div class="spr"><span class="spr-label">${label}</span><span class="spr-now">${bv}</span><span class="spr-arrow">→</span><span class="spr-after" style="color:${dc}">${av}</span><span class="spr-diff" style="color:${dc}">${Math.abs(diff)>0.001?sign+rdiff:''}</span></div>`;
+    }
+    const fp=v=>`${(Math.round(v*10)/10).toFixed(1)}%`;
+    el.innerHTML=`<div style="font-size:7px;color:#f44;margin-bottom:4px">🗑 ถ้าถอด: ${item.slot}</div>`
+      +row2('STR',csBefore.str,csAfter.str)+row2('AGI',csBefore.agi,csAfter.agi)
+      +row2('INT',csBefore.int,csAfter.int)+row2('VIT',csBefore.vit,csAfter.vit)+row2('LCK',csBefore.luck,csAfter.luck)
+      +`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`
+      +row2(isMagic?'M.ATK':'ATK',csBefore.atk,csAfter.atk,v=>`${Math.round(v)}`)
+      +row2('DEF',csBefore.def,csAfter.def)+row2('HP',csBefore.maxHp,csAfter.maxHp)+row2('MP',csBefore.maxMp,csAfter.maxMp)
+      +`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`
+      +row2('CRIT',csBefore.critR,csAfter.critR,fp)+row2('DODGE',csBefore.dodgeR,csAfter.dodgeR,fp)
+      +row2('SPEED',csBefore.moveSpd,csAfter.moveSpd,v=>`${v.toFixed(2)}`);
+  }
 }
 
 // ─── SKILLS ─────────────────────────────────────────────────
+// ─── EQUIP STAT PREVIEW ─────────────────────────────────────
+function showStatPreview(item){
+  const el=document.getElementById('equip-stat-preview-body');
+  if(!el||!G.p)return;
+  const p=G.p;
+  const csBefore=calcStats(p);
+  const oldEquip=p.equips[item.slot];
+  p.equips[item.slot]=item;
+  const csAfter=calcStats(p);
+  p.equips[item.slot]=oldEquip;
+
+  const isMagic=(p.class==='Priest'||p.class==='Merlin Bloodline');
+
+  function row(label,before,after,fmt,higherIsBetter=true){
+    const bv=fmt?fmt(before):Math.round(before);
+    const av=fmt?fmt(after):Math.round(after);
+    const diff=after-before;
+    const rdiff=fmt?fmt(diff):Math.round(diff);
+    let dc='#888',sign='';
+    if(Math.abs(diff)>0.001){
+      const good=(higherIsBetter&&diff>0)||(!higherIsBetter&&diff<0);
+      dc=good?'#8dffb0':'#ff7070';
+      sign=diff>0?'+':'';
+    }
+    return`<div class="spr">
+      <span class="spr-label">${label}</span>
+      <span class="spr-now">${bv}</span>
+      <span class="spr-arrow">→</span>
+      <span class="spr-after" style="color:${dc}">${av}</span>
+      <span class="spr-diff" style="color:${dc}">${Math.abs(diff)>0.001?sign+rdiff:''}</span>
+    </div>`;
+  }
+
+  const fmtPct=v=>`${(Math.round(v*10)/10).toFixed(1)}%`;
+  const fmtF1=v=>`${Math.round(v)}`;
+
+  let html=`<div style="font-size:7px;color:var(--lux2);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.fullName||item.name}</div>`;
+  html+=row('STR', csBefore.str, csAfter.str);
+  html+=row('AGI', csBefore.agi, csAfter.agi);
+  html+=row('INT', csBefore.int, csAfter.int);
+  html+=row('VIT', csBefore.vit, csAfter.vit);
+  html+=row('LCK', csBefore.luck, csAfter.luck);
+  html+=`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`;
+  html+=row(isMagic?'M.ATK':'ATK', csBefore.atk, csAfter.atk, fmtF1);
+  html+=row('DEF', csBefore.def, csAfter.def);
+  html+=row('HP', csBefore.maxHp, csAfter.maxHp);
+  html+=row('MP', csBefore.maxMp, csAfter.maxMp);
+  html+=`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`;
+  html+=row('CRIT', csBefore.critR, csAfter.critR, fmtPct);
+  html+=row('DODGE', csBefore.dodgeR, csAfter.dodgeR, fmtPct);
+  html+=row('SPEED', csBefore.moveSpd, csAfter.moveSpd, v=>`${v.toFixed(2)}`);
+
+  // Set bonus change
+  if(csAfter.setBonus!==csBefore.setBonus){
+    const diff=csAfter.setBonus-csBefore.setBonus;
+    const pct=(diff*100).toFixed(0);
+    html+=`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`;
+    html+=`<div style="font-size:7px;color:${diff>0?'#ffe082':'#888'}">✦ Set bonus ${diff>0?'+':''}${pct}% all</div>`;
+  }
+
+  // Special procs gained/lost
+  const procNames={poison:'☠พิษ',stun:'💫สตัน',slow:'🐢ช้า',antiPoison:'🛡กันพิษ',fastAtk:'⚡ตีไว',fastMove:'🏃เดินไว',dodge:'💨Dodge',antiStun:'🧿กันสตัน'};
+  const spBefore=(oldEquip?.effects?.special||[]).map(s=>s.type);
+  const spAfter=(item.effects?.special||[]).map(s=>s.type);
+  const gained=spAfter.filter(t=>!spBefore.includes(t));
+  const lost=spBefore.filter(t=>!spAfter.includes(t));
+  if(gained.length||lost.length){
+    html+=`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`;
+    if(gained.length)html+=`<div style="color:#8dffb0;font-size:7px">+${gained.map(t=>procNames[t]||t).join(' ')}</div>`;
+    if(lost.length)html+=`<div style="color:#ff7070;font-size:7px">−${lost.map(t=>procNames[t]||t).join(' ')}</div>`;
+  }
+
+  // Set piece progress
+  if(item.setName){
+    const setCount={};
+    Object.values(p.equips).forEach(eq=>{if(eq?.setName)setCount[eq.setName]=(setCount[eq.setName]||0)+1;});
+    const currentPieces=setCount[item.setName]||0;
+    const newPieces=oldEquip?.setName===item.setName?currentPieces:currentPieces+1;
+    const setDef=SET_DEFS.find(s=>s.name===item.setName);
+    const full=newPieces>=SET_SLOTS.length;
+    html+=`<div style="border-top:1px solid var(--border);margin:3px 0"></div>`;
+    html+=`<div style="font-size:7px;color:${full?setDef?.color||'#ffe082':'var(--text3)'}">✦ ${item.setName}<br>${newPieces}/${SET_SLOTS.length}${full?' — FULL SET +'+item.setBonusPct+'%!':''}</div>`;
+  }
+
+  el.innerHTML=html;
+}
+
+function clearStatPreview(){
+  const el=document.getElementById('equip-stat-preview-body');
+  if(el)el.innerHTML='<span style="color:var(--text3);font-size:8px;line-height:1.8">Hover อาวุธ/<br>อุปกรณ์เพื่อดู<br>การเปลี่ยนแปลง</span>';
+}
+
 function renderSkills(){
   const sl=document.getElementById('skill-list');if(!sl)return;
   const sks=availableSkills(),learned=G.p.learnedSkills;
